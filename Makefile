@@ -3,4 +3,4 @@ clean-pyc:
 	find . -type f -name "*.pyo" -delete
 
 documentation:
-	cd docs && make clean html
+	cd docs && DJANGO_SETTINGS_MODULE=job_runner.settings.env.development make clean html
