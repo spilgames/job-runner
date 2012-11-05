@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Job-Runner{% endblock %}</title>
+    {% block extrahead %}{% endblock %}
+
+    <link rel="stylesheet/less" href="{{ STATIC_URL }}less/bootstrap/bootstrap.less" />
+    <link rel="stylesheet/less" href="{{ STATIC_URL }}less/bootstrap/responsive.less" />
+    <link rel="stylesheet/less" href="{{ STATIC_URL }}less/master.less" />
+    {% block extracss %}{% endblock %}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/less.min.js"></script>
+    {% block extrajs %}{% endblock %}
+</head>
+<body class="{% block bodyclass %}generic{% endblock %}" id="{% block bodyid %}generic{% endblock %}">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="brand" href="/">Job-Runner</a>
+                <ul class="nav">
+<!--                     <li class="active"><a href="#">Home</a></li>
+                    <li><a href="#">Link</a></li>
+                    <li><a href="#">Link</a></li> -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
