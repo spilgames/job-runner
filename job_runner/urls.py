@@ -9,8 +9,8 @@ urlpatterns = patterns('',
     (r'^', include('job_runner.apps.job_runner.urls')),
     (r'^api/job_runner/', include('job_runner.apps.job_runner.api_urls')),
 
-    (r'^accounts/login/$', 'django.contrib.auth.views.login'),
-    (r'^accounts/logout/$', 'django.contrib.auth.views.logout', {
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {
         'next_page': '/'
-    }),
+    }, name='logout'),
 )
