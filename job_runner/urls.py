@@ -10,5 +10,7 @@ urlpatterns = patterns('',
     (r'^api/job_runner/', include('job_runner.apps.job_runner.api_urls')),
 
     (r'^accounts/login/$', 'django.contrib.auth.views.login'),
-    (r'^accounts/logout/$', 'django.contrib.auth.views.logout'),
+    (r'^accounts/logout/$', 'django.contrib.auth.views.logout', {
+        'next_page': '/'
+    }),
 )
