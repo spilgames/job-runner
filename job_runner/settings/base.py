@@ -44,7 +44,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -117,6 +117,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'south',
+    'tastypie',
+
+    'job_runner.apps.job_runner',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -147,3 +150,23 @@ LOGGING = {
         },
     }
 }
+
+
+JOB_RUNNER_WS_SERVER = 'ws://somehost:5000/'
+"""
+The URL to the Job-Runner WebSocket server.
+
+This should be in the following format::
+
+    ws://hostname:port/
+
+"""
+
+
+JOB_RUNNER_ADMIN_EMAILS = []
+"""
+A list of e-mail addresses of the Job-Runner admin(s).
+
+This list will currently be used when a job failed to reschedule.
+
+"""

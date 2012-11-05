@@ -1,0 +1,13 @@
+The rescheduling for the following job failed!
+
+Job title:
+{{ job.title }}
+
+Admin link:
+https://portal.priv.spillgroup.org/admin/job_runner/job/{{ job.pk }}/
+
+
+Probably this is because the server could not calculate a new schedule date
+for this job because of the configured reschedule excludes.
+
+A manual action is required to reschedule this job!
