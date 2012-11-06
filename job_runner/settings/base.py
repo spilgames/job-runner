@@ -155,7 +155,7 @@ LOGGING = {
 LOGIN_REDIRECT_URL = '/'
 
 
-JOB_RUNNER_WS_SERVER = 'ws://somehost:5000/'
+JOB_RUNNER_WS_SERVER = 'ws://localhost:5000/'
 """
 The URL to the Job-Runner WebSocket server.
 
