@@ -63,6 +63,7 @@
         Models
     */
     var Run = TastypieModel.extend({
+        // return the state of the run
         state: function() {
             if (this.attributes.enqueue_dts === null) {
                 return 'scheduled';
@@ -77,6 +78,7 @@
             }
         },
 
+        // return the human readable state
         humanReadableState: function() {
             return {
                 'scheduled': 'Scheduled',
@@ -121,11 +123,13 @@
             'click .details': 'showDetails'
         },
 
+        // initialize the view
         initialize: function(options) {
             _.bindAll(this, 'render', 'renderItem', 'changeItem', 'initialFetch', 'sortItems', 'showDetails');
             var self = this;
 
             options.router.on('route:showDashboard', function() {
+                $('#job_runner section').addClass('hide');
                 $('#dashboard').removeClass('hide');
             });
 
@@ -152,6 +156,7 @@
             };
         },
 
+        // fetch the initial data
         initialFetch: function() {
             var self = this;
 
@@ -182,6 +187,7 @@
             });
         },
 
+        // callback for when an item has been updated
         changeItem: function(item) {
             var self = this;
             $('#run-' + item.id, self.el).fadeOut('fast', function() {
@@ -190,6 +196,7 @@
             });
         },
 
+        // callback for showing details of a run
         showDetails: function(e) {
             e.preventDefault();
 
@@ -211,6 +218,7 @@
             $('#run_modal').modal();
         },
 
+        // render a run
         renderItem: function(item) {
             var self = this;
             var job = this.job_collection.where({'resource_uri': item.attributes.job})[0];
@@ -279,12 +287,14 @@
             $('#run-'+ item.id).slideDown("slow");
         },
 
+        // sort items based on timestamp
         sortItems: function(column_id) {
             $(column_id +' div').sort(function(a, b) {
                 return $(a).data('timestamp') < $(b).data('timestamp') ? 1 : -1;
             }).appendTo(column_id);
         },
 
+        // handle websocket event
         handleEvent: function(event) {
             var self = this;
             var run = this.run_collection.get(event.run_id);
@@ -315,6 +325,7 @@
             }
         },
 
+        // helper for formatting datetime
         formatDateTime: function(dateString) {
             if (dateString !== null) {
                 return moment(dateString).format('YY-MM-DD HH:mm:ss');
@@ -323,6 +334,7 @@
             }
         },
 
+        // helper for formatting the duration
         formatDuration: function(startDTS, endDTS) {
             if (startDTS !== null && endDTS !== null) {
                 var start = moment(startDTS);
@@ -334,14 +346,48 @@
         }
     });
 
-    var AppRouter = Backbone.Router.extend({
-        routes: {
-            '': 'showDashboard'
+    var JobsView = Backbone.View.extend({
+        initialize: function(options) {
+            options.router.on('route:showJobs', function() {
+                $('#job_runner section').addClass('hide');
+                $('#jobs').removeClass('hide');
+            });
         }
     });
 
+
+    /*
+        Application router
+    */
+    var AppRouter = Backbone.Router.extend({
+        routes: {
+            '': 'showDashboard',
+            'jobs/': 'showJobs'
+        },
+
+        initialize: function() {
+            $('.js-link').click(function(e){
+                e.preventDefault();
+                Backbone.history.navigate($(this).attr("href"),true);
+            });
+        },
+
+        showDashboard: function(e) {
+
+            $('ul.nav li').removeClass('active');
+            $('ul.nav li.dashboard').addClass('active');
+        },
+
+        showJobs: function() {
+            $('ul.nav li').removeClass('active');
+            $('ul.nav li.jobs').addClass('active');
+        }
+    });
+
+
     var appRouter = new AppRouter();
     var runView = new RunView({router: appRouter});
-    Backbone.history.start();
+    var jobsView = new JobsView({router: appRouter});
+    Backbone.history.start({pushState: true});
 
 })(jQuery);

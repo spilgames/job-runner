@@ -8,7 +8,8 @@
 
 {% block navbar %}
 <ul class="nav">
-    <li class="active"><a href="#">Dashboard</a></li>
+    <li class="active dashboard"><a href="/" class="js-link">Dashboard</a></li>
+    <li class="jobs"><a href="/jobs/" class="js-link">Jobs</a></li>
 </ul>
 {% endblock %}
 
@@ -69,6 +70,9 @@
                     <div id="completed-with-error-runs"></div>
                 </div>
             </div>
+        </section>
+        <section class="hide" id="jobs">
+            <h1>Jobs</h1>
         </section>
     </div>
 

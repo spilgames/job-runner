@@ -5,5 +5,5 @@ from job_runner.apps.job_runner.views import DashboardView
 
 
 urlpatterns = patterns('',
-    (r'^$', login_required(DashboardView.as_view())),
+    (r'^(|jobs/)$', login_required(DashboardView.as_view())),
 )
