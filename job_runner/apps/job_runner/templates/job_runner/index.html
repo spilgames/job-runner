@@ -12,6 +12,10 @@
 </ul>
 {% endblock %}
 
+{% block extracss %}
+    <link rel="stylesheet/less" href="{{ STATIC_URL }}job_runner/less/job_runner.less" />
+{% endblock %}
+
 {% block content %}
     <div class="modal hide fade" id="run_modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
         <div class="modal-header">
@@ -71,6 +75,8 @@
 {% endblock %}
 
 {% block extrajs %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-transition.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.csrf.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/moment.min.js"></script>
