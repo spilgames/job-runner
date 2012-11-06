@@ -1,4 +1,5 @@
 django==1.4.2
+django-grappelli
 south
 sphinx
 

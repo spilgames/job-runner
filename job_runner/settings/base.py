@@ -108,6 +108,9 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    # has to be before admin app
+    'grappelli',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
