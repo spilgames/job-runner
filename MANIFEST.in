@@ -1,0 +1,8 @@
+include README.rst
+
+recursive-include job_runner/static/job_runner *
+recursive-include job_runner/templates *
+
+recursive-include job_runner/apps/job_runner/fixtures *
+recursive-include job_runner/apps/job_runner/static *
+recursive-include job_runner/apps/job_runner/templates *
