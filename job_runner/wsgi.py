@@ -15,7 +15,8 @@ framework.
 """
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "job_runner.settings")
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", "job_runner.settings.env.development")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
