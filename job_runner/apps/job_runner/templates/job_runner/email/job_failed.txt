@@ -1,0 +1,17 @@
+Server:
+{{ run.job.server.hostname }}
+
+Job title:
+{{ run.job.title }}
+
+Job script:
+{{ run.job.script_content_rendered|safe }}
+
+Run id:
+{{ run.id }}
+
+Run returned at (in UTC):
+{{ run.return_dts }}
+
+Run log:
+{{ run.return_log|safe }}

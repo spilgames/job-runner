@@ -1,0 +1,11 @@
+[
+    {
+        "pk": 1,
+        "model": "job_runner.scripttemplate",
+        "fields": {
+            "title": "Python",
+            "body": "#!/usr/bin/env python\r\n\r\n{{ content|safe }}",
+            "notification_addresses": "template1@example.com\n\rtemplate2@example.com\n\r"
+        }
+    }
+]
