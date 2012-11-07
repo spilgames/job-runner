@@ -347,11 +347,14 @@
     });
 
     var JobsView = Backbone.View.extend({
+
+        // initialization of the view
         initialize: function(options) {
             options.router.on('route:showJobs', function() {
                 $('#job_runner section').addClass('hide');
                 $('#jobs').removeClass('hide');
             });
+            
         }
     });
 
