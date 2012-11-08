@@ -117,7 +117,7 @@
         Views
     */
     var RunView = Backbone.View.extend({
-        template: _.template("<div style='display: none;' class='job-run job-<%= state %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'><h5><a href='#' class='details'><%= title %></a></h5><ul><li><i class='icon-tag'></i> <%= server %></li><li><i class='icon-time'></i> <%= timestamp %></li></ul></div>"),
+        template: _.template($('#run-template').html()),
         el: $('#job_runner'),
         events: {
             'click .details': 'showDetails'
@@ -125,7 +125,7 @@
 
         // initialize the view
         initialize: function(options) {
-            _.bindAll(this, 'render', 'renderItem', 'changeItem', 'initialFetch', 'sortItems', 'showDetails');
+            _.bindAll(this, 'renderItem', 'changeItem', 'initialFetch', 'sortItems', 'showDetails');
             var self = this;
 
             options.router.on('route:showDashboard', function() {
@@ -347,14 +347,39 @@
     });
 
     var JobsView = Backbone.View.extend({
+        template: _.template($('#job-template').html()),
 
         // initialization of the view
         initialize: function(options) {
+            var self = this;
+
+            _.bindAll(this, 'renderItem');
+
             options.router.on('route:showJobs', function() {
                 $('#job_runner section').addClass('hide');
                 $('#jobs').removeClass('hide');
             });
             
+            this.job_collection = new JobCollection();
+            this.server_collection = new ServerCollection();
+            this.job_collection.bind('add', this.renderItem);
+
+            this.server_collection.fetch_all({success: function() {
+                self.job_collection.fetch_all();
+            }});
+
+        },
+
+        // render a job
+        renderItem: function(item) {
+            var server = this.server_collection.where({'resource_uri': item.attributes.server})[0];
+
+            $('#jobs .jobs').append(this.template({
+                id: item.id,
+                title: item.attributes.title,
+                hostname: server.attributes.hostname
+            }));
+
         }
     });
 
@@ -376,14 +401,13 @@
         },
 
         showDashboard: function(e) {
-
-            $('ul.nav li').removeClass('active');
-            $('ul.nav li.dashboard').addClass('active');
+            $('header ul.nav li').removeClass('active');
+            $('header ul.nav li.dashboard').addClass('active');
         },
 
         showJobs: function() {
-            $('ul.nav li').removeClass('active');
-            $('ul.nav li.jobs').addClass('active');
+            $('header ul.nav li').removeClass('active');
+            $('header ul.nav li.jobs').addClass('active');
         }
     });
 

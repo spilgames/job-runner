@@ -4,18 +4,45 @@
     <script type="text/javascript">
         var ws_server = '{{ ws_server }}';
     </script>
+
+    <script type="text/html" id="run-template">
+        <div style='display: none;' class='job-run job-<%= state %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'>
+            <h5>
+                <a href='#' class='details'><%= title %></a>
+            </h5>
+            <ul>
+                <li><i class='icon-tag'></i> <%= server %></li>
+                <li><i class='icon-time'></i> <%= timestamp %></li>
+            </ul>
+        </div>
+    </script>
+
+    <script type="text/html" id="job-template">
+        <div class="span2">
+        <div class="job" id="job-<%= id %>" data-id="<%= id %>">
+            <h5><a href="#" class="details"><%= title %></a></h5>
+            <ul>
+                <li>
+                    <i class="icon-tag"></i> <%= hostname %>
+                </li>
+            </ul>
+        </div>
+        </div>
+    </script>
 {% endblock %}
 
 {% block navbar %}
 <ul class="nav">
     <li class="active dashboard"><a href="/" class="js-link">Dashboard</a></li>
-    {# <li class="jobs"><a href="/jobs/" class="js-link">Jobs</a></li> #}
+    <li class="jobs"><a href="/jobs/" class="js-link">Jobs</a></li>
 </ul>
 {% endblock %}
 
 {% block extracss %}
     <link rel="stylesheet/less" href="{{ STATIC_URL }}job_runner/less/job_runner.less" />
 {% endblock %}
+
+{% block bodyid %}job_runner{% endblock %}
 
 {% block content %}
     <div class="modal hide fade" id="run_modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
@@ -46,41 +73,44 @@
         </div>
     </div>
 
-    <div id="job_runner">
-        <section class="hide" id="dashboard">
-            <div class="row">
-                <div class="span2">
-                    <h4>Scheduled</h4>
-                    <div id="scheduled-runs"></div>
-                </div>
-                <div class="span2">
-                    <h4>In queue</h4>
-                    <div id="enqueued-runs"></div>
-                </div>
-                <div class="span2">
-                    <h4>Started</h4>
-                    <div id="started-runs"></div>
-                </div>
-                <div class="span2">
-                    <h4>Completed</h4>
-                    <div id="completed-runs"></div>
-                </div>
-                <div class="span2">
-                    <h4>Completed (error)</h4>
-                    <div id="completed-with-error-runs"></div>
-                </div>
+    <section class="hide" id="dashboard">
+        <div class="row">
+            <div class="span2">
+                <h4>Scheduled</h4>
+                <div id="scheduled-runs"></div>
             </div>
-        </section>
-        <section class="hide" id="jobs">
-            <h1>Jobs</h1>
-        </section>
-    </div>
+            <div class="span2">
+                <h4>In queue</h4>
+                <div id="enqueued-runs"></div>
+            </div>
+            <div class="span2">
+                <h4>Started</h4>
+                <div id="started-runs"></div>
+            </div>
+            <div class="span2">
+                <h4>Completed</h4>
+                <div id="completed-runs"></div>
+            </div>
+            <div class="span2">
+                <h4>Completed (error)</h4>
+                <div id="completed-with-error-runs"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hide" id="jobs">
+        <h1>Jobs</h1>
+        <div class="row jobs">
+            {# <div class="span12 jobs"></div> #}
+        </div>
+    </section>
 
 {% endblock %}
 
 {% block extrajs %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-transition.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-tab.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.csrf.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/moment.min.js"></script>
