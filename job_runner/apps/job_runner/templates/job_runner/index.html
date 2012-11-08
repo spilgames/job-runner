@@ -17,6 +17,34 @@
         </div>
     </script>
 
+    <script type="text/html" id="run-modal-template">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="run_modal_title"><%= title %></h3>
+        </div>
+        <div class="modal-body" id="status-modal">
+            <h3>Status</h3>
+            <p class="state"><%= state %></p>
+            <h3>Scheduled</h3>
+            <p class="schedule_dts"><%= schedule_dts %></p>
+            <h3>In queue</h3>
+            <p class="enqueue_dts"><%= enqueue_dts %></p>
+            <h3>Started</h3>
+            <p class="start_dts"><%= start_dts %></p>
+            <h3>Returned</h3>
+            <p class="return_dts"><%= return_dts %></p>
+            <h3>Run duration</h3>
+            <p class="run_duration"><%= run_duration %></p>
+            <h3>Command</h3>
+            <p><pre class="script_content"><%= script_content %></pre></p>
+            <h3>Log output</h3>
+            <p><pre class="return_log"><%= return_log %></pre></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </script>
+
     <script type="text/html" id="job-template">
         <div class="span2">
         <div class="job" id="job-<%= id %>" data-id="<%= id %>">
@@ -45,32 +73,7 @@
 {% block bodyid %}job_runner{% endblock %}
 
 {% block content %}
-    <div class="modal hide fade" id="run_modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title"></h3>
-        </div>
-        <div class="modal-body" id="status-modal">
-            <h3>Status</h3>
-            <p class="state">Completed</p>
-            <h3>Scheduled</h3>
-            <p class="schedule_dts"></p>
-            <h3>In queue</h3>
-            <p class="enqueue_dts"></p>
-            <h3>Started</h3>
-            <p class="start_dts"></p>
-            <h3>Returned</h3>
-            <p class="return_dts"></p>
-            <h3>Run duration</h3>
-            <p class="run_duration"></p>
-            <h3>Command</h3>
-            <p><pre class="script_content"></pre></p>
-            <h3>Log output</h3>
-            <p><pre class="return_log"></pre></p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
+    <div class="modal hide fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
     </div>
 
     <section class="hide" id="dashboard">

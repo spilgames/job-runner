@@ -118,6 +118,8 @@
     */
     var RunView = Backbone.View.extend({
         template: _.template($('#run-template').html()),
+        runModalTemplate: _.template($('#run-modal-template').html()),
+
         el: $('#job_runner'),
         events: {
             'click .details': 'showDetails'
@@ -204,18 +206,17 @@
             var run = this.run_collection.get(runId);
             var job = this.job_collection.where({'resource_uri': run.attributes.job})[0];
 
-            var modal = $('#run_modal');
-            $('#run_modal_title').html(job.attributes.title);
-            $('.state', modal).html(run.humanReadableState());
-            $('.schedule_dts', modal).html(this.formatDateTime(run.attributes.schedule_dts));
-            $('.enqueue_dts', modal).html(this.formatDateTime(run.attributes.enqueue_dts));
-            $('.start_dts', modal).html(this.formatDateTime(run.attributes.start_dts));
-            $('.return_dts', modal).html(this.formatDateTime(run.attributes.return_dts));
-            $('.run_duration', modal).html(this.formatDuration(run.attributes.start_dts, run.attributes.return_dts));
-            $('.script_content', modal).html(job.attributes.script_content_rendered);
-            $('.return_log', modal).html(run.attributes.return_log);
-
-            $('#run_modal').modal();
+            $('#modal').html(this.runModalTemplate({
+                title: job.attributes.title,
+                state: run.humanReadableState(),
+                schedule_dts: this.formatDateTime(run.attributes.schedule_dts),
+                enqueue_dts: this.formatDateTime(run.attributes.enqueue_dts),
+                start_dts: this.formatDateTime(run.attributes.start_dts),
+                return_dts: this.formatDateTime(run.attributes.return_dts),
+                run_duration: this.formatDuration(run.attributes.start_dts, run.attributes.return_dts),
+                script_content: job.attributes.script_content_rendered,
+                return_log: run.attributes.return_log
+            })).modal();
         },
 
         // render a run
