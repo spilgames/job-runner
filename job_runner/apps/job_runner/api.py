@@ -16,7 +16,7 @@ class ServerResource(ModelResource):
         queryset = Server.objects.all()
         resource_name = 'server'
         allowed_methods = ['get']
-        fields = ['hostname']
+        fields = ['hostname', 'id']
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
@@ -35,6 +35,9 @@ class JobResource(ModelResource):
         queryset = Job.objects.all()
         resource_name = 'job'
         allowed_methods = ['get']
+        filtering = {
+            'server': ALL,
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())

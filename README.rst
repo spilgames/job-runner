@@ -14,3 +14,4 @@ v0.6.0
 ~~~~~~
 
 * Move Job-Runner code out of engportal project.
+* Add overview of jobs + scheduling.
