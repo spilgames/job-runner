@@ -45,6 +45,21 @@
         </div>
     </script>
 
+    <script type="text/html" id="job-modal-template">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="run_modal_title"><%= title %></h3>
+        </div>
+        <div class="modal-body" id="status-modal">
+            <h3>Command</h3>
+            <p><pre class="script_content"><%= script_content %></pre></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn"><i class="icon-play"></i> Schedule now</button>
+            <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+        </div>
+    </script>
+
     <script type="text/html" id="job-template">
         <div class="span2">
         <div class="job" id="job-<%= id %>" data-id="<%= id %>">
@@ -119,5 +134,11 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/moment.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/backbone.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/dashboard.js"></script>
+
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/collections.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/runs.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/jobs.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/router.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/boot.js"></script>
 {% endblock %}
