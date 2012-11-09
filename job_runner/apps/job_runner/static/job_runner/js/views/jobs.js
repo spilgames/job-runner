@@ -11,7 +11,7 @@ var JobsView = Backbone.View.extend({
     initialize: function(options) {
         var self = this;
 
-        _.bindAll(this, 'renderItem', 'showDetails');
+        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob');
 
         options.router.on('route:showJobs', function() {
             $('#job_runner section').addClass('hide');
@@ -37,6 +37,7 @@ var JobsView = Backbone.View.extend({
             title: item.attributes.title,
             hostname: server.attributes.hostname
         }));
+        $('#job-'+ item.id).slideDown("slow");
 
     },
 
@@ -49,7 +50,27 @@ var JobsView = Backbone.View.extend({
 
         $('#modal').html(this.jobModalTemplate({
             title: job.attributes.title,
-            script_content: job.attributes.script_content_rendered
+            script_content: job.attributes.script_content_rendered,
+            job_url: job.url()
         })).modal();
+        $('.schedule-job').click(this.scheduleJob);
+    },
+
+    scheduleJob: function(e) {
+        if (confirm('Are you sure you want to schedule this job?')) {         
+            var run_collection = new RunCollection();
+
+            var run = run_collection.create({
+                job: $(e.target).data('job_url'),
+                schedule_dts: moment.utc().format('YYYY-MM-DD HH:mm:ss')
+            }, {
+                success: function() {
+                    alert('The job has been scheduled.');
+                },
+                error: function() {
+                    alert('The scheduling failed, make sure you have permission to schedule this job.');
+                }
+            });
+        }
     }
 });

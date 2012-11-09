@@ -2,9 +2,9 @@ var RunView = Backbone.View.extend({
     template: _.template($('#run-template').html()),
     runModalTemplate: _.template($('#run-modal-template').html()),
 
-    el: $('#job_runner'),
+    el: $('#dashboard'),
     events: {
-        'click #dashboard .details': 'showDetails'
+        'click .details': 'showDetails'
     },
 
     // initialize the view
