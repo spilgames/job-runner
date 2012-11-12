@@ -1,7 +1,7 @@
 import hashlib
 import hmac
 import json
-# from datetime import datetime
+from datetime import datetime
 
 # from django.contrib.auth.models import Group
 # from django.core import mail
@@ -307,142 +307,118 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual(1, json_data['objects'][0]['id'])
 
-#     def test_get_runs(self):
-#         """
-#         Test GET ``/api/v1/run/``.
-#         """
-#         response = self.get('/api/v1/run/')
-#         self.assertEqual(200, response.status_code)
+    def test_scheduled(self):
+        """
+        Test listing scheduled runs.
+        """
+        expected = [
+            ('scheduled', 1),
+            ('in_queue', 0),
+            ('started', 0),
+            ('completed', 0),
+            ('completed_successful', 0),
+            ('completed_with_error', 0),
+        ]
 
-#         json_data = json.loads(response.content)
-#         self.assertEqual(1, len(json_data['objects']))
-#         self.assertEqual(1, json_data['objects'][0]['id'])
-#         self.assertEqual(
-#             '/api/v1/job/1/', json_data['objects'][0]['job'])
+        for argument, expected in expected:
+            json_data = self.get_json(
+                '/api/v1/run/?state={0}'.format(argument))
+            self.assertEqual(expected, len(json_data['objects']))
 
-#     def test_get_run_1(self):
-#         """
-#         Test GET ``/api/v1/run/1/``.
-#         """
-#         response = self.get('/api/v1/run/1/')
-#         self.assertEqual(200, response.status_code)
+    def test_in_queue(self):
+        """
+        Test listing runs in queue.
+        """
+        expected = [
+            ('scheduled', 0),
+            ('in_queue', 1),
+            ('started', 0),
+            ('completed', 0),
+            ('completed_successful', 0),
+            ('completed_with_error', 0),
+        ]
 
-#         json_data = json.loads(response.content)
-#         self.assertEqual(1, json_data['id'])
-#         self.assertEqual('/api/v1/job/1/', json_data['job'])
+        run = Run.objects.get(pk=1)
+        run.enqueue_dts = datetime.utcnow()
+        run.save()
 
-#     def test_scheduled(self):
-#         """
-#         Test listing scheduled runs.
-#         """
-#         expected = [
-#             ('scheduled', 1),
-#             ('in_queue', 0),
-#             ('started', 0),
-#             ('completed', 0),
-#             ('completed_successful', 0),
-#             ('completed_with_error', 0),
-#         ]
+        for argument, expected in expected:
+            json_data = self.get_json(
+                '/api/v1/run/?state={0}'.format(argument))
+            self.assertEqual(expected, len(json_data['objects']))
 
-#         for argument, expected in expected:
-#             json_data = self.get_json(
-#                 '/api/v1/run/?state={0}'.format(argument))
-#             self.assertEqual(expected, len(json_data['objects']))
+    def test_started(self):
+        """
+        Test listing runs that are started.
+        """
+        expected = [
+            ('scheduled', 0),
+            ('in_queue', 0),
+            ('started', 1),
+            ('completed', 0),
+            ('completed_successful', 0),
+            ('completed_with_error', 0),
+        ]
 
-#     def test_in_queue(self):
-#         """
-#         Test listing runs in queue.
-#         """
-#         expected = [
-#             ('scheduled', 0),
-#             ('in_queue', 1),
-#             ('started', 0),
-#             ('completed', 0),
-#             ('completed_successful', 0),
-#             ('completed_with_error', 0),
-#         ]
+        run = Run.objects.get(pk=1)
+        run.enqueue_dts = datetime.utcnow()
+        run.start_dts = datetime.utcnow()
+        run.save()
 
-#         run = Run.objects.get(pk=1)
-#         run.enqueue_dts = datetime.utcnow()
-#         run.save()
+        for argument, expected in expected:
+            json_data = self.get_json(
+                '/api/v1/run/?state={0}'.format(argument))
+            self.assertEqual(expected, len(json_data['objects']))
 
-#         for argument, expected in expected:
-#             json_data = self.get_json(
-#                 '/api/v1/run/?state={0}'.format(argument))
-#             self.assertEqual(expected, len(json_data['objects']))
+    def test_completed(self):
+        """
+        Test listing runs that are completed.
+        """
+        expected = [
+            ('scheduled', 0),
+            ('in_queue', 0),
+            ('started', 0),
+            ('completed', 1),
+            ('completed_successful', 1),
+            ('completed_with_error', 0),
+        ]
 
-#     def test_started(self):
-#         """
-#         Test listing runs that are started.
-#         """
-#         expected = [
-#             ('scheduled', 0),
-#             ('in_queue', 0),
-#             ('started', 1),
-#             ('completed', 0),
-#             ('completed_successful', 0),
-#             ('completed_with_error', 0),
-#         ]
+        run = Run.objects.get(pk=1)
+        run.enqueue_dts = datetime.utcnow()
+        run.start_dts = datetime.utcnow()
+        run.return_dts = datetime.utcnow()
+        run.return_success = True
+        run.save()
 
-#         run = Run.objects.get(pk=1)
-#         run.enqueue_dts = datetime.utcnow()
-#         run.start_dts = datetime.utcnow()
-#         run.save()
+        for argument, expected in expected:
+            json_data = self.get_json(
+                '/api/v1/run/?state={0}'.format(argument))
+            self.assertEqual(expected, len(json_data['objects']))
 
-#         for argument, expected in expected:
-#             json_data = self.get_json(
-#                 '/api/v1/run/?state={0}'.format(argument))
-#             self.assertEqual(expected, len(json_data['objects']))
+    def test_completed_with_error(self):
+        """
+        Test listing runs that are completed with error.
+        """
+        expected = [
+            ('scheduled', 0),
+            ('in_queue', 0),
+            ('started', 0),
+            ('completed', 1),
+            ('completed_successful', 0),
+            ('completed_with_error', 1),
+        ]
 
-#     def test_completed(self):
-#         """
-#         Test listing runs that are completed.
-#         """
-#         expected = [
-#             ('scheduled', 0),
-#             ('in_queue', 0),
-#             ('started', 0),
-#             ('completed', 1),
-#             ('completed_successful', 1),
-#             ('completed_with_error', 0),
-#         ]
+        run = Run.objects.get(pk=1)
+        run.enqueue_dts = datetime.utcnow()
+        run.start_dts = datetime.utcnow()
+        run.return_dts = datetime.utcnow()
+        run.return_success = False
+        run.save()
 
-#         run = Run.objects.get(pk=1)
-#         run.enqueue_dts = datetime.utcnow()
-#         run.start_dts = datetime.utcnow()
-#         run.return_dts = datetime.utcnow()
-#         run.return_success = True
-#         run.save()
-
-#         for argument, expected in expected:
-#             json_data = self.get_json(
-#                 '/api/v1/run/?state={0}'.format(argument))
-#             self.assertEqual(expected, len(json_data['objects']))
-
-#     def test_completed_with_error(self):
-#         """
-#         Test listing runs that are completed with error.
-#         """
-#         expected = [
-#             ('scheduled', 0),
-#             ('in_queue', 0),
-#             ('started', 0),
-#             ('completed', 1),
-#             ('completed_successful', 0),
-#             ('completed_with_error', 1),
-#         ]
-
-#         run = Run.objects.get(pk=1)
-#         run.enqueue_dts = datetime.utcnow()
-#         run.start_dts = datetime.utcnow()
-#         run.return_dts = datetime.utcnow()
-#         run.return_success = False
-#         run.save()
-
-#         for argument, expected in expected:
-#             json_data = self.get_json(
-#                 '/api/v1/run/?state={0}'.format(argument))
-#             self.assertEqual(expected, len(json_data['objects']))
+        for argument, expected in expected:
+            json_data = self.get_json(
+                '/api/v1/run/?state={0}'.format(argument))
+            self.assertEqual(expected, len(json_data['objects']))
 
 #     def test_patch_run_1(self):
 #         """
