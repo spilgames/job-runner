@@ -98,43 +98,28 @@ class JobTemplateTestCase(ApiTestBase):
         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
 
-# class JobTestCase(ApiTestBase):
-#     """
-#     Tests for the job interface.
-#     """
-#     fixtures = ['test_job', 'test_server', 'test_script_template']
+class JobTestCase(ApiTestBase):
+    """
+    Tests for the job interface.
+    """
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+    ]
 
-#     def test_job_methods(self):
-#         """
-#         Test allowed methods on jobs.
-#         """
-#         response = self.get('/api/job_runner/v1/job/schema/')
-#         self.assertEqual(200, response.status_code)
+    def test_job_methods(self):
+        """
+        Test allowed methods on jobs.
+        """
+        response = self.get('/api/job_runner/v1/job/schema/')
+        self.assertEqual(200, response.status_code)
 
-#         json_data = json.loads(response.content)
-#         self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
-#         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
-
-#     def test_get_jobs(self):
-#         """
-#         Test GET ``/api/job_runner/v1/job/``.
-#         """
-#         response = self.get('/api/job_runner/v1/job/')
-#         self.assertEqual(200, response.status_code)
-
-#         json_data = json.loads(response.content)
-#         self.assertEqual(1, len(json_data['objects']))
-#         self.assertEqual('Test job', json_data['objects'][0]['title'])
-
-#     def test_get_job_1(self):
-#         """
-#         Test GET ``/api/job_runner/v1/job/1/``.
-#         """
-#         response = self.get('/api/job_runner/v1/job/1/')
-#         self.assertEqual(200, response.status_code)
-
-#         json_data = json.loads(response.content)
-#         self.assertEqual('Test job', json_data['title'])
+        json_data = json.loads(response.content)
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
 
 # class RunTestCase(ApiTestBase):

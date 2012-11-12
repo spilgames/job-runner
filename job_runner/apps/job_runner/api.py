@@ -4,6 +4,7 @@ from tastypie.resources import ModelResource
 
 from job_runner.apps.job_runner.auth import HmacAuthentication
 from job_runner.apps.job_runner.models import (
+    Job,
     JobTemplate,
     Project,
     Worker,
@@ -57,6 +58,29 @@ class JobTemplateResource(ModelResource):
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
 
+
+class JobResource(ModelResource):
+    """
+    RESTful resource for jobs.
+    """
+    job_template = fields.ToOneField(
+        'job_runner.apps.job_runner.api.JobTemplateResource', 'job_template')
+    parent = fields.ToOneField('self', 'parent', null=True)
+    children = fields.ToManyField('self', 'children', null=True)
+
+    class Meta:
+        queryset = Job.objects.all()
+        resource_name = 'job'
+        allowed_methods = ['get']
+        fields = ['title', 'script_content']
+        # filtering = {
+        #     'server': ALL,
+        # }
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+
 # from tastypie import fields
 # from tastypie.authentication import MultiAuthentication, SessionAuthentication
 # from tastypie.constants import ALL
@@ -67,40 +91,7 @@ class JobTemplateResource(ModelResource):
 # from job_runner.apps.job_runner.models import Job, Run, Server
 
 
-# class ServerResource(ModelResource):
-#     """
-#     RESTful resource for servers.
-#     """
-#     class Meta:
-#         queryset = Server.objects.all()
-#         resource_name = 'server'
-#         allowed_methods = ['get']
-#         fields = ['hostname', 'id']
-
-#         authentication = MultiAuthentication(
-#             SessionAuthentication(), HmacAuthentication())
-
-
-# class JobResource(ModelResource):
-#     """
-#     RESTful resource for jobs.
-#     """
-#     server = fields.ToOneField(
-#         'job_runner.apps.job_runner.api.ServerResource', 'server')
-#     parent = fields.ToOneField('self', 'parent', null=True)
-#     children = fields.ToManyField('self', 'children', null=True)
-
-#     class Meta:
-#         queryset = Job.objects.all()
-#         resource_name = 'job'
-#         allowed_methods = ['get']
-#         filtering = {
-#             'server': ALL,
-#         }
-
-#         authentication = MultiAuthentication(
-#             SessionAuthentication(), HmacAuthentication())
-#         authorization = JobAuthorization()
+        # authorization = JobAuthorization()
 
 
 # class RunResource(ModelResource):
