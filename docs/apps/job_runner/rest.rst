@@ -55,8 +55,18 @@ Workers
 ``GET /api/job_runner/v1/worker/``
     Returns a list of available workers.
 
-``GET /api/job_runner/v1/worker/{WORKER_ID}``
+``GET /api/job_runner/v1/worker/{WORKER_ID}/``
     Returns the details of a specific worker-id.
+
+
+Job-templates
+~~~~~~~~~~~~~
+
+``GET /api/job_runner/v1/job_template/``
+    Returns a list of available job-templates.
+
+``GET /api/job_runner/v1/job_template/{JOB_TEMPLATE_ID}/``
+    Returns the details of a specific job-template id.
 
 
 Jobs
