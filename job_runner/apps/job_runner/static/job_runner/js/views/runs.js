@@ -184,7 +184,7 @@ var RunView = Backbone.View.extend({
         if (run !== undefined) {
             run.fetch();
         } else {
-            run = new Run({'resource_uri': '/api/job_runner/v1/run/' + event.run_id + '/'});
+            run = new Run({'resource_uri': '/api/v1/run/' + event.run_id + '/'});
             run.fetch({success: function() {
                 self.run_collection.add(run);
 

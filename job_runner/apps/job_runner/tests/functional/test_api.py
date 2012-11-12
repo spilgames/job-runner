@@ -53,7 +53,7 @@ class ProjectTestCase(ApiTestBase):
         """
         Test allowed methods.
         """
-        response = self.get('/api/job_runner/v1/project/schema/')
+        response = self.get('/api/v1/project/schema/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
@@ -71,7 +71,7 @@ class WorkerTestCase(ApiTestBase):
         """
         Test allowed methods.
         """
-        response = self.get('/api/job_runner/v1/worker/schema/')
+        response = self.get('/api/v1/worker/schema/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
@@ -90,7 +90,7 @@ class JobTemplateTestCase(ApiTestBase):
         """
         Test allowed methods.
         """
-        response = self.get('/api/job_runner/v1/job_template/schema/')
+        response = self.get('/api/v1/job_template/schema/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
@@ -114,7 +114,7 @@ class JobTestCase(ApiTestBase):
         """
         Test allowed methods on jobs.
         """
-        response = self.get('/api/job_runner/v1/job/schema/')
+        response = self.get('/api/v1/job/schema/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
@@ -138,7 +138,7 @@ class RunTestCase(ApiTestBase):
         """
         Test allowed methods on runs.
         """
-        response = self.get('/api/job_runner/v1/run/schema/')
+        response = self.get('/api/v1/run/schema/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
@@ -151,27 +151,27 @@ class RunTestCase(ApiTestBase):
 
 #     def test_get_runs(self):
 #         """
-#         Test GET ``/api/job_runner/v1/run/``.
+#         Test GET ``/api/v1/run/``.
 #         """
-#         response = self.get('/api/job_runner/v1/run/')
+#         response = self.get('/api/v1/run/')
 #         self.assertEqual(200, response.status_code)
 
 #         json_data = json.loads(response.content)
 #         self.assertEqual(1, len(json_data['objects']))
 #         self.assertEqual(1, json_data['objects'][0]['id'])
 #         self.assertEqual(
-#             '/api/job_runner/v1/job/1/', json_data['objects'][0]['job'])
+#             '/api/v1/job/1/', json_data['objects'][0]['job'])
 
 #     def test_get_run_1(self):
 #         """
-#         Test GET ``/api/job_runner/v1/run/1/``.
+#         Test GET ``/api/v1/run/1/``.
 #         """
-#         response = self.get('/api/job_runner/v1/run/1/')
+#         response = self.get('/api/v1/run/1/')
 #         self.assertEqual(200, response.status_code)
 
 #         json_data = json.loads(response.content)
 #         self.assertEqual(1, json_data['id'])
-#         self.assertEqual('/api/job_runner/v1/job/1/', json_data['job'])
+#         self.assertEqual('/api/v1/job/1/', json_data['job'])
 
 #     def test_scheduled(self):
 #         """
@@ -188,7 +188,7 @@ class RunTestCase(ApiTestBase):
 
 #         for argument, expected in expected:
 #             json_data = self.get_json(
-#                 '/api/job_runner/v1/run/?state={0}'.format(argument))
+#                 '/api/v1/run/?state={0}'.format(argument))
 #             self.assertEqual(expected, len(json_data['objects']))
 
 #     def test_in_queue(self):
@@ -210,7 +210,7 @@ class RunTestCase(ApiTestBase):
 
 #         for argument, expected in expected:
 #             json_data = self.get_json(
-#                 '/api/job_runner/v1/run/?state={0}'.format(argument))
+#                 '/api/v1/run/?state={0}'.format(argument))
 #             self.assertEqual(expected, len(json_data['objects']))
 
 #     def test_started(self):
@@ -233,7 +233,7 @@ class RunTestCase(ApiTestBase):
 
 #         for argument, expected in expected:
 #             json_data = self.get_json(
-#                 '/api/job_runner/v1/run/?state={0}'.format(argument))
+#                 '/api/v1/run/?state={0}'.format(argument))
 #             self.assertEqual(expected, len(json_data['objects']))
 
 #     def test_completed(self):
@@ -258,7 +258,7 @@ class RunTestCase(ApiTestBase):
 
 #         for argument, expected in expected:
 #             json_data = self.get_json(
-#                 '/api/job_runner/v1/run/?state={0}'.format(argument))
+#                 '/api/v1/run/?state={0}'.format(argument))
 #             self.assertEqual(expected, len(json_data['objects']))
 
 #     def test_completed_with_error(self):
@@ -283,15 +283,15 @@ class RunTestCase(ApiTestBase):
 
 #         for argument, expected in expected:
 #             json_data = self.get_json(
-#                 '/api/job_runner/v1/run/?state={0}'.format(argument))
+#                 '/api/v1/run/?state={0}'.format(argument))
 #             self.assertEqual(expected, len(json_data['objects']))
 
 #     def test_patch_run_1(self):
 #         """
-#         Test PATCH ``/api/job_runner/v1/run/1/``.
+#         Test PATCH ``/api/v1/run/1/``.
 #         """
 #         response = self.patch(
-#             '/api/job_runner/v1/run/1/',
+#             '/api/v1/run/1/',
 #             {
 #                 'enqueue_dts': datetime.utcnow().isoformat(' ')
 #             }
@@ -301,10 +301,10 @@ class RunTestCase(ApiTestBase):
 
 #     def test_patch_with_reschedule(self):
 #         """
-#         Test PATCH ``/api/job_runner/v1/run/1/`` causing a reschedule.
+#         Test PATCH ``/api/v1/run/1/`` causing a reschedule.
 #         """
 #         response = self.patch(
-#             '/api/job_runner/v1/run/1/',
+#             '/api/v1/run/1/',
 #             {
 #                 'return_dts': datetime.utcnow().isoformat(' '),
 #                 'return_success': True,
@@ -316,7 +316,7 @@ class RunTestCase(ApiTestBase):
 
 #     def test_returned_with_error(self):
 #         """
-#         Test PATCH ``/api/job_runner/v1/run/1/`` returned with error.
+#         Test PATCH ``/api/v1/run/1/`` returned with error.
 
 #         This is expected to send e-mail notifications out.
 
@@ -326,7 +326,7 @@ class RunTestCase(ApiTestBase):
 
 #         """
 #         response = self.patch(
-#             '/api/job_runner/v1/run/1/',
+#             '/api/v1/run/1/',
 #             {
 #                 'return_dts': datetime.utcnow().isoformat(' '),
 #                 'return_success': False,
@@ -350,9 +350,9 @@ class RunTestCase(ApiTestBase):
 #         self.client.login(username='admin', password='admin')
 
 #         response = self.client.post(
-#             '/api/job_runner/v1/run/',
+#             '/api/v1/run/',
 #             data=json.dumps({
-#                 'job': '/api/job_runner/v1/job/1/',
+#                 'job': '/api/v1/job/1/',
 #                 'schedule_dts': '2013-01-01 00:00:00',
 #             }),
 #             content_type='application/json',
@@ -372,9 +372,9 @@ class RunTestCase(ApiTestBase):
 #         self.client.login(username='admin', password='admin')
 
 #         response = self.client.post(
-#             '/api/job_runner/v1/run/',
+#             '/api/v1/run/',
 #             data=json.dumps({
-#                 'job': '/api/job_runner/v1/job/1/',
+#                 'job': '/api/v1/job/1/',
 #                 'schedule_dts': '2013-01-01 00:00:00',
 #             }),
 #             content_type='application/json',
@@ -393,11 +393,11 @@ class RunTestCase(ApiTestBase):
 
 #     def test_patch_with_reschedule(self):
 #         """
-#         Test PATCH ``/api/job_runner/v1/run/1/`` for chained job.
+#         Test PATCH ``/api/v1/run/1/`` for chained job.
 
 #         """
 #         response = self.patch(
-#             '/api/job_runner/v1/run/1/',
+#             '/api/v1/run/1/',
 #             {
 #                 'return_dts': datetime.utcnow().isoformat(' '),
 #                 'return_success': True,
