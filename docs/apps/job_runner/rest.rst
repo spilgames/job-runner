@@ -38,6 +38,17 @@ Available end-points
 .. note:: You can append ``schema/`` to the end of the URL to get information
     about the schema!
 
+
+Projects
+~~~~~~~~
+
+``GET /api/job_runner/v1/project/``
+    Returns a list of available projects.
+
+``GET /api/job_runner/v1/project/{PROJECT_ID}/``
+    Returns the details of a specific project-id.
+
+
 Jobs
 ~~~~
 
@@ -68,13 +79,3 @@ Runs
 ``PATCH /api/job_runner/v1/run/{RUN_ID}/``
     When the ``return_dts`` is patched, the job will be automatically
     rescheduled (if needed).
-
-
-Servers
-~~~~~~~
-
-``GET /api/job_runner/v1/server/``
-    Returns a list of available servers.
-
-``GET /api/job_runner/v1/servers/{SERVER_ID}/``.
-    Returns the details of a specific server-id.

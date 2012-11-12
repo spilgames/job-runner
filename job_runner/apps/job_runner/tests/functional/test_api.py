@@ -1,48 +1,64 @@
-# import hashlib
-# import hmac
-# import json
+import hashlib
+import hmac
+import json
 # from datetime import datetime
 
 # from django.contrib.auth.models import Group
 # from django.core import mail
-# from django.test import TestCase
-
-# from job_runner.apps.job_runner.models import Job, Run
+from django.test import TestCase
 
 
-# class ApiTestBase(TestCase):
-#     """
-#     Base class for API testing.
-#     """
-#     def get(self, path, *args, **kwargs):
-#         api_key = hmac.new(
-#             'key', 'GET{0}'.format(path), hashlib.sha1).hexdigest()
+class ApiTestBase(TestCase):
+    """
+    Base class for API testing.
+    """
+    def get(self, path, *args, **kwargs):
+        api_key = hmac.new(
+            'verysecret', 'GET{0}'.format(path), hashlib.sha1).hexdigest()
 
-#         return self.client.get(
-#             path,
-#             *args,
-#             ACCEPT='application/json',
-#             HTTP_AUTHORIZATION='ApiKey test:{0}'.format(api_key)
-#         )
+        return self.client.get(
+            path,
+            *args,
+            ACCEPT='application/json',
+            HTTP_AUTHORIZATION='ApiKey worker1:{0}'.format(api_key)
+        )
 
-#     def get_json(self, path, *args, **kwargs):
-#         response = self.get(path, *args, **kwargs)
-#         return json.loads(response.content)
+    def get_json(self, path, *args, **kwargs):
+        response = self.get(path, *args, **kwargs)
+        return json.loads(response.content)
 
-#     def patch(self, path, data):
-#         json_data = json.dumps(data)
-#         api_key = hmac.new(
-#             'key', 'PATCH{0}{1}'.format(path, json_data), hashlib.sha1
-#         ).hexdigest()
+    def patch(self, path, data):
+        json_data = json.dumps(data)
+        api_key = hmac.new(
+            'key', 'PATCH{0}{1}'.format(path, json_data), hashlib.sha1
+        ).hexdigest()
 
-#         return self.client.post(
-#             path,
-#             data=json_data,
-#             content_type='application/json',
-#             ACCEPT='application/json',
-#             HTTP_AUTHORIZATION='ApiKey test:{0}'.format(api_key),
-#             HTTP_X_HTTP_METHOD_OVERRIDE='PATCH',
-#         )
+        return self.client.post(
+            path,
+            data=json_data,
+            content_type='application/json',
+            ACCEPT='application/json',
+            HTTP_AUTHORIZATION='ApiKey test:{0}'.format(api_key),
+            HTTP_X_HTTP_METHOD_OVERRIDE='PATCH',
+        )
+
+
+class ProjectTestCase(ApiTestBase):
+    """
+    Tests for the project interface.
+    """
+    fixtures = ['test_auth', 'test_project', 'test_worker']
+
+    def test_project_methods(self):
+        """
+        Test allowed methods.
+        """
+        response = self.get('/api/job_runner/v1/project/schema/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
 
 # class JobTestCase(ApiTestBase):
