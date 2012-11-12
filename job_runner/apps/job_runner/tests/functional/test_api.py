@@ -122,26 +122,32 @@ class JobTestCase(ApiTestBase):
         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
 
-# class RunTestCase(ApiTestBase):
-#     """
-#     Tests for the run interface.
-#     """
-#     fixtures = ['test_auth', 'test_job', 'test_server', 'test_script_template']
+class RunTestCase(ApiTestBase):
+    """
+    Tests for the run interface.
+    """
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+    ]
 
-#     def test_run_methods(self):
-#         """
-#         Test allowed methods on runs.
-#         """
-#         response = self.get('/api/job_runner/v1/run/schema/')
-#         self.assertEqual(200, response.status_code)
+    def test_run_methods(self):
+        """
+        Test allowed methods on runs.
+        """
+        response = self.get('/api/job_runner/v1/run/schema/')
+        self.assertEqual(200, response.status_code)
 
-#         json_data = json.loads(response.content)
-#         self.assertEqual([
-#             'get',
-#             'patch',
-#         ], json_data['allowed_detail_http_methods'])
-#         self.assertEqual(
-#             ['get', 'post'], json_data['allowed_list_http_methods'])
+        json_data = json.loads(response.content)
+        self.assertEqual([
+            'get',
+            'patch',
+        ], json_data['allowed_detail_http_methods'])
+        self.assertEqual(
+            ['get', 'post'], json_data['allowed_list_http_methods'])
 
 #     def test_get_runs(self):
 #         """
