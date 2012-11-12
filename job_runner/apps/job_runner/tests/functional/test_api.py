@@ -3,8 +3,8 @@ import hmac
 import json
 from datetime import datetime
 
-# from django.contrib.auth.models import Group
-# from django.core import mail
+from django.contrib.auth.models import Group
+from django.core import mail
 from django.test import TestCase
 
 from job_runner.apps.job_runner.models import (
@@ -38,7 +38,7 @@ class ApiTestBase(TestCase):
     def patch(self, path, data):
         json_data = json.dumps(data)
         api_key = hmac.new(
-            'key', 'PATCH{0}{1}'.format(path, json_data), hashlib.sha1
+            'verysecret', 'PATCH{0}{1}'.format(path, json_data), hashlib.sha1
         ).hexdigest()
 
         return self.client.post(
@@ -46,7 +46,7 @@ class ApiTestBase(TestCase):
             data=json_data,
             content_type='application/json',
             ACCEPT='application/json',
-            HTTP_AUTHORIZATION='ApiKey test:{0}'.format(api_key),
+            HTTP_AUTHORIZATION='ApiKey worker1:{0}'.format(api_key),
             HTTP_X_HTTP_METHOD_OVERRIDE='PATCH',
         )
 
@@ -420,102 +420,98 @@ class RunTestCase(ApiTestBase):
                 '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
-#     def test_patch_run_1(self):
-#         """
-#         Test PATCH ``/api/v1/run/1/``.
-#         """
-#         response = self.patch(
-#             '/api/v1/run/1/',
-#             {
-#                 'enqueue_dts': datetime.utcnow().isoformat(' ')
-#             }
-#         )
+    def test_patch_run_1(self):
+        """
+        Test PATCH ``/api/v1/run/1/``.
+        """
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'enqueue_dts': datetime.utcnow().isoformat(' ')
+            }
+        )
 
-#         self.assertEqual(202, response.status_code)
+        self.assertEqual(202, response.status_code)
 
-#     def test_patch_with_reschedule(self):
-#         """
-#         Test PATCH ``/api/v1/run/1/`` causing a reschedule.
-#         """
-#         response = self.patch(
-#             '/api/v1/run/1/',
-#             {
-#                 'return_dts': datetime.utcnow().isoformat(' '),
-#                 'return_success': True,
-#             }
-#         )
+    def test_patch_with_reschedule(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` causing a reschedule.
+        """
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': datetime.utcnow().isoformat(' '),
+                'return_success': True,
+            }
+        )
 
-#         self.assertEqual(202, response.status_code)
-#         self.assertEqual(2, Run.objects.count())
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
-#     def test_returned_with_error(self):
-#         """
-#         Test PATCH ``/api/v1/run/1/`` returned with error.
+    def test_returned_with_error(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` returned with error.
 
-#         This is expected to send e-mail notifications out.
+        This is expected to send e-mail notifications out.
 
-#         .. note:: Make sure you test this with the following setting::
+        .. note:: Make sure you test this with the following setting::
 
-#             EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+            EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 
-#         """
-#         response = self.patch(
-#             '/api/v1/run/1/',
-#             {
-#                 'return_dts': datetime.utcnow().isoformat(' '),
-#                 'return_success': False,
-#             }
-#         )
+        """
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': datetime.utcnow().isoformat(' '),
+                'return_success': False,
+            }
+        )
 
-#         self.assertEqual(202, response.status_code)
-#         self.assertTrue(hasattr(mail, 'outbox'))
-#         self.assertEqual(1, len(mail.outbox))
-#         self.assertEqual(6, len(mail.outbox[0].to))
-#         self.assertEqual('Run error for: Test job', mail.outbox[0].subject)
+        self.assertEqual(202, response.status_code)
+        self.assertTrue(hasattr(mail, 'outbox'))
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual(4, len(mail.outbox[0].to))
+        self.assertEqual('Run error for: Test job 1', mail.outbox[0].subject)
 
-#     def test_create_new_run(self):
-#         """
-#         Test create a new run by performing a ``POST``.
-#         """
-#         job = Job.objects.get(pk=1)
-#         job.one_of_groups.add(Group.objects.get(pk=1))
-#         job.save()
+    def test_create_new_run(self):
+        """
+        Test create a new run by performing a ``POST``.
+        """
+        self.client.login(username='admin', password='admin')
 
-#         self.client.login(username='admin', password='admin')
+        response = self.client.post(
+            '/api/v1/run/',
+            data=json.dumps({
+                'job': '/api/v1/job/1/',
+                'schedule_dts': '2013-01-01 00:00:00',
+            }),
+            content_type='application/json',
+            ACCEPT='application/json',
+        )
 
-#         response = self.client.post(
-#             '/api/v1/run/',
-#             data=json.dumps({
-#                 'job': '/api/v1/job/1/',
-#                 'schedule_dts': '2013-01-01 00:00:00',
-#             }),
-#             content_type='application/json',
-#             ACCEPT='application/json',
-#         )
+        self.assertEqual(201, response.status_code)
 
-#         self.assertEqual(201, response.status_code)
+    def test_create_new_run_no_permission(self):
+        """
+        Test create a new run by performing a ``POST`` with invalid group.
+        """
+        template = JobTemplate.objects.get(pk=1)
+        template.auth_groups = [Group.objects.get(pk=2)]
+        template.save()
 
-#     def test_create_new_run_no_permission(self):
-#         """
-#         Test create a new run by performing a ``POST`` with invalid group.
-#         """
-#         job = Job.objects.get(pk=1)
-#         job.one_of_groups = [Group.objects.get(pk=2)]
-#         job.save()
+        self.client.login(username='admin', password='admin')
 
-#         self.client.login(username='admin', password='admin')
+        response = self.client.post(
+            '/api/v1/run/',
+            data=json.dumps({
+                'job': '/api/v1/job/1/',
+                'schedule_dts': '2013-01-01 00:00:00',
+            }),
+            content_type='application/json',
+            ACCEPT='application/json',
+        )
 
-#         response = self.client.post(
-#             '/api/v1/run/',
-#             data=json.dumps({
-#                 'job': '/api/v1/job/1/',
-#                 'schedule_dts': '2013-01-01 00:00:00',
-#             }),
-#             content_type='application/json',
-#             ACCEPT='application/json',
-#         )
-
-#         self.assertEqual(400, response.status_code)
+        self.assertEqual(400, response.status_code)
 
 
 # class ChainedRunTestCase(ApiTestBase):

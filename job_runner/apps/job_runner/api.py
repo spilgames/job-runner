@@ -100,6 +100,7 @@ class JobResource(ModelResource):
         authorization = ModelAuthorization(
             api_key_path='job_template__worker__api_key',
             user_groups_path='job_template__worker__project__groups',
+            auth_user_groups_path='job_template__auth_groups',
         )
 
 
@@ -171,37 +172,37 @@ class RunResource(ModelResource):
 
         return orm_filters
 
-    # def obj_update(self, bundle, request=None, *args, **kwargs):
-    #     """
-    #     Override of the default obj_update method.
+    def obj_update(self, bundle, request=None, *args, **kwargs):
+        """
+        Override of the default obj_update method.
 
-    #     This will call the ``reschedule`` method after a successful object
-    #     update, which will re-schedule the job if needed.
+        This will call the ``reschedule`` method after a successful object
+        update, which will re-schedule the job if needed.
 
-    #     If the object update represents the returning of a run with error,
-    #     it will call also ``send_error_notification`` method.
+        If the object update represents the returning of a run with error,
+        it will call also ``send_error_notification`` method.
 
-    #     """
-    #     deserialized = self.deserialize(
-    #         request,
-    #         request.raw_post_data,
-    #         format=request.META.get('CONTENT_TYPE', 'application/json')
-    #     )
+        """
+        deserialized = self.deserialize(
+            request,
+            request.raw_post_data,
+            format=request.META.get('CONTENT_TYPE', 'application/json')
+        )
 
-    #     result = super(RunResource, self).obj_update(
-    #         bundle, request, *args, **kwargs)
+        result = super(RunResource, self).obj_update(
+            bundle, request, *args, **kwargs)
 
-    #     bundle.obj.job.reschedule()
+        bundle.obj.job.reschedule()
 
-    #     if (deserialized.get('return_dts', None)
-    #         and deserialized.get('return_success', None) == False):
-    #             bundle.obj.send_error_notification()
-    #     elif (deserialized.get('return_dts', None)
-    #         and deserialized.get('return_success', None) == True):
-    #             for child in bundle.obj.job.children.all():
-    #                 child.schedule_now()
+        if (deserialized.get('return_dts', None)
+            and deserialized.get('return_success', None) == False):
+                bundle.obj.send_error_notification()
+        elif (deserialized.get('return_dts', None)
+            and deserialized.get('return_success', None) == True):
+                for child in bundle.obj.job.children.all():
+                    child.schedule_now()
 
-    #     return result
+        return result
 
 
 # from tastypie import fields
