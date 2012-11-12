@@ -7,13 +7,28 @@
             "reschedule_type": "AFTER_SCHEDULE_DTS", 
             "script_content": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n", 
             "job_template": 1, 
-            "title": "Test job", 
+            "title": "Test job 1", 
             "notification_addresses": "job@example.com", 
             "reschedule_interval": 1, 
             "script_content_partial": "print \"Hello world\"", 
             "reschedule_interval_type": "DAY"
         }
     }, 
+    {
+        "pk": 2,
+        "model": "job_runner.job",
+        "fields": {
+            "parent": null, 
+            "reschedule_type": "AFTER_SCHEDULE_DTS", 
+            "script_content": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n", 
+            "job_template": 2, 
+            "title": "Test job 2", 
+            "notification_addresses": "job@example.com", 
+            "reschedule_interval": 1, 
+            "script_content_partial": "print \"Hello world\"", 
+            "reschedule_interval_type": "DAY"
+        }
+    },
     {
         "pk": 1, 
         "model": "job_runner.run", 

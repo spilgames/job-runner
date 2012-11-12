@@ -117,7 +117,7 @@ class RunTestCase(TestCase):
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(4, len(mail.outbox[0].to))
         self.assertEqual(
-            'Reschedule error for: Test job', mail.outbox[0].subject)
+            'Reschedule error for: Test job 1', mail.outbox[0].subject)
 
     def test_get_notification_addresses(self):
         """
