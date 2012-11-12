@@ -7,7 +7,18 @@
             "groups": [
                 1
             ], 
-            "title": "Test project"
+            "title": "Test project 1"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "job_runner.project",
+        "fields": {
+            "notification_addresses": "",
+            "groups": [
+                2
+            ],
+            "title": "Test project 2"
         }
     }
 ]

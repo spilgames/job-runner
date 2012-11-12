@@ -2,7 +2,8 @@ from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.resources import ModelResource
 
-from job_runner.apps.job_runner.auth import HmacAuthentication
+from job_runner.apps.job_runner.auth import (
+    HmacAuthentication, ModelAuthorization)
 from job_runner.apps.job_runner.models import (
     Job,
     JobTemplate,
@@ -24,6 +25,11 @@ class ProjectResource(ModelResource):
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='worker__api_key',
+            user_groups_path='groups',
+        )
 
 
 class WorkerResource(ModelResource):
