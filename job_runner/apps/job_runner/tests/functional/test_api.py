@@ -7,7 +7,7 @@ import json
 # from django.core import mail
 from django.test import TestCase
 
-from job_runner.apps.job_runner.models import Project
+from job_runner.apps.job_runner.models import Project, Worker
 
 
 class ApiTestBase(TestCase):
@@ -109,6 +109,36 @@ class WorkerTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+
+    def test_worker_count(self):
+        """
+        Test worker count in the DB.
+        """
+        self.assertEqual(2, Worker.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/worker/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test worker 1', json_data['objects'][0]['title'])
+
+    def test_user_authorization(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/worker/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test worker 1', json_data['objects'][0]['title'])
 
 
 class JobTemplateTestCase(ApiTestBase):

@@ -48,6 +48,11 @@ class WorkerResource(ModelResource):
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
 
+        authorization = ModelAuthorization(
+            api_key_path='api_key',
+            user_groups_path='project__groups',
+        )
+
 
 class JobTemplateResource(ModelResource):
     """

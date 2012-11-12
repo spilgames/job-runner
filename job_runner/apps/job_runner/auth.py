@@ -121,7 +121,7 @@ class ModelAuthorization(Authorization):
             object_list = object_list.filter(groups_or)
 
             # apply extra filters when the request is not a GET
-            if request.method != 'GET':
+            if request.method != 'GET' and self.auth_user_groups_path:
                 groups_or = None
 
                 for group in request.user.groups.all():
