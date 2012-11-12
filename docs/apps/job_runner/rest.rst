@@ -49,6 +49,16 @@ Projects
     Returns the details of a specific project-id.
 
 
+Workers
+~~~~~~~
+
+``GET /api/job_runner/v1/worker/``
+    Returns a list of available workers.
+
+``GET /api/job_runner/v1/worker/{WORKER_ID}``
+    Returns the details of a specific worker-id.
+
+
 Jobs
 ~~~~
 

@@ -61,6 +61,24 @@ class ProjectTestCase(ApiTestBase):
         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
 
+class WorkerTestCase(ApiTestBase):
+    """
+    Tests for the worker interface.
+    """
+    fixtures = ['test_auth', 'test_project', 'test_worker']
+
+    def test_worker_methods(self):
+        """
+        Test allowed methods.
+        """
+        response = self.get('/api/job_runner/v1/worker/schema/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+
+
 # class JobTestCase(ApiTestBase):
 #     """
 #     Tests for the job interface.

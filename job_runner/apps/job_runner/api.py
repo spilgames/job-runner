@@ -1,9 +1,11 @@
+from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.resources import ModelResource
 
 from job_runner.apps.job_runner.auth import HmacAuthentication
 from job_runner.apps.job_runner.models import (
     Project,
+    Worker,
 )
 
 
@@ -16,6 +18,23 @@ class ProjectResource(ModelResource):
         resource_name = 'project'
         allowed_methods = ['get']
         fields = ['title', 'id']
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+
+class WorkerResource(ModelResource):
+    """
+    RESTful resource for workers.
+    """
+    project = fields.ToOneField(
+        'job_runner.apps.job_runner.api.ProjectResource', 'project')
+
+    class Meta:
+        queryset = Worker.objects.all()
+        resource_name = 'worker'
+        allowed_methods = ['get']
+        fields = ['title', 'api_key']
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
