@@ -15,10 +15,12 @@ class RunManagerTestCase(TestCase):
         """
         Test :meth:`.Run.awaiting_enqueue`.
         """
-        self.assertEqual(1, Run.objects.awaiting_enqueue().count())
+        self.assertEqual(
+            1, Run.objects.awaiting_enqueue().filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
         run.enqueue_dts = datetime.now()
         run.save()
 
-        self.assertEqual(0, Run.objects.awaiting_enqueue().count())
+        self.assertEqual(
+            0, Run.objects.awaiting_enqueue().filter(job_id=1).count())

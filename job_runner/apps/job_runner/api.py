@@ -122,7 +122,12 @@ class RunResource(ModelResource):
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
-        # authorization = RunAuthorization()
+
+        authorization = ModelAuthorization(
+            api_key_path='job__job_template__worker__api_key',
+            user_groups_path='job__job_template__worker__project__groups',
+            auth_user_groups_path='job__job_template__auth_groups',
+        )
 
     def build_filters(self, filters=None):
         if filters is None:

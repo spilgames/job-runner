@@ -11,6 +11,7 @@ from job_runner.apps.job_runner.models import (
     Job,
     JobTemplate,
     Project,
+    Run,
     Worker,
 )
 
@@ -275,6 +276,36 @@ class RunTestCase(ApiTestBase):
         ], json_data['allowed_detail_http_methods'])
         self.assertEqual(
             ['get', 'post'], json_data['allowed_list_http_methods'])
+
+    def test_run_count(self):
+        """
+        Test the run count in the db.
+        """
+        self.assertEqual(2, Run.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/run/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual(1, json_data['objects'][0]['id'])
+
+    def test_user_authorization(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/run/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual(1, json_data['objects'][0]['id'])
 
 #     def test_get_runs(self):
 #         """

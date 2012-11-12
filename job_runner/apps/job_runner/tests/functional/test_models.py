@@ -26,18 +26,18 @@ class RunTestCase(TestCase):
         """
         Test reschedule after schedule dts.
         """
-        self.assertEqual(1, Run.objects.count())
+        self.assertEqual(1, Run.objects.filter(job_id=1).count())
         Job.objects.get(pk=1).reschedule()
-        self.assertEqual(1, Run.objects.count())
+        self.assertEqual(1, Run.objects.filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
         run.return_dts = datetime.now()
         run.save()
 
         Job.objects.get(pk=1).reschedule()
-        self.assertEqual(2, Run.objects.count())
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
-        runs = Run.objects.all()
+        runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
             runs[1].schedule_dts + timedelta(days=1),
             runs[0].schedule_dts
@@ -57,9 +57,9 @@ class RunTestCase(TestCase):
 
         job.reschedule()
 
-        self.assertEqual(2, Run.objects.count())
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
-        runs = Run.objects.all()
+        runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
             runs[1].return_dts + timedelta(days=1),
             runs[0].schedule_dts
@@ -86,7 +86,7 @@ class RunTestCase(TestCase):
 
         job.reschedule()
 
-        self.assertEqual(2, Run.objects.count())
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
         runs = Run.objects.all()
         self.assertEqual(datetime(2012, 1, 1, 13, 59), runs[0].schedule_dts)
@@ -112,7 +112,7 @@ class RunTestCase(TestCase):
 
         job.reschedule()
 
-        self.assertEqual(1, Run.objects.count())
+        self.assertEqual(1, Run.objects.filter(job_id=1).count())
         self.assertTrue(hasattr(mail, 'outbox'))
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(4, len(mail.outbox[0].to))
