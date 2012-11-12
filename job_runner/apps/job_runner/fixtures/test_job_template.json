@@ -1,0 +1,15 @@
+[
+    {
+        "pk": 1, 
+        "model": "job_runner.jobtemplate", 
+        "fields": {
+            "body": "#!/usr/bin/env python\r\n\r\n{{ content|safe }}\r\n", 
+            "notification_addresses": "template@example.com", 
+            "worker": 1, 
+            "auth_groups": [
+                1
+            ], 
+            "title": "Test template"
+        }
+    }
+]

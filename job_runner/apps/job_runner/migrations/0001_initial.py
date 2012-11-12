@@ -8,48 +8,65 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Server'
-        db.create_table('job_runner_server', (
+        # Adding model 'Project'
+        db.create_table('job_runner_project', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('hostname', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('public_key', self.gf('django.db.models.fields.CharField')(max_length=255, db_index=True)),
-            ('private_key', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('notification_addresses', self.gf('django.db.models.fields.TextField')(blank=True)),
         ))
-        db.send_create_signal('job_runner', ['Server'])
+        db.send_create_signal('job_runner', ['Project'])
 
-        # Adding model 'ScriptTemplate'
-        db.create_table('job_runner_scripttemplate', (
+        # Adding M2M table for field groups on 'Project'
+        db.create_table('job_runner_project_groups', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('project', models.ForeignKey(orm['job_runner.project'], null=False)),
+            ('group', models.ForeignKey(orm['auth.group'], null=False))
+        ))
+        db.create_unique('job_runner_project_groups', ['project_id', 'group_id'])
+
+        # Adding model 'Worker'
+        db.create_table('job_runner_worker', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('api_key', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255, db_index=True)),
+            ('secret', self.gf('django.db.models.fields.CharField')(max_length=255, db_index=True)),
+            ('project', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['job_runner.Project'])),
+            ('notification_addresses', self.gf('django.db.models.fields.TextField')(blank=True)),
+        ))
+        db.send_create_signal('job_runner', ['Worker'])
+
+        # Adding model 'JobTemplate'
+        db.create_table('job_runner_jobtemplate', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
             ('body', self.gf('django.db.models.fields.TextField')()),
+            ('worker', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['job_runner.Worker'])),
             ('notification_addresses', self.gf('django.db.models.fields.TextField')(blank=True)),
         ))
-        db.send_create_signal('job_runner', ['ScriptTemplate'])
+        db.send_create_signal('job_runner', ['JobTemplate'])
+
+        # Adding M2M table for field auth_groups on 'JobTemplate'
+        db.create_table('job_runner_jobtemplate_auth_groups', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('jobtemplate', models.ForeignKey(orm['job_runner.jobtemplate'], null=False)),
+            ('group', models.ForeignKey(orm['auth.group'], null=False))
+        ))
+        db.create_unique('job_runner_jobtemplate_auth_groups', ['jobtemplate_id', 'group_id'])
 
         # Adding model 'Job'
         db.create_table('job_runner_job', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('parent', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='children', null=True, to=orm['job_runner.Job'])),
-            ('server', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['job_runner.Server'])),
-            ('script_template', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['job_runner.ScriptTemplate'])),
+            ('job_template', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['job_runner.JobTemplate'])),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('script_content_partial', self.gf('django.db.models.fields.TextField')()),
             ('script_content', self.gf('django.db.models.fields.TextField')()),
-            ('script_content_rendered', self.gf('django.db.models.fields.TextField')()),
             ('reschedule_interval', self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True)),
             ('reschedule_interval_type', self.gf('django.db.models.fields.CharField')(max_length=6, blank=True)),
             ('reschedule_type', self.gf('django.db.models.fields.CharField')(max_length=18, blank=True)),
             ('notification_addresses', self.gf('django.db.models.fields.TextField')(blank=True)),
         ))
         db.send_create_signal('job_runner', ['Job'])
-
-        # Adding M2M table for field one_of_groups on 'Job'
-        db.create_table('job_runner_job_one_of_groups', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('job', models.ForeignKey(orm['job_runner.job'], null=False)),
-            ('group', models.ForeignKey(orm['auth.group'], null=False))
-        ))
-        db.create_unique('job_runner_job_one_of_groups', ['job_id', 'group_id'])
 
         # Adding model 'RescheduleExclude'
         db.create_table('job_runner_rescheduleexclude', (
@@ -75,17 +92,23 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        # Deleting model 'Server'
-        db.delete_table('job_runner_server')
+        # Deleting model 'Project'
+        db.delete_table('job_runner_project')
 
-        # Deleting model 'ScriptTemplate'
-        db.delete_table('job_runner_scripttemplate')
+        # Removing M2M table for field groups on 'Project'
+        db.delete_table('job_runner_project_groups')
+
+        # Deleting model 'Worker'
+        db.delete_table('job_runner_worker')
+
+        # Deleting model 'JobTemplate'
+        db.delete_table('job_runner_jobtemplate')
+
+        # Removing M2M table for field auth_groups on 'JobTemplate'
+        db.delete_table('job_runner_jobtemplate_auth_groups')
 
         # Deleting model 'Job'
         db.delete_table('job_runner_job')
-
-        # Removing M2M table for field one_of_groups on 'Job'
-        db.delete_table('job_runner_job_one_of_groups')
 
         # Deleting model 'RescheduleExclude'
         db.delete_table('job_runner_rescheduleexclude')
@@ -118,16 +141,30 @@ class Migration(SchemaMigration):
         'job_runner.job': {
             'Meta': {'object_name': 'Job'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'job_template': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.JobTemplate']"}),
             'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'one_of_groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': "orm['job_runner.Job']"}),
             'reschedule_interval': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'reschedule_interval_type': ('django.db.models.fields.CharField', [], {'max_length': '6', 'blank': 'True'}),
             'reschedule_type': ('django.db.models.fields.CharField', [], {'max_length': '18', 'blank': 'True'}),
             'script_content': ('django.db.models.fields.TextField', [], {}),
-            'script_content_rendered': ('django.db.models.fields.TextField', [], {}),
-            'script_template': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.ScriptTemplate']"}),
-            'server': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Server']"}),
+            'script_content_partial': ('django.db.models.fields.TextField', [], {}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'job_runner.jobtemplate': {
+            'Meta': {'object_name': 'JobTemplate'},
+            'auth_groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
+            'body': ('django.db.models.fields.TextField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'worker': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Worker']"})
+        },
+        'job_runner.project': {
+            'Meta': {'object_name': 'Project'},
+            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
         'job_runner.rescheduleexclude': {
@@ -148,20 +185,14 @@ class Migration(SchemaMigration):
             'schedule_dts': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
             'start_dts': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'db_index': 'True'})
         },
-        'job_runner.scripttemplate': {
-            'Meta': {'object_name': 'ScriptTemplate'},
-            'body': ('django.db.models.fields.TextField', [], {}),
+        'job_runner.worker': {
+            'Meta': {'object_name': 'Worker'},
+            'api_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Project']"}),
+            'secret': ('django.db.models.fields.CharField', [], {'max_length': '255', 'db_index': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
-        },
-        'job_runner.server': {
-            'Meta': {'object_name': 'Server'},
-            'hostname': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'private_key': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'public_key': ('django.db.models.fields.CharField', [], {'max_length': '255', 'db_index': 'True'})
         }
     }
 

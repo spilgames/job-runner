@@ -29,40 +29,67 @@ class RescheduleException(Exception):
     """
 
 
-class Server(models.Model):
+class Project(models.Model):
     """
-    Contains the public / private key combinations.
+    Projects
     """
-    hostname = models.CharField(max_length=255)
-    public_key = models.CharField(max_length=255, db_index=True)
-    private_key = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    groups = models.ManyToManyField(Group)
     notification_addresses = models.TextField(
-        help_text='Separate addresses by a newline',
+        help_text='Separate e-mail addresses by a newline',
         blank=True,
     )
 
     def __unicode__(self):
-        return self.hostname
+        return self.title
+
+    def get_notification_addresses(self):
+        """
+        Return a ``list`` notification addresses.
+        """
+        addresses = self.notification_addresses.strip().split('\n')
+        return [x.strip() for x in addresses]
+
+
+class Worker(models.Model):
+    """
+    Workers
+    """
+    title = models.CharField(max_length=255)
+    api_key = models.CharField(max_length=255, db_index=True, unique=True)
+    secret = models.CharField(max_length=255, db_index=True)
+    project = models.ForeignKey(Project)
+    notification_addresses = models.TextField(
+        help_text='Separate e-mail addresses by a newline',
+        blank=True,
+    )
+
+    def __unicode__(self):
+        return self.title
 
     def get_notification_addresses(self):
         """
         Return a ``list`` of notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        return [x.strip() for x in addresses]
+        addresses = [x.strip() for x in addresses]
+        addresses.extend(self.project.get_notification_addresses())
+        return addresses
 
 
-class ScriptTemplate(models.Model):
+class JobTemplate(models.Model):
     """
-    Contains templates for the job scripts.
+    Job templates
     """
     title = models.CharField(max_length=255)
     body = models.TextField(help_text=(
         'Use {{ content|safe }} at the place where you want to render the '
         'script content of the job'
     ))
+    worker = models.ForeignKey(Worker)
+    auth_groups = models.ManyToManyField(Group, blank=True)
     notification_addresses = models.TextField(
-        help_text='Separate addresses by a newline',
+        help_text='Separate e-mail addresses by a newline',
         blank=True,
     )
 
@@ -77,7 +104,7 @@ class ScriptTemplate(models.Model):
         will be updated on the job level.
 
         """
-        super(ScriptTemplate, self).save(*args, **kwargs)
+        super(JobTemplate, self).save(*args, **kwargs)
         for job in self.job_set.all():
             job.save()
 
@@ -86,7 +113,9 @@ class ScriptTemplate(models.Model):
         Return a ``list`` of notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        return [x.strip() for x in addresses]
+        addresses = [x.strip() for x in addresses]
+        addresses.extend(self.worker.get_notification_addresses())
+        return addresses
 
 
 class Job(models.Model):
@@ -95,12 +124,10 @@ class Job(models.Model):
     """
     parent = models.ForeignKey(
         'self', blank=True, null=True, related_name='children')
-    server = models.ForeignKey(Server)
-    script_template = models.ForeignKey(ScriptTemplate)
-    one_of_groups = models.ManyToManyField(Group, blank=True)
+    job_template = models.ForeignKey(JobTemplate)
     title = models.CharField(max_length=255)
-    script_content = models.TextField()
-    script_content_rendered = models.TextField(editable=False)
+    script_content_partial = models.TextField('script content')
+    script_content = models.TextField(editable=False)
     reschedule_interval = models.PositiveIntegerField(
         null=True,
         blank=True,
@@ -168,9 +195,6 @@ class Job(models.Model):
 
                     addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
                     addresses.extend(self.get_notification_addresses())
-                    addresses.extend(
-                        self.script_template.get_notification_addresses())
-                    addresses.extend(self.server.get_notification_addresses())
 
                     if addresses:
                         send_mail(
@@ -190,9 +214,9 @@ class Job(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        t = Template(self.script_template.body)
-        c = Context({'content': self.script_content})
-        self.script_content_rendered = t.render(c)
+        t = Template(self.job_template.body)
+        c = Context({'content': self.script_content_partial})
+        self.script_content = t.render(c)
         super(Job, self).save(*args, **kwargs)
 
     def get_notification_addresses(self):
@@ -200,7 +224,9 @@ class Job(models.Model):
         Return a ``list`` of notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        return [x.strip() for x in addresses]
+        addresses = [x.strip() for x in addresses]
+        addresses.extend(self.job_template.get_notification_addresses())
+        return addresses
 
     def _get_reschedule_date(
             self, reference_date, reschedule_delta, increment_date=None):
@@ -289,8 +315,6 @@ class Run(models.Model):
 
         addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
         addresses.extend(self.job.get_notification_addresses())
-        addresses.extend(self.job.script_template.get_notification_addresses())
-        addresses.extend(self.job.server.get_notification_addresses())
 
         if addresses:
             send_mail(

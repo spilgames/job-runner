@@ -1,7 +1,13 @@
 from django.contrib import admin
 
 from job_runner.apps.job_runner.models import (
-    Job, RescheduleExclude, Run, ScriptTemplate, Server)
+    Job,
+    JobTemplate,
+    Project,
+    RescheduleExclude,
+    Run,
+    Worker,
+)
 
 
 class RunInlineAdmin(admin.TabularInline):
@@ -27,7 +33,7 @@ class JobAdmin(admin.ModelAdmin):
     """
     Admin interface for jobs.
     """
-    list_display = ('title', 'server', 'reschedule_type', 'parent')
+    list_display = ('title', 'job_template', 'reschedule_type', 'parent')
     inlines = [
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,
@@ -35,13 +41,10 @@ class JobAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'server',)
+            'fields': ('title', 'job_template',)
         }),
         ('Script', {
-            'fields': ('script_template', 'script_content',)
-        }),
-        ('Permissions', {
-            'fields': ('one_of_groups',)
+            'fields': ('script_content_partial',)
         }),
         ('Notifications', {
             'fields': ('notification_addresses',)
@@ -56,5 +59,6 @@ class JobAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Job, JobAdmin)
-admin.site.register(ScriptTemplate)
-admin.site.register(Server)
+admin.site.register(JobTemplate)
+admin.site.register(Project)
+admin.site.register(Worker)

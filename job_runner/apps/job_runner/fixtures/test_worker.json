@@ -1,0 +1,13 @@
+[
+    {
+        "pk": 1, 
+        "model": "job_runner.worker", 
+        "fields": {
+            "project": 1, 
+            "secret": "verysecret", 
+            "api_key": "worker1", 
+            "notification_addresses": "worker@example.com", 
+            "title": "Test worker"
+        }
+    }
+]

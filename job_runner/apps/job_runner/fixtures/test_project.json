@@ -1,0 +1,13 @@
+[
+    {
+        "pk": 1, 
+        "model": "job_runner.project", 
+        "fields": {
+            "notification_addresses": "project@example.com\n", 
+            "groups": [
+                1
+            ], 
+            "title": "Test project"
+        }
+    }
+]
