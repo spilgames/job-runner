@@ -1,0 +1,17 @@
+[
+    {
+        "pk": 3, 
+        "model": "job_runner.job", 
+        "fields": {
+            "parent": 1, 
+            "reschedule_type": "", 
+            "script_content": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n", 
+            "job_template": 1, 
+            "title": "Test job 3", 
+            "notification_addresses": "job@example.com", 
+            "reschedule_interval": null, 
+            "script_content_partial": "print \"Hello world\"", 
+            "reschedule_interval_type": ""
+        }
+    }
+]

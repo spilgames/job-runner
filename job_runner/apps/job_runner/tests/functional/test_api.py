@@ -514,26 +514,32 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(400, response.status_code)
 
 
-# class ChainedRunTestCase(ApiTestBase):
-#     """
-#     Tests for the run interface with chaining.
-#     """
-#     fixtures = [
-#         'test_job', 'test_child_job', 'test_server', 'test_script_template']
+class ChainedRunTestCase(ApiTestBase):
+    """
+    Tests for the run interface with chaining.
+    """
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+        'test_child_job',
+    ]
 
-#     def test_patch_with_reschedule(self):
-#         """
-#         Test PATCH ``/api/v1/run/1/`` for chained job.
+    def test_patch_with_reschedule(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` for chained job.
 
-#         """
-#         response = self.patch(
-#             '/api/v1/run/1/',
-#             {
-#                 'return_dts': datetime.utcnow().isoformat(' '),
-#                 'return_success': True,
-#             }
-#         )
+        """
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': datetime.utcnow().isoformat(' '),
+                'return_success': True,
+            }
+        )
 
-#         self.assertEqual(202, response.status_code)
-#         self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
-#         self.assertEqual(1, Job.objects.get(pk=2).run_set.count())
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
+        self.assertEqual(1, Job.objects.get(pk=3).run_set.count())
