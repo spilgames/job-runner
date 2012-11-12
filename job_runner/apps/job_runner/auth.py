@@ -1,70 +1,70 @@
-# import hashlib
-# import hmac
+import hashlib
+import hmac
 # import json
-# import re
+import re
 
-# from tastypie.authentication import Authentication
+from tastypie.authentication import Authentication
 # from tastypie.authorization import Authorization
 
-# from job_runner.apps.job_runner.models import Server
+from job_runner.apps.job_runner.models import Worker
 
 
-# def validate_hmac(request):
-#     """
-#     Validate the HMAC of an incoming request.
+def validate_hmac(request):
+    """
+    Validate the HMAC of an incoming request.
 
-#     :param request:
-#         The incoming request object.
+    :param request:
+        The incoming request object.
 
-#     :return:
-#         A ``bool`` indicating if the request is valid.
+    :return:
+        A ``bool`` indicating if the request is valid.
 
-#     This will test the ``Authentication`` header for valid keys. The following
-#     format is expected::
+    This will test the ``Authentication`` header for valid keys. The following
+    format is expected::
 
-#         Authorization: ApiKey public_key:hmac_sha1
+        Authorization: ApiKey api_key:hmac_sha1
 
-#     ``public_key``
-#         Is the public key as stored in the ApiKey model.
+    ``public_key``
+        Is the public key as stored in the ApiKey model.
 
-#     ``hmac_sha1``
-#         The HMAC-SHA1 generated over the uppercased request method + full
-#         request path (path + query string, if applicable) + request body,
-#         if applicable.
+    ``hmac_sha1``
+        The HMAC-SHA1 generated over the uppercased request method + full
+        request path (path + query string, if applicable) + request body,
+        if applicable.
 
-#     """
-#     auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-#     api_key_match = re.match(r'^ApiKey (.*?):(.*?)$', auth_header)
+    """
+    auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+    api_key_match = re.match(r'^ApiKey (.*?):(.*?)$', auth_header)
 
-#     if not api_key_match:
-#         return False
+    if not api_key_match:
+        return False
 
-#     try:
-#         api_user = Server.objects.get(public_key=api_key_match.group(1))
-#     except Server.DoesNotExist:
-#         return False
+    try:
+        worker = Worker.objects.get(api_key=api_key_match.group(1))
+    except Worker.DoesNotExist:
+        return False
 
-#     hmac_message = '{request_method}{full_path}{request_body}'.format(
-#         request_method=request.method,
-#         full_path=request.get_full_path(),
-#         request_body=request.raw_post_data,
-#     )
+    hmac_message = '{request_method}{full_path}{request_body}'.format(
+        request_method=request.method,
+        full_path=request.get_full_path(),
+        request_body=request.raw_post_data,
+    )
 
-#     expected_hmac = hmac.new(
-#         str(api_user.private_key), hmac_message, hashlib.sha1)
+    expected_hmac = hmac.new(
+        str(worker.secret), hmac_message, hashlib.sha1)
 
-#     if expected_hmac.hexdigest() == api_key_match.group(2):
-#         return True
+    if expected_hmac.hexdigest() == api_key_match.group(2):
+        return True
 
-#     return False
+    return False
 
 
-# class HmacAuthentication(Authentication):
-#     """
-#     Authenticate based on request HMAC.
-#     """
-#     def is_authenticated(self, request, **kwargs):
-#         return validate_hmac(request)
+class HmacAuthentication(Authentication):
+    """
+    Authenticate based on request HMAC.
+    """
+    def is_authenticated(self, request, **kwargs):
+        return validate_hmac(request)
 
 
 # class JobAuthorization(Authorization):
