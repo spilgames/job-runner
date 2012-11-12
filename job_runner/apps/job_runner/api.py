@@ -70,6 +70,11 @@ class JobTemplateResource(ModelResource):
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
 
+        authorization = ModelAuthorization(
+            api_key_path='worker__api_key',
+            user_groups_path='worker__project__groups',
+        )
+
 
 class JobResource(ModelResource):
     """
