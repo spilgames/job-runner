@@ -213,16 +213,3 @@ class RunResource(ModelResource):
                     child.schedule_now()
 
         return result
-
-
-# from tastypie import fields
-# from tastypie.authentication import MultiAuthentication, SessionAuthentication
-# from tastypie.constants import ALL
-# from tastypie.resources import ModelResource
-
-# from job_runner.apps.job_runner.auth import (
-#     HmacAuthentication, RunAuthorization, JobAuthorization)
-# from job_runner.apps.job_runner.models import Job, Run, Server
-
-
-        # authorization = JobAuthorization()
