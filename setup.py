@@ -19,6 +19,7 @@ setup(
         'django-grappelli',
         'south',
         'uwsgi',
+        'MySQL-python',
         'django-tastypie==0.9.12-alpha',
         'mimeparse==0.1.3',
         'python-dateutil==1.5',
