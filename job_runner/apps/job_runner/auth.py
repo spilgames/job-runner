@@ -110,9 +110,13 @@ class ModelAuthorization(Authorization):
               and request.user.groups.count() > 0):
             groups_or = None
 
+            if self.user_groups_path == "":
+                path = 'name'
+            else:
+                path = '{0}__name'.format(self.user_groups_path)
+
             for group in request.user.groups.all():
-                q_obj = Q(**{'{0}__name'.format(
-                    self.user_groups_path): group.name})
+                q_obj = Q(**{path: group.name})
                 if not groups_or:
                     groups_or = q_obj
                 else:
@@ -121,12 +125,16 @@ class ModelAuthorization(Authorization):
             object_list = object_list.filter(groups_or)
 
             # apply extra filters when the request is not a GET
-            if request.method != 'GET' and self.auth_user_groups_path:
+            if request.method != 'GET' and self.auth_user_groups_path != None:
                 groups_or = None
 
+                if self.auth_user_groups_path == "":
+                    path = 'name'
+                else:
+                    path = '{0}__name'.format(self.auth_user_groups_path)
+
                 for group in request.user.groups.all():
-                    q_obj = Q(**{'{0}__name'.format(
-                        self.auth_user_groups_path): group.name})
+                    q_obj = Q(**{path: group.name})
                     if not groups_or:
                         groups_or = q_obj
                     else:

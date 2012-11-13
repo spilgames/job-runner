@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
@@ -12,6 +13,25 @@ from job_runner.apps.job_runner.models import (
     Run,
     Worker,
 )
+
+
+class GroupResource(ModelResource):
+    """
+    RESTful resource for Django groups.
+    """
+    class Meta:
+        queryset = Group.objects.all()
+        resource_name = 'group'
+        allowed_methods = ['get']
+        fields = ['name']
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='jobtemplate__worker__api_key',
+            user_groups_path='',
+        )
 
 
 class ProjectResource(ModelResource):

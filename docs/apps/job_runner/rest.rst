@@ -38,6 +38,15 @@ Available end-points
 .. note:: You can append ``schema/`` to the end of the URL to get information
     about the schema!
 
+Groups
+~~~~~~
+
+``GET /api/v1/group/``
+    Returns a list of available (and thus assigned) groups.
+
+``GET /api/v1/group/{GROUP_ID}/``
+    Returns the details of a specific job-id.
+
 
 Projects
 ~~~~~~~~
