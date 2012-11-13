@@ -1,5 +1,6 @@
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.resources import ModelResource
 
 from job_runner.apps.job_runner.auth import (
@@ -22,6 +23,9 @@ class ProjectResource(ModelResource):
         resource_name = 'project'
         allowed_methods = ['get']
         fields = ['title', 'id']
+        filtering = {
+            'id': ('exact',),
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
@@ -44,6 +48,9 @@ class WorkerResource(ModelResource):
         resource_name = 'worker'
         allowed_methods = ['get']
         fields = ['title', 'api_key']
+        filtering = {
+            'project': ALL_WITH_RELATIONS,
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
@@ -66,6 +73,9 @@ class JobTemplateResource(ModelResource):
         resource_name = 'job_template'
         allowed_methods = ['get']
         fields = ['title']
+        filtering = {
+            'worker': ALL_WITH_RELATIONS,
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
@@ -90,9 +100,9 @@ class JobResource(ModelResource):
         resource_name = 'job'
         allowed_methods = ['get']
         fields = ['title', 'script_content']
-        # filtering = {
-        #     'server': ALL,
-        # }
+        filtering = {
+            'job_template': ALL_WITH_RELATIONS,
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
@@ -116,10 +126,10 @@ class RunResource(ModelResource):
         resource_name = 'run'
         detail_allowed_methods = ['get', 'patch']
         list_allowed_methods = ['get', 'post']
-        # filtering = {
-        #     'schedule_dts': ALL,
-        #     'job': ALL,
-        # }
+        filtering = {
+            'schedule_dts': ALL,
+            'job': ALL_WITH_RELATIONS,
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
