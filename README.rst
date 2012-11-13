@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v0.6.2
+~~~~~~
+
+* Add missing static-file and logging settings.
+
+
 v0.6.1
 ~~~~~~
 
