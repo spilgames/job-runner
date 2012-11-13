@@ -90,6 +90,7 @@ var Run = TastypieModel.extend({
     }
 });
 
+var Group = TastypieModel.extend();
 var Project = TastypieModel.extend();
 var Worker = TastypieModel.extend();
 var Job = TastypieModel.extend();

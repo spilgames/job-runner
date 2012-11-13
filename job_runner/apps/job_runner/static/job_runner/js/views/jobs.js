@@ -18,6 +18,7 @@ var JobView = Backbone.View.extend({
             $('#jobs').removeClass('hide');
         });
         
+        this.groupCollection = options.groupCollection;
         this.workerCollection = options.workerCollection;
         this.jobTemplateCollection = options.jobTemplateCollection;
         this.jobCollection = options.jobCollection;
@@ -47,17 +48,26 @@ var JobView = Backbone.View.extend({
 
         var JobId = $(e.target.parentNode.parentNode).data('id');
         var job = this.jobCollection.get(JobId);
+        var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
 
         $('#modal').html(this.jobModalTemplate({
             title: job.attributes.title,
             script_content: job.attributes.script_content,
             job_url: job.url()
         })).modal();
+
+        $('.schedule-job').hide();
+        _(this.groupCollection.models).each(function(group) {
+            if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
+                $('.schedule-job').show();
+            }
+        });
+
         $('.schedule-job').click(this.scheduleJob);
     },
 
     scheduleJob: function(e) {
-        if (confirm('Are you sure you want to schedule this job?')) {         
+        if (confirm('Are you sure you want to schedule this job?')) {
             var runCollection = new RunCollection();
 
             var run = runCollection.create({

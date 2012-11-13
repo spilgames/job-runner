@@ -1,6 +1,11 @@
 /*
     Collections
 */
+var GroupCollection = TastypieCollection.extend({
+    model: Group,
+    url: '/api/v1/group/'
+});
+
 var ProjectCollection = TastypieCollection.extend({
     model: Project,
     url: '/api/v1/project/'
