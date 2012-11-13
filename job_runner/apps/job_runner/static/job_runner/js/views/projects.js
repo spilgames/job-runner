@@ -11,7 +11,7 @@ var ProjectView = Backbone.View.extend({
     },
 
     renderProject: function(project) {
-        $('.dropdown-menu', self.el).append('<li><a href="/project/'+ project.id +'/runs/">'+ project.attributes.title +'</a></li>');
+        $('.dropdown-menu', this.el).append('<li><a href="/project/'+ project.id +'/runs/">'+ project.attributes.title +'</a></li>');
     }
 
 });
