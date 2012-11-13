@@ -87,6 +87,11 @@ class JobTemplateResource(ModelResource):
     """
     worker = fields.ToOneField(
         'job_runner.apps.job_runner.api.WorkerResource', 'worker')
+    auth_groups = fields.ToManyField(
+        'job_runner.apps.job_runner.api.GroupResource',
+        'auth_groups',
+        null=True
+    )
 
     class Meta:
         queryset = JobTemplate.objects.all()
