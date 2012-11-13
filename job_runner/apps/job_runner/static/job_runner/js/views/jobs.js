@@ -1,4 +1,4 @@
-var JobsView = Backbone.View.extend({
+var JobView = Backbone.View.extend({
     template: _.template($('#job-template').html()),
     jobModalTemplate: _.template($('#job-modal-template').html()),
 
@@ -18,26 +18,26 @@ var JobsView = Backbone.View.extend({
             $('#jobs').removeClass('hide');
         });
         
-        this.job_collection = new JobCollection();
-        this.server_collection = new ServerCollection();
-        this.job_collection.bind('add', this.renderItem);
+        this.workerCollection = options.workerCollection;
+        this.jobTemplateCollection = options.jobTemplateCollection;
+        this.jobCollection = options.jobCollection;
 
-        this.server_collection.fetch_all({success: function() {
-            self.job_collection.fetch_all();
-        }});
-
+        _(this.jobCollection.models).each(function(job) {
+            self.renderItem(job);
+        });
     },
 
     // render a job
-    renderItem: function(item) {
-        var server = this.server_collection.where({'resource_uri': item.attributes.server})[0];
+    renderItem: function(job) {
+        var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
+        var worker = this.workerCollection.where({'resource_uri': jobTemplate.attributes.worker})[0];
 
         $('#jobs .jobs').append(this.template({
-            id: item.id,
-            title: item.attributes.title,
-            hostname: server.attributes.hostname
+            id: job.id,
+            title: job.attributes.title,
+            hostname: worker.attributes.title
         }));
-        $('#job-'+ item.id).slideDown("slow");
+        $('#job-'+ job.id).slideDown("slow");
 
     },
 
@@ -46,11 +46,11 @@ var JobsView = Backbone.View.extend({
         e.preventDefault();
 
         var JobId = $(e.target.parentNode.parentNode).data('id');
-        var job = this.job_collection.get(JobId);
+        var job = this.jobCollection.get(JobId);
 
         $('#modal').html(this.jobModalTemplate({
             title: job.attributes.title,
-            script_content: job.attributes.script_content_rendered,
+            script_content: job.attributes.script_content,
             job_url: job.url()
         })).modal();
         $('.schedule-job').click(this.scheduleJob);
@@ -58,9 +58,9 @@ var JobsView = Backbone.View.extend({
 
     scheduleJob: function(e) {
         if (confirm('Are you sure you want to schedule this job?')) {         
-            var run_collection = new RunCollection();
+            var runCollection = new RunCollection();
 
-            var run = run_collection.create({
+            var run = runCollection.create({
                 job: $(e.target).data('job_url'),
                 schedule_dts: moment.utc().format('YYYY-MM-DD HH:mm:ss')
             }, {

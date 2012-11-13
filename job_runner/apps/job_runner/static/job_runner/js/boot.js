@@ -27,6 +27,14 @@ projectCollection.fetch_all({success: function() {
                     jobCollection: jobCollection
                 });
 
+                var jobView = new JobView({
+                    router: appRouter,
+                    projectCollection: projectCollection,
+                    workerCollection: workerCollection,
+                    jobTemplateCollection: jobTemplateCollection,
+                    jobCollection: jobCollection
+                });
+
                 Backbone.history.start({pushState: true});
                 
             }});
