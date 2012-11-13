@@ -90,5 +90,7 @@ var Run = TastypieModel.extend({
     }
 });
 
+var Project = TastypieModel.extend();
+var Worker = TastypieModel.extend();
 var Job = TastypieModel.extend();
-var Server = TastypieModel.extend();
+var JobTemplate = TastypieModel.extend();

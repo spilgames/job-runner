@@ -1,7 +1,8 @@
 var AppRouter = Backbone.Router.extend({
     routes: {
-        '': 'showDashboard',
-        'jobs/': 'showJobs'
+        '': 'redirectToFirstProject',
+        'project/:project/runs/': 'showDashboard',
+        'project/:project/jobs/': 'showJobs'
     },
 
     initialize: function() {
@@ -11,13 +12,27 @@ var AppRouter = Backbone.Router.extend({
         });
     },
 
-    showDashboard: function(e) {
-        $('header ul.nav li').removeClass('active');
-        $('header ul.nav li.dashboard').addClass('active');
+    redirectToFirstProject: function(e) {
+        window.location.href = '/project/'+ projectCollection.models[0].id + '/runs/';
     },
 
-    showJobs: function() {
+    activateNavigation: function(name) {
         $('header ul.nav li').removeClass('active');
-        $('header ul.nav li.jobs').addClass('active');
+        $('header ul.nav li.'+ name).addClass('active');
+    },
+
+    updateProjectNav: function(project_id) {
+        var project = projectCollection.get(project_id);
+        $('#project-list span').html(project.attributes.title);
+    },
+
+    showDashboard: function(project) {
+        this.activateNavigation('dashboard');
+        this.updateProjectNav(project);
+    },
+
+    showJobs: function(project) {
+        this.activateNavigation('jobs');
+        this.updateProjectNav(project);
     }
 });

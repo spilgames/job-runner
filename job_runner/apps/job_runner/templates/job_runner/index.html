@@ -76,9 +76,18 @@
 
 {% block navbar %}
 <ul class="nav">
-    <li class="active dashboard"><a href="/">Dashboard</a></li>
-    <li class="jobs"><a href="/jobs/">Jobs</a></li>
+    <li class="active dashboard"><a href="../runs/">Dashboard</a></li>
+    <li class="jobs"><a href="../jobs/">Jobs</a></li>
 </ul>
+
+<ul class="nav pull-right" id="project-list">
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>Select project</span> <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+        </ul>
+    </li>
+</ul>
+
 {% endblock %}
 
 {% block extracss %}
@@ -136,8 +145,9 @@
 
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/collections.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/runs.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/jobs.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/projects.js"></script>
+    {# // <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/runs.js"></script> #}
+    {# // <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/jobs.js"></script> #}
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/router.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/boot.js"></script>
 {% endblock %}

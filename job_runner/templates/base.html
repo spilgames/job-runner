@@ -15,7 +15,6 @@
             <div class="navbar-inner">
                 <div class="container">
                     <a class="brand" href="/">Job-Runner</a>
-                    {% block navbar %}{% endblock %}
                     <ul class="nav pull-right">
                         {% if user.is_authenticated %}
                             <li class="dropdown">
@@ -31,6 +30,7 @@
                             <li><a href="{% url login %}">Login</a></li>
                         {% endif %}
                     </ul>
+                    {% block navbar %}{% endblock %}
                 </div>
             </div>
         </div>
