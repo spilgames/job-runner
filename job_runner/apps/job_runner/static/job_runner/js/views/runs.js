@@ -135,13 +135,13 @@ var RunView = Backbone.View.extend({
             }));
             this.sortRuns('#completed-runs');
 
-        } else if (item.state() == 'completed_with_error') {
+        } else if (run.state() == 'completed_with_error') {
             var old = $('#completed-with-error-runs div, #completed-runs div').filter(function() {
                 return $(this).data('job_id') == job.id;
             });
             old.fadeOut('slow', function() { old.remove(); });
             $('#completed-with-error-runs', self.el).append(self.template({
-                id: item.id,
+                id: run.id,
                 job_id: job.id,
                 state: 'completed-with-error',
                 title: job.attributes.title,

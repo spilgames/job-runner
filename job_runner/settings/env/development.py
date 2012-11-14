@@ -11,3 +11,5 @@ DATABASES = {
 }
 
 JOB_RUNNER_WS_SERVER = 'ws://localhost:5000/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
