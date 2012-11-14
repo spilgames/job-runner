@@ -22,6 +22,7 @@ var RunView = Backbone.View.extend({
 
         var self = this;
 
+        // router callback
         options.router.on('route:showDashboard', function(project_id) {
             $('#job_runner section').addClass('hide');
             $('#dashboard').removeClass('hide');
@@ -40,6 +41,7 @@ var RunView = Backbone.View.extend({
         });
     },
 
+    // fetch initial data (based on active project)
     initialFetch: function() {
         var self = this;
 
@@ -67,6 +69,7 @@ var RunView = Backbone.View.extend({
         });
     },
 
+    // fetch initial set of runs (based on active project)
     initialFetchRuns: function() {
         var self = this;
 

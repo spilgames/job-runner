@@ -20,6 +20,7 @@ var JobView = Backbone.View.extend({
 
         var self = this;
 
+        // router callback
         options.router.on('route:showJobs', function(project_id) {
             $('#job_runner section').addClass('hide');
             $('#jobs').removeClass('hide');
@@ -29,6 +30,7 @@ var JobView = Backbone.View.extend({
         });
     },
 
+    // fetch data (based on active project)
     initialFetch: function() {
         var self = this;
 
@@ -91,6 +93,7 @@ var JobView = Backbone.View.extend({
         $('.schedule-job').click(this.scheduleJob);
     },
 
+    // callback for scheduling a job
     scheduleJob: function(e) {
         if (confirm('Are you sure you want to schedule this job?')) {
             var runCollection = new RunCollection();
