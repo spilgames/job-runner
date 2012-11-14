@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Q
 
 from job_runner.apps.job_runner.models import (
     Job,
@@ -8,6 +9,75 @@ from job_runner.apps.job_runner.models import (
     Run,
     Worker,
 )
+
+
+class PermissionAdminMixin(object):
+    """
+    Mixin class to limit the number of items displayed.
+    """
+
+    groups_path = None
+    """
+    A ``str`` containing the path to the groups.
+
+    Example::
+
+        'job_template__auth_groups'
+
+    """
+
+    fk_groups_path = {}
+    """
+    A ``dict`` containing the FK field name and as a value the corresponding
+    model and path to the groups.
+
+    Example::
+
+        {
+            'job_template': {
+                'path': 'auth_groups',
+                'model': JobTemplate,
+            }
+        }
+
+    """
+
+    def _filter_groups(self, request, qs, groups_path):
+        if request.user.is_superuser:
+            return qs
+
+        if not request.user.groups.count():
+            return qs.none()
+
+        groups_or = None
+        for group in request.user.groups.all():
+            q_obj = Q(**{groups_path: group})
+            if not groups_or:
+                groups_or = q_obj
+            else:
+                groups_or = groups_or | q_obj
+
+        return qs.filter(groups_or)
+
+    def queryset(self, request):
+        """
+        Get results based on groups the user is in.
+
+        If the user is a super-user, the user has access to everything. Else,
+        the results are limited based on matching groups as set in the model.
+
+        """
+        qs = super(PermissionAdminMixin, self).queryset(request)
+        return self._filter_groups(request, qs, self.groups_path)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name in self.fK_groups_path:
+            qs = self.fK_groups_path[db_field.name]['model'].objects.all()
+            group_path = self.fK_groups_path[db_field.name]['path']
+            kwargs['queryset'] = self._filter_groups(request, qs, group_path)
+
+        return super(PermissionAdminMixin, self).formfield_for_foreignkey(
+            db_field, request, **kwargs)
 
 
 class RunInlineAdmin(admin.TabularInline):
@@ -29,7 +99,7 @@ class RescheduleExcludeInlineAdmin(admin.TabularInline):
     model = RescheduleExclude
 
 
-class JobAdmin(admin.ModelAdmin):
+class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     """
     Admin interface for jobs.
     """
@@ -38,6 +108,13 @@ class JobAdmin(admin.ModelAdmin):
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,
     ]
+    groups_path = 'job_template__auth_groups'
+    fK_groups_path = {
+        'job_template': {
+            'model': JobTemplate,
+            'path': 'auth_groups',
+        }
+    }
 
     fieldsets = (
         (None, {

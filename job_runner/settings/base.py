@@ -176,3 +176,12 @@ A list of e-mail addresses of the Job-Runner admin(s).
 This list will currently be used when a job failed to reschedule.
 
 """
+
+
+JOB_RUNNER_BROADCASTER_PORT = 5556
+"""
+The port to which the queue broadcaster is binding to.
+
+Unless there is a specific need, you can keep the default.
+
+"""
