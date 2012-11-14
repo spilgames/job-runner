@@ -9,12 +9,12 @@ var RunView = Backbone.View.extend({
     
     // initialization
     initialize: function(options) {
-        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'sortRuns', 'handleEvent');
+        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent');
         this.activeProject = null;
 
-        this.workerCollection = options.workerCollection;
-        this.jobTemplateCollection = options.jobTemplateCollection;
-        this.jobCollection = options.jobCollection;
+        this.workerCollection = new WorkerCollection();
+        this.jobTemplateCollection = new JobTemplateCollection();
+        this.jobCollection = new JobCollection();
 
         this.runCollection = new RunCollection();
         this.runCollection.bind('add', this.renderRun);
@@ -41,6 +41,33 @@ var RunView = Backbone.View.extend({
     },
 
     initialFetch: function() {
+        var self = this;
+
+        this.workerCollection.fetch_all({
+            data: {
+                'project__id': self.activeProject.id
+            },
+            success: function() {
+                self.jobTemplateCollection.fetch_all({
+                    data: {
+                        'worker__project__id': self.activeProject.id
+                    },
+                    success: function() {
+                        self.jobCollection.fetch_all({
+                            data: {
+                                'job_template__worker__project__id': self.activeProject.id
+                            },
+                            success: function() {
+                                self.initialFetchRuns();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    },
+
+    initialFetchRuns: function() {
         var self = this;
 
         this.runCollection.fetch_all({
@@ -179,7 +206,7 @@ var RunView = Backbone.View.extend({
             run.fetch();
         } else {
             run = new Run({'resource_uri': '/api/v1/run/' + event.run_id + '/'});
-            fun.fetch({success: function() {
+            run.fetch({success: function() {
                 self.runCollection.add(run);
 
                 // TODO check that this run is actually in our project!

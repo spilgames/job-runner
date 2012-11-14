@@ -9,22 +9,47 @@ var JobView = Backbone.View.extend({
 
     // initialization of the view
     initialize: function(options) {
+        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob', 'initialFetch');
+        this.activeProject = null;
+
+        this.groupCollection = options.groupCollection;
+        this.workerCollection = new WorkerCollection();
+        this.jobTemplateCollection = new JobTemplateCollection();
+        this.jobCollection = new JobCollection();
+        this.jobCollection.bind('add', this.renderItem);
+
         var self = this;
 
-        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob');
-
-        options.router.on('route:showJobs', function() {
+        options.router.on('route:showJobs', function(project_id) {
             $('#job_runner section').addClass('hide');
             $('#jobs').removeClass('hide');
-        });
-        
-        this.groupCollection = options.groupCollection;
-        this.workerCollection = options.workerCollection;
-        this.jobTemplateCollection = options.jobTemplateCollection;
-        this.jobCollection = options.jobCollection;
 
-        _(this.jobCollection.models).each(function(job) {
-            self.renderItem(job);
+            self.activeProject = options.projectCollection.get(project_id);
+            self.initialFetch();
+        });
+    },
+
+    initialFetch: function() {
+        var self = this;
+
+        this.workerCollection.fetch_all({
+            data: {
+                'project__id': self.activeProject.id
+            },
+            success: function() {
+                self.jobTemplateCollection.fetch_all({
+                    data: {
+                        'worker__project__id': self.activeProject.id
+                    },
+                    success: function() {
+                        self.jobCollection.fetch_all({
+                            data: {
+                                'job_template__worker__project__id': self.activeProject.id
+                            }
+                        });
+                    }
+                });
+            }
         });
     },
 
