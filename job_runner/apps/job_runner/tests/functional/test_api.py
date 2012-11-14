@@ -437,6 +437,7 @@ class RunTestCase(ApiTestBase):
         """
         Test PATCH ``/api/v1/run/1/`` causing a reschedule.
         """
+        Run.objects.update(enqueue_dts=datetime.utcnow())
         response = self.patch(
             '/api/v1/run/1/',
             {
@@ -532,6 +533,7 @@ class ChainedRunTestCase(ApiTestBase):
         Test PATCH ``/api/v1/run/1/`` for chained job.
 
         """
+        Run.objects.update(enqueue_dts=datetime.utcnow())
         response = self.patch(
             '/api/v1/run/1/',
             {

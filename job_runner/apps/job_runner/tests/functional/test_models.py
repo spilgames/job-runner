@@ -31,7 +31,8 @@ class RunTestCase(TestCase):
         self.assertEqual(1, Run.objects.filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
-        run.return_dts = datetime.now()
+        run.enqueue_dts = datetime.utcnow()
+        run.return_dts = datetime.utcnow()
         run.save()
 
         Job.objects.get(pk=1).reschedule()
@@ -52,7 +53,8 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
-        run.return_dts = datetime.now()
+        run.enqueue_dts = datetime.utcnow()
+        run.return_dts = datetime.utcnow()
         run.save()
 
         job.reschedule()
@@ -75,6 +77,7 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
+        run.enqueue_dts = datetime.utcnow()
         run.return_dts = datetime(2012, 1, 1, 11, 59)
         run.save()
 
@@ -101,6 +104,7 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
+        run.enqueue_dts = datetime.utcnow()
         run.return_dts = datetime(2012, 1, 1, 11, 59)
         run.save()
 
