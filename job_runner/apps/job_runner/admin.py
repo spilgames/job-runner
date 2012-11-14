@@ -113,12 +113,16 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         'job_template': {
             'model': JobTemplate,
             'path': 'auth_groups',
+        },
+        'parent': {
+            'model': Job,
+            'path': 'job_template__auth_groups',
         }
     }
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'job_template',)
+            'fields': ('title', 'job_template', 'parent')
         }),
         ('Script', {
             'fields': ('script_content_partial',)
