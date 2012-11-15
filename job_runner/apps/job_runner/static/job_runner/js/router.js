@@ -8,7 +8,7 @@ var AppRouter = Backbone.Router.extend({
     initialize: function() {
         $('.js-link').click(function(e){
             e.preventDefault();
-            Backbone.history.navigate($(this).attr("href"),true);
+            Backbone.history.navigate(this.pathname, true);
         });
     },
 
