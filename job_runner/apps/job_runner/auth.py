@@ -142,9 +142,6 @@ class ModelAuthorization(Authorization):
 
                 object_list = object_list.filter(groups_or)
 
-            if request.method != 'GET' and not self.auth_user_groups_path:
-                return object_list.none()
-
             return object_list
 
         return object_list.none()

@@ -123,7 +123,8 @@ class JobResource(ModelResource):
     class Meta:
         queryset = Job.objects.all()
         resource_name = 'job'
-        allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'put']
+        list_allowed_methods = ['get']
         fields = ['id', 'title', 'script_content', 'is_enabled']
         filtering = {
             'job_template': ALL_WITH_RELATIONS,

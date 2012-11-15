@@ -9,7 +9,7 @@ var JobView = Backbone.View.extend({
 
     // initialization of the view
     initialize: function(options) {
-        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob', 'initialFetch');
+        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled');
         this.activeProject = null;
 
         this.groupCollection = options.groupCollection;
@@ -26,6 +26,10 @@ var JobView = Backbone.View.extend({
             $('#jobs').removeClass('hide');
 
             self.activeProject = options.projectCollection.get(project_id);
+            self.workerCollection.reset();
+            self.jobTemplateCollection.reset();
+            self.jobCollection.reset();
+            $('.jobs div.span2', self.el).remove();
             self.initialFetch();
         });
     },
@@ -80,17 +84,56 @@ var JobView = Backbone.View.extend({
         $('#modal').html(this.jobModalTemplate({
             title: job.attributes.title,
             script_content: job.attributes.script_content,
-            job_url: job.url()
+            job_url: job.url(),
+            id: job.id
         })).modal();
 
+        if (job.attributes.is_enabled === true) {
+            $('.toggle-enable-job').addClass('btn-danger');
+            $('.toggle-enable-job span').html('Disable');
+        } else {
+            $('.toggle-enable-job').addClass('btn-success');
+            $('.toggle-enable-job span').html('Enable');
+        }
+ 
         $('.schedule-job').hide();
+        $('.toggle-enable-job').hide();
+
         _(this.groupCollection.models).each(function(group) {
             if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
                 $('.schedule-job').show();
+                $('.toggle-enable-job').show();
             }
         });
 
         $('.schedule-job').click(this.scheduleJob);
+        $('.toggle-enable-job').click(this.toggleJobIsEnabled);
+    },
+
+    // callback for toggeling the is_enabled attribute of a job
+    toggleJobIsEnabled: function(e) {
+        var jobId = $(e.target.parentNode).data('job_id');
+        var job = this.jobCollection.get(jobId);
+
+        if (job.attributes.is_enabled === true) {
+            if (confirm('Are you sure you want to disable this job?')) {
+                job.attributes.is_enabled = false;
+                job.save({}, {success: function() {
+                    $('.toggle-enable-job').removeClass('btn-danger');
+                    $('.toggle-enable-job').addClass('btn-success');
+                    $('.toggle-enable-job span').html('Enable');
+                }});
+            }
+        } else {
+            if (confirm('Are you suse you want to enable this job?')) {
+                job.attributes.is_enabled = true;
+                job.save({}, {success: function() {
+                    $('.toggle-enable-job').removeClass('btn-success');
+                    $('.toggle-enable-job').addClass('btn-danger');
+                    $('.toggle-enable-job span').html('Disable');
+                }});
+            }
+        }
     },
 
     // callback for scheduling a job

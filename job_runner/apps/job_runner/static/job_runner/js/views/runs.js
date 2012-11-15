@@ -27,6 +27,14 @@ var RunView = Backbone.View.extend({
             $('#job_runner section').addClass('hide');
             $('#dashboard').removeClass('hide');
             self.activeProject = options.projectCollection.get(project_id);
+
+            self.workerCollection.reset();
+            self.jobTemplateCollection.reset();
+            self.jobCollection.reset();
+            self.runCollection.reset();
+
+            $('.job-run', self.el).remove();
+
             self.initialFetch();
 
             var socket = new WebSocket(ws_server);
