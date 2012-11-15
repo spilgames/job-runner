@@ -114,6 +114,12 @@ var JobView = Backbone.View.extend({
     // callback for toggeling the is_enabled attribute of a job
     toggleJobIsEnabled: function(e) {
         var jobId = $(e.target.parentNode).data('job_id');
+
+        // firefox
+        if (jobId === undefined) {
+            jobId = $(e.target).data('job_id');
+        }
+
         var job = this.jobCollection.get(jobId);
 
         if (job.attributes.is_enabled === true) {
@@ -143,12 +149,17 @@ var JobView = Backbone.View.extend({
 
     // callback for scheduling a job
     scheduleJob: function(e) {
+        var jobUrl = $(e.target.parentNode).data('job_url');
+
+        // firefox
+        if (jobUrl === undefined) {
+            jobUrl = $(e.target).data('job_url');
+        }
+
         if (confirm('Are you sure you want to schedule this job?')) {
-
             var runCollection = new RunCollection();
-
             var run = runCollection.create({
-                job: $(e.target.parentNode).data('job_url'),
+                job: jobUrl,
                 schedule_dts: moment.utc().format('YYYY-MM-DD HH:mm:ss')
             }, {
                 success: function() {
