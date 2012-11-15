@@ -212,9 +212,6 @@ var RunView = Backbone.View.extend({
             run.fetch({success: function() {
                 self.runCollection.add(run);
 
-                // TODO check that this run is actually in our project!
-                // might be as well changed in the WS server / message?
-
                 var job = self.jobCollection.where({'resource_uri': run.attributes.job})[0];
                 if (job === undefined) {
                     job = new Job({'resource_uri': run.attributes.job});
