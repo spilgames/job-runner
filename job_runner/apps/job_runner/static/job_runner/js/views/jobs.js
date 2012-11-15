@@ -99,11 +99,13 @@ var JobView = Backbone.View.extend({
             var runCollection = new RunCollection();
 
             var run = runCollection.create({
-                job: $(e.target).data('job_url'),
+                job: $(e.target.parentNode).data('job_url'),
                 schedule_dts: moment.utc().format('YYYY-MM-DD HH:mm:ss')
             }, {
                 success: function() {
-                    alert('The job has been scheduled.');
+                    $('.schedule-job i').removeClass('icon-play').addClass('icon-ok');
+                    $('.schedule-job span').html('Job scheduled');
+                    $('.schedule-job').attr('disabled', 'disabled');
                 },
                 error: function() {
                     alert('The scheduling failed, make sure you have permission to schedule this job.');
