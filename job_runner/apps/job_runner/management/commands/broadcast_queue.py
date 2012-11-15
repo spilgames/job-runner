@@ -23,6 +23,9 @@ class Command(NoArgsCommand):
         publisher.bind(
             'tcp://*:{0}'.format(settings.JOB_RUNNER_BROADCASTER_PORT))
 
+        # give the subscribers some time to (re-)connect.
+        time.sleep(2)
+
         while True:
             self._broadcast(publisher)
             time.sleep(5)
