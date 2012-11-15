@@ -94,6 +94,7 @@ var JobView = Backbone.View.extend({
         } else {
             $('.toggle-enable-job').addClass('btn-success');
             $('.toggle-enable-job span').html('Enable');
+            $('.schedule-job').attr('disabled', 'disabled');
         }
  
         $('.schedule-job').hide();
@@ -122,6 +123,8 @@ var JobView = Backbone.View.extend({
                     $('.toggle-enable-job').removeClass('btn-danger');
                     $('.toggle-enable-job').addClass('btn-success');
                     $('.toggle-enable-job span').html('Enable');
+
+                    $('.schedule-job').attr('disabled', 'disabled');
                 }});
             }
         } else {
@@ -131,6 +134,8 @@ var JobView = Backbone.View.extend({
                     $('.toggle-enable-job').removeClass('btn-success');
                     $('.toggle-enable-job').addClass('btn-danger');
                     $('.toggle-enable-job span').html('Disable');
+
+                    $('.schedule-job').removeAttr('disabled');
                 }});
             }
         }
@@ -139,6 +144,7 @@ var JobView = Backbone.View.extend({
     // callback for scheduling a job
     scheduleJob: function(e) {
         if (confirm('Are you sure you want to schedule this job?')) {
+
             var runCollection = new RunCollection();
 
             var run = runCollection.create({
@@ -149,9 +155,6 @@ var JobView = Backbone.View.extend({
                     $('.schedule-job i').removeClass('icon-play').addClass('icon-ok');
                     $('.schedule-job span').html('Job scheduled');
                     $('.schedule-job').attr('disabled', 'disabled');
-                },
-                error: function() {
-                    alert('The scheduling failed, make sure you have permission to schedule this job.');
                 }
             });
         }
