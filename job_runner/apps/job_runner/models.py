@@ -125,6 +125,7 @@ class Job(models.Model):
     parent = models.ForeignKey(
         'self', blank=True, null=True, related_name='children')
     job_template = models.ForeignKey(JobTemplate)
+    is_enabled = models.BooleanField(default=True, db_index=True)
     title = models.CharField(max_length=255)
     script_content_partial = models.TextField('script content')
     script_content = models.TextField(editable=False)

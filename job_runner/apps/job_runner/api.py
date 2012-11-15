@@ -124,7 +124,7 @@ class JobResource(ModelResource):
         queryset = Job.objects.all()
         resource_name = 'job'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'script_content']
+        fields = ['id', 'title', 'script_content', 'is_enabled']
         filtering = {
             'job_template': ALL_WITH_RELATIONS,
         }
@@ -147,7 +147,7 @@ class RunResource(ModelResource):
         'job_runner.apps.job_runner.api.JobResource', 'job')
 
     class Meta:
-        queryset = Run.objects.all()
+        queryset = Run.objects.filter(job__is_enabled=True)
         resource_name = 'run'
         detail_allowed_methods = ['get', 'patch']
         list_allowed_methods = ['get', 'post']

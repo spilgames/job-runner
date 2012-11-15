@@ -294,6 +294,17 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual(1, json_data['objects'][0]['id'])
 
+    def test_api_authorization_disabled_job(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        Job.objects.update(is_enabled=False)
+        response = self.get('/api/v1/run/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(0, len(json_data['objects']))
+
     def test_user_authorization(self):
         """
         Test user authorization (user has only access to one object).
@@ -306,6 +317,19 @@ class RunTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual(1, json_data['objects'][0]['id'])
+
+    def test_user_authorization_disabled_job(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        Job.objects.update(is_enabled=False)
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/run/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(0, len(json_data['objects']))
 
     def test_scheduled(self):
         """
