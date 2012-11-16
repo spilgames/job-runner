@@ -37,13 +37,19 @@ class Command(NoArgsCommand):
         """
         Broadcast runs that are scheduled to run now.
 
+        When the job has ``job__enqueue_is_enabled`` set to ``False``, its
+        runs are not broadcasted, unless they are scheduled manually
+        (``is_manual`` set to ``True``).
+
         :param publisher:
             A ``zmq`` publisher.
 
         """
         enqueueable_runs = Run.objects.awaiting_enqueue().filter(
             schedule_dts__lte=datetime.utcnow(),
-            job__enqueue_is_enabled=True,
+        ).exclude(
+            job__enqueue_is_enabled=False,
+            is_manual=False,
         ).select_related()
 
         for run in enqueueable_runs:

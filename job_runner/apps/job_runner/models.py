@@ -201,7 +201,10 @@ class Job(models.Model):
 
                 except RescheduleException:
                     t = get_template('job_runner/email/reschedule_failed.txt')
-                    c = Context({'job': self})
+                    c = Context({
+                        'job': self,
+                        'hostname': settings.HOSTNAME,
+                    })
                     email_body = t.render(c)
 
                     addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
@@ -310,6 +313,8 @@ class Run(models.Model):
     return_success = models.NullBooleanField(
         default=None, null=True)
     return_log = models.TextField(null=True, default=None)
+    is_manual = models.BooleanField(
+        default=False, editable=False, db_index=True)
 
     objects = RunManager()
 
@@ -321,7 +326,10 @@ class Run(models.Model):
         Send out an error notification e-mail.
         """
         t = get_template('job_runner/email/job_failed.txt')
-        c = Context({'run': self})
+        c = Context({
+            'run': self,
+            'hostname': settings.HOSTNAME,
+        })
         email_body = t.render(c)
 
         addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)

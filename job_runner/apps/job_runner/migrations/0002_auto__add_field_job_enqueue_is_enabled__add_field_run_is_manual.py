@@ -13,10 +13,18 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.BooleanField')(default=True, db_index=True),
                       keep_default=False)
 
+        # Adding field 'Run.is_manual'
+        db.add_column('job_runner_run', 'is_manual',
+                      self.gf('django.db.models.fields.BooleanField')(default=False, db_index=True),
+                      keep_default=False)
+
 
     def backwards(self, orm):
         # Deleting field 'Job.enqueue_is_enabled'
         db.delete_column('job_runner_job', 'enqueue_is_enabled')
+
+        # Deleting field 'Run.is_manual'
+        db.delete_column('job_runner_run', 'is_manual')
 
 
     models = {
@@ -81,6 +89,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('-id',)", 'object_name': 'Run'},
             'enqueue_dts': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_manual': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'job': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Job']"}),
             'return_dts': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'return_log': ('django.db.models.fields.TextField', [], {'default': 'None', 'null': 'True'}),

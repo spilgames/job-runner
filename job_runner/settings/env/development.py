@@ -38,3 +38,6 @@ LOGGING = {
         },
     }
 }
+
+
+HOSTNAME = 'localhost:8000'

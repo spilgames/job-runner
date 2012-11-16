@@ -185,3 +185,12 @@ The port to which the queue broadcaster is binding to.
 Unless there is a specific need, you can keep the default.
 
 """
+
+
+HOSTNAME = ''
+"""
+The hostname of the server.
+
+This value is used for generating URL's in the notification e-mails.
+
+"""
