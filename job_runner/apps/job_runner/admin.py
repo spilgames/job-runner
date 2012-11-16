@@ -99,11 +99,31 @@ class RescheduleExcludeInlineAdmin(admin.TabularInline):
     model = RescheduleExclude
 
 
+class WorkerAdmin(admin.ModelAdmin):
+    """
+    Admin interface for workers.
+    """
+    list_display = ('title', 'api_key', 'project',)
+
+
+class JobTemplateAdmin(admin.ModelAdmin):
+    """
+    Admin interface for job-templates.
+    """
+    list_display = ('title', 'worker',)
+
+
 class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     """
     Admin interface for jobs.
     """
-    list_display = ('title', 'job_template', 'reschedule_type', 'parent')
+    list_display = (
+        'title',
+        'job_template',
+        'enqueue_is_enabled',
+        'reschedule_type',
+        'parent'
+    )
     inlines = [
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,
@@ -141,6 +161,6 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
 
 
 admin.site.register(Job, JobAdmin)
-admin.site.register(JobTemplate)
+admin.site.register(JobTemplate, JobTemplateAdmin)
 admin.site.register(Project)
-admin.site.register(Worker)
+admin.site.register(Worker, WorkerAdmin)
