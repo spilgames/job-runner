@@ -122,7 +122,7 @@ var JobView = Backbone.View.extend({
         var job = this.jobCollection.get(jobId);
 
         if (job.attributes.enqueue_is_enabled === true) {
-            if (confirm('Are you sure you want to suspend the enqueueuing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
+            if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
                 job.attributes.enqueue_is_enabled = false;
                 job.save({}, {success: function() {
                     $('.toggle-enable-job').removeClass('btn-danger');
