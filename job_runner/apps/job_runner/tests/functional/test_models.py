@@ -31,6 +31,7 @@ class RunTestCase(TestCase):
         self.assertEqual(1, Run.objects.filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
+        run.schedule_dts = datetime.utcnow()
         run.enqueue_dts = datetime.utcnow()
         run.return_dts = datetime.utcnow()
         run.save()
@@ -43,6 +44,24 @@ class RunTestCase(TestCase):
             runs[1].schedule_dts + timedelta(days=1),
             runs[0].schedule_dts
         )
+
+    def test_reschedule_after_schedule_dts_not_in_past(self):
+        """
+        Test reschedule after schedule dts is never in the past.
+        """
+        dts_now = datetime.utcnow()
+
+        run = Run.objects.get(pk=1)
+        run.schedule_dts = dts_now - timedelta(days=31)
+        run.enqueue_dts = dts_now - timedelta(days=31)
+        run.return_dts = dts_now - timedelta(days=31)
+        run.save()
+
+        Job.objects.get(pk=1).reschedule()
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
+
+        run = Run.objects.get(pk=3)
+        self.assertEqual(run.schedule_dts, dts_now + timedelta(days=1))
 
     def test_reschedule_after_complete_dts(self):
         """
@@ -78,7 +97,7 @@ class RunTestCase(TestCase):
 
         run = Run.objects.get(pk=1)
         run.enqueue_dts = datetime.utcnow()
-        run.return_dts = datetime(2012, 1, 1, 11, 59)
+        run.return_dts = datetime(2032, 1, 1, 11, 59)
         run.save()
 
         RescheduleExclude.objects.create(
@@ -92,7 +111,7 @@ class RunTestCase(TestCase):
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
         runs = Run.objects.all()
-        self.assertEqual(datetime(2012, 1, 1, 13, 59), runs[0].schedule_dts)
+        self.assertEqual(datetime(2032, 1, 1, 13, 59), runs[0].schedule_dts)
 
     def test_reschedule_with_invalid_exclude(self):
         """

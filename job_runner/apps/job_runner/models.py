@@ -272,8 +272,12 @@ class Job(models.Model):
             An instance of :class:`datetime.datetime`.
 
         """
+        while (reference_date + reschedule_delta) < datetime.utcnow():
+            reference_date = reference_date + reschedule_delta
+
         if not increment_date:
             increment_date = reference_date
+
         elif (increment_date - reference_date) > timedelta(days=1):
             raise RescheduleException(
                 'Unable to reschedule due to reschedule excludes')
