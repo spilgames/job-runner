@@ -175,7 +175,7 @@ class Job(models.Model):
 
         if (self.reschedule_type and self.reschedule_interval_type
                 and self.reschedule_interval):
-            last_run = self.run_set.all()[0]
+            last_run = self.run_set.filter(is_manual=False)[0]
 
             if last_run.return_dts:
                 if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
