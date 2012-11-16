@@ -122,7 +122,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'job_template', 'parent', 'is_enabled')
+            'fields': ('title', 'job_template', 'parent',)
         }),
         ('Script', {
             'fields': ('script_content_partial',)
@@ -132,6 +132,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         }),
         ('Scheduling', {
             'fields': (
+                'enqueue_is_enabled',
                 'reschedule_interval',
                 'reschedule_interval_type',
                 'reschedule_type',)

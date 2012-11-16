@@ -3,6 +3,8 @@ from mock import Mock, call
 
 from job_runner.apps.job_runner.management.commands.broadcast_queue import (
     Command)
+from job_runner.apps.job_runner.models import Job
+
 
 class CommandTestCase(TestCase):
     """
@@ -34,4 +36,17 @@ class CommandTestCase(TestCase):
                 'master.broadcast.worker1',
                 '{"action": "enqueue", "run_id": 1}'
             ]),
+        ], publisher.send_multipart.call_args_list)
+
+    def test__broadcast_disabled_enqueue(self):
+        """
+        Test :meth:`.Command._broadcast`.
+        """
+        Job.objects.update(enqueue_is_enabled=False)
+        command = Command()
+
+        publisher = Mock()
+        command._broadcast(publisher)
+
+        self.assertEqual([
         ], publisher.send_multipart.call_args_list)

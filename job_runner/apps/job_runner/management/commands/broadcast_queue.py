@@ -42,7 +42,9 @@ class Command(NoArgsCommand):
 
         """
         enqueueable_runs = Run.objects.awaiting_enqueue().filter(
-            schedule_dts__lte=datetime.utcnow()).select_related()
+            schedule_dts__lte=datetime.utcnow(),
+            job__enqueue_is_enabled=True,
+        ).select_related()
 
         for run in enqueueable_runs:
             worker = run.job.job_template.worker

@@ -148,7 +148,7 @@ class RunResource(ModelResource):
         'job_runner.apps.job_runner.api.JobResource', 'job')
 
     class Meta:
-        queryset = Run.objects.filter(job__is_enabled=True)
+        queryset = Run.objects.filter()
         resource_name = 'run'
         detail_allowed_methods = ['get', 'patch']
         list_allowed_methods = ['get', 'post']
