@@ -11,7 +11,7 @@
                 <a href='#' class='details'><%= title %></a>
             </h5>
             <ul>
-                <li><i class='icon-tag'></i> <%= server %></li>
+                <li><i class='icon-hdd'></i> <%= server %></li>
                 <li><i class='icon-time'></i> <%= timestamp %></li>
             </ul>
         </div>
@@ -27,18 +27,28 @@
             <p class="state"><%= state %></p>
             <h3>Scheduled</h3>
             <p class="schedule_dts"><%= schedule_dts %></p>
-            <h3>In queue</h3>
-            <p class="enqueue_dts"><%= enqueue_dts %></p>
-            <h3>Started</h3>
-            <p class="start_dts"><%= start_dts %></p>
-            <h3>Returned</h3>
-            <p class="return_dts"><%= return_dts %></p>
-            <h3>Run duration</h3>
-            <p class="run_duration"><%= run_duration %></p>
+            <% if(enqueue_dts) { %>
+                <h3>In queue</h3>
+                <p class="enqueue_dts"><%= enqueue_dts %></p>
+            <% } %>
+            <% if(start_dts) { %>
+                <h3>Started</h3>
+                <p class="start_dts"><%= start_dts %></p>
+            <% } %>
+            <% if (return_dts) { %>
+                <h3>Returned</h3>
+                <p class="return_dts"><%= return_dts %></p>
+            <% } %>
+            <% if(run_duration) { %>
+                <h3>Run duration</h3>
+                <p class="run_duration"><%= run_duration %></p>
+            <% } %>
             <h3>Command</h3>
             <p><pre class="script_content"><%= script_content %></pre></p>
-            <h3>Log output</h3>
-            <p><pre class="return_log"><%= return_log %></pre></p>
+            <% if(return_log) { %>
+                <h3>Log output</h3>
+                <p><pre class="return_log"><%= return_log %></pre></p>
+            <% } %>
         </div>
         <div class="modal-footer">
             <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -55,7 +65,8 @@
             <p><pre class="script_content"><%= script_content %></pre></p>
         </div>
         <div class="modal-footer">
-            <button class="btn schedule-job" data-job_url="<%= job_url %>"><i class="icon-play"></i> Schedule now</button>
+            <button class="btn schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>"><i class="icon-play"></i> <span>Schedule now</span></button>
+            <button class="btn toggle-enable-job" data-job_id="<%= id %>"><span></span></button>
             <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
         </div>
     </script>
@@ -76,9 +87,18 @@
 
 {% block navbar %}
 <ul class="nav">
-    <li class="active dashboard"><a href="/">Dashboard</a></li>
-    <li class="jobs"><a href="/jobs/">Jobs</a></li>
+    <li class="active dashboard"><a href="../runs/" class="js-link">Dashboard</a></li>
+    <li class="jobs"><a href="../jobs/" class="js-link">Jobs</a></li>
 </ul>
+
+<ul class="nav pull-right" id="project-list">
+    <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span></span> <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+        </ul>
+    </li>
+</ul>
+
 {% endblock %}
 
 {% block extracss %}
@@ -136,6 +156,7 @@
 
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/collections.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/projects.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/runs.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/jobs.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/router.js"></script>

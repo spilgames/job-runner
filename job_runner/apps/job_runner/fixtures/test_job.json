@@ -1,30 +1,57 @@
 [
     {
-        "pk": 1,
+        "pk": 1, 
+        "model": "job_runner.job", 
+        "fields": {
+            "parent": null, 
+            "reschedule_type": "AFTER_SCHEDULE_DTS", 
+            "script_content": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n", 
+            "job_template": 1, 
+            "title": "Test job 1", 
+            "notification_addresses": "job@example.com", 
+            "reschedule_interval": 1, 
+            "script_content_partial": "print \"Hello world\"", 
+            "reschedule_interval_type": "DAY"
+        }
+    }, 
+    {
+        "pk": 2,
         "model": "job_runner.job",
         "fields": {
-            "server": 1,
-            "script_template": 1,
-            "one_of_groups": [1],
-            "reschedule_type": "AFTER_SCHEDULE_DTS",
-            "reschedule_interval_type": "DAY",
-            "reschedule_interval": 1,
-            "script_content": "print \"Hello world\"\r\n",
-            "script_content_rendered": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n",
-            "title": "Test job",
-            "notification_addresses": "job1@example.com\n\rjob2@example.com"
+            "parent": null, 
+            "reschedule_type": "AFTER_SCHEDULE_DTS", 
+            "script_content": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n", 
+            "job_template": 2, 
+            "title": "Test job 2", 
+            "notification_addresses": "job@example.com", 
+            "reschedule_interval": 1, 
+            "script_content_partial": "print \"Hello world\"", 
+            "reschedule_interval_type": "DAY"
         }
     },
     {
-        "pk": 1,
-        "model": "job_runner.run",
+        "pk": 1, 
+        "model": "job_runner.run", 
         "fields": {
-            "start_dts": null,
-            "return_success": false,
-            "return_dts": null,
-            "job": 1,
-            "return_log": "",
-            "schedule_dts": "2012-01-01 00:00:00",
+            "start_dts": null, 
+            "return_success": null, 
+            "return_dts": null, 
+            "job": 1, 
+            "return_log": null, 
+            "schedule_dts": "2012-01-01T00:00:00", 
+            "enqueue_dts": null
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "job_runner.run", 
+        "fields": {
+            "start_dts": null, 
+            "return_success": null, 
+            "return_dts": null, 
+            "job": 2, 
+            "return_log": null, 
+            "schedule_dts": "2012-01-01T00:00:00", 
             "enqueue_dts": null
         }
     }

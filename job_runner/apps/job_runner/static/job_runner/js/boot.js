@@ -1,4 +1,31 @@
-var appRouter = new AppRouter();
-var runView = new RunView({router: appRouter});
-var jobsView = new JobsView({router: appRouter});
-Backbone.history.start({pushState: true});
+// collections
+var groupCollection = new GroupCollection();
+var projectCollection = new ProjectCollection();
+
+// pre-fetch all data
+groupCollection.fetch_all({success: function() {
+    projectCollection.fetch_all({success: function() {
+
+        // router
+        var appRouter = new AppRouter();
+        
+        var projectView = new ProjectView({
+            router: appRouter,
+            projectCollection: projectCollection
+        });
+
+        var runView = new RunView({
+            router: appRouter,
+            projectCollection: projectCollection
+        });
+
+        var jobView = new JobView({
+            router: appRouter,
+            groupCollection: groupCollection,
+            projectCollection: projectCollection
+        });
+
+        Backbone.history.start({pushState: true});
+
+    }});
+}});

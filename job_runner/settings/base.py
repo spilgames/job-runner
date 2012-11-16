@@ -157,6 +157,9 @@ LOGGING = {
 
 LOGIN_REDIRECT_URL = '/'
 
+GRAPPELLI_ADMIN_HEADLINE = 'Job-Runner'
+GRAPPELLI_ADMIN_TITLE = 'Job-Runner'
+
 
 JOB_RUNNER_WS_SERVER = 'ws://localhost:5000/'
 """
@@ -174,5 +177,23 @@ JOB_RUNNER_ADMIN_EMAILS = []
 A list of e-mail addresses of the Job-Runner admin(s).
 
 This list will currently be used when a job failed to reschedule.
+
+"""
+
+
+JOB_RUNNER_BROADCASTER_PORT = 5556
+"""
+The port to which the queue broadcaster is binding to.
+
+Unless there is a specific need, you can keep the default.
+
+"""
+
+
+HOSTNAME = ''
+"""
+The hostname of the server.
+
+This value is used for generating URL's in the notification e-mails.
 
 """

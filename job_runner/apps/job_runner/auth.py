@@ -1,12 +1,12 @@
 import hashlib
 import hmac
-import json
 import re
 
+from django.db.models import Q
 from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 
-from job_runner.apps.job_runner.models import Server
+from job_runner.apps.job_runner.models import Worker
 
 
 def validate_hmac(request):
@@ -22,7 +22,7 @@ def validate_hmac(request):
     This will test the ``Authentication`` header for valid keys. The following
     format is expected::
 
-        Authorization: ApiKey public_key:hmac_sha1
+        Authorization: ApiKey api_key:hmac_sha1
 
     ``public_key``
         Is the public key as stored in the ApiKey model.
@@ -40,8 +40,8 @@ def validate_hmac(request):
         return False
 
     try:
-        api_user = Server.objects.get(public_key=api_key_match.group(1))
-    except Server.DoesNotExist:
+        worker = Worker.objects.get(api_key=api_key_match.group(1))
+    except Worker.DoesNotExist:
         return False
 
     hmac_message = '{request_method}{full_path}{request_body}'.format(
@@ -51,7 +51,7 @@ def validate_hmac(request):
     )
 
     expected_hmac = hmac.new(
-        str(api_user.private_key), hmac_message, hashlib.sha1)
+        str(worker.secret), hmac_message, hashlib.sha1)
 
     if expected_hmac.hexdigest() == api_key_match.group(2):
         return True
@@ -67,55 +67,81 @@ class HmacAuthentication(Authentication):
         return validate_hmac(request)
 
 
-class JobAuthorization(Authorization):
+class ModelAuthorization(Authorization):
     """
-    Authorization for jobs.
+    Model authorization.
+
+    The purpose of this custom authorization class is to limit the number of
+    results returned to the user based on session or API-key.
+
+    In case of the session it will be limited to the groups the logged-in
+    user is assiged to, in case of the API-key it will be limited to the
+    data that refereces back to the API-key.
+
+    :param api_key_path:
+        The path relative from the used model to the API-key. For the
+        ``JobTemplate`` this would be ``'worker__api_key'``.
+
+    :param user_groups_path:
+        The path relative from the used model to the groups the user belongs
+        to. For the ``JobTemplate`` this would be
+        ``'worker__project__groups'``.
+
+    :param auth_user_groups_path:
+        The path relative from the used model to the groups that are authorized
+        to make modifications. Default is ``None``. For the ``Job`` model this
+        would be ``'job_template__auth_groups'``.
+
     """
+    def __init__(
+            self, api_key_path, user_groups_path, auth_user_groups_path=None):
+        self.api_key_path = api_key_path
+        self.user_groups_path = user_groups_path
+        self.auth_user_groups_path = auth_user_groups_path
+
     def apply_limits(self, request, object_list):
-        """
-        In case of API request, limit results or show all on GET request.
-        """
-        # Limit results on API key
         if request and 'HTTP_AUTHORIZATION' in request.META:
-            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+            auth_header = request.META.get('HTTP_AUTHORIZATION')
             api_key_match = re.match(r'^ApiKey (.*?):(.*?)$', auth_header)
             return object_list.filter(
-                server__public_key=api_key_match.group(1))
+                **{self.api_key_path: api_key_match.group(1)})
 
-        # Django session, don't limit on GET
-        elif request and request.method == 'GET':
+        elif (request and request.user.is_authenticated()
+              and request.user.groups.count() > 0):
+            groups_or = None
+
+            if self.user_groups_path == "":
+                path = 'name'
+            else:
+                path = '{0}__name'.format(self.user_groups_path)
+
+            for group in request.user.groups.all():
+                q_obj = Q(**{path: group.name})
+                if not groups_or:
+                    groups_or = q_obj
+                else:
+                    groups_or = groups_or | q_obj
+
+            object_list = object_list.filter(groups_or)
+
+            # apply extra filters when the request is not a GET
+            if request.method != 'GET' and self.auth_user_groups_path != None:
+                groups_or = None
+
+                if self.auth_user_groups_path == "":
+                    path = 'name'
+                else:
+                    path = '{0}__name'.format(self.auth_user_groups_path)
+
+                for group in request.user.groups.all():
+                    q_obj = Q(**{path: group.name})
+                    if not groups_or:
+                        groups_or = q_obj
+                    else:
+                        groups_or = groups_or | q_obj
+
+                object_list = object_list.filter(groups_or)
+
             return object_list
-
-        # Django session and request other than GET, limit on session groups
-        elif request and request.user.is_authenticated():
-            return object_list.filter(
-                one_of_groups__in=request.user.groups.all())
-
-        return object_list.none()
-
-
-class RunAuthorization(Authorization):
-    """
-    Authorization for job runs.
-    """
-    def apply_limits(self, request, object_list):
-        """
-        In case of API request, limit results or show all on GET request.
-        """
-        # Limit results on API key
-        if request and 'HTTP_AUTHORIZATION' in request.META:
-            auth_header = request.META.get('HTTP_AUTHORIZATION', '')
-            api_key_match = re.match(r'^ApiKey (.*?):(.*?)$', auth_header)
-            return object_list.filter(
-                job__server__public_key=api_key_match.group(1))
-
-        # Django session, don't limit on GET
-        elif request and request.method == 'GET':
-            return object_list
-
-        # Django session and request other than GET, limit on session groups
-        elif request and request.user.is_authenticated():
-            return object_list.filter(
-                job__one_of_groups__in=request.user.groups.all())
 
         return object_list.none()

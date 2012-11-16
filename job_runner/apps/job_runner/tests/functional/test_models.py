@@ -4,35 +4,64 @@ from django.core import mail
 from django.test import TestCase
 
 from job_runner.apps.job_runner.models import (
-    Job, RescheduleExclude, Run, ScriptTemplate, Server)
+    Job,
+    RescheduleExclude,
+    Run,
+)
 
 
 class RunTestCase(TestCase):
     """
     Tests for the job run model.
     """
-    fixtures = ['test_server', 'test_job', 'test_script_template']
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job'
+    ]
 
     def test_reschedule_after_schedule_dts(self):
         """
         Test reschedule after schedule dts.
         """
-        self.assertEqual(1, Run.objects.count())
+        self.assertEqual(1, Run.objects.filter(job_id=1).count())
         Job.objects.get(pk=1).reschedule()
-        self.assertEqual(1, Run.objects.count())
+        self.assertEqual(1, Run.objects.filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
-        run.return_dts = datetime.now()
+        run.schedule_dts = datetime.utcnow()
+        run.enqueue_dts = datetime.utcnow()
+        run.return_dts = datetime.utcnow()
         run.save()
 
         Job.objects.get(pk=1).reschedule()
-        self.assertEqual(2, Run.objects.count())
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
-        runs = Run.objects.all()
+        runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
             runs[1].schedule_dts + timedelta(days=1),
             runs[0].schedule_dts
         )
+
+    def test_reschedule_after_schedule_dts_not_in_past(self):
+        """
+        Test reschedule after schedule dts is never in the past.
+        """
+        dts_now = datetime.utcnow()
+
+        run = Run.objects.get(pk=1)
+        run.schedule_dts = dts_now - timedelta(days=31)
+        run.enqueue_dts = dts_now - timedelta(days=31)
+        run.return_dts = dts_now - timedelta(days=31)
+        run.save()
+
+        Job.objects.get(pk=1).reschedule()
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
+
+        run = Run.objects.get(pk=3)
+        self.assertEqual(run.schedule_dts, dts_now + timedelta(days=1))
 
     def test_reschedule_after_complete_dts(self):
         """
@@ -43,14 +72,15 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
-        run.return_dts = datetime.now()
+        run.enqueue_dts = datetime.utcnow()
+        run.return_dts = datetime.utcnow()
         run.save()
 
         job.reschedule()
 
-        self.assertEqual(2, Run.objects.count())
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
-        runs = Run.objects.all()
+        runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
             runs[1].return_dts + timedelta(days=1),
             runs[0].schedule_dts
@@ -66,7 +96,8 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
-        run.return_dts = datetime(2012, 1, 1, 11, 59)
+        run.enqueue_dts = datetime.utcnow()
+        run.return_dts = datetime(2032, 1, 1, 11, 59)
         run.save()
 
         RescheduleExclude.objects.create(
@@ -77,10 +108,10 @@ class RunTestCase(TestCase):
 
         job.reschedule()
 
-        self.assertEqual(2, Run.objects.count())
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
         runs = Run.objects.all()
-        self.assertEqual(datetime(2012, 1, 1, 13, 59), runs[0].schedule_dts)
+        self.assertEqual(datetime(2032, 1, 1, 13, 59), runs[0].schedule_dts)
 
     def test_reschedule_with_invalid_exclude(self):
         """
@@ -92,6 +123,7 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
+        run.enqueue_dts = datetime.utcnow()
         run.return_dts = datetime(2012, 1, 1, 11, 59)
         run.save()
 
@@ -103,30 +135,25 @@ class RunTestCase(TestCase):
 
         job.reschedule()
 
-        self.assertEqual(1, Run.objects.count())
+        self.assertEqual(1, Run.objects.filter(job_id=1).count())
         self.assertTrue(hasattr(mail, 'outbox'))
         self.assertEqual(1, len(mail.outbox))
-        self.assertEqual(6, len(mail.outbox[0].to))
+        self.assertEqual(4, len(mail.outbox[0].to))
         self.assertEqual(
-            'Reschedule error for: Test job', mail.outbox[0].subject)
+            'Reschedule error for: Test job 1', mail.outbox[0].subject)
 
     def test_get_notification_addresses(self):
         """
         Test ``get_notification_addresses`` methods on models.
         """
         self.assertEqual(
-            ['server1@example.com', 'server2@example.com'],
-            Server.objects.get(pk=1).get_notification_addresses()
-        )
-
-        self.assertEqual(
-            ['template1@example.com', 'template2@example.com'],
-            ScriptTemplate.objects.get(pk=1).get_notification_addresses()
-        )
-
-        self.assertEqual(
-            ['job1@example.com', 'job2@example.com'],
-            Job.objects.get(pk=1).get_notification_addresses()
+            sorted([
+                'project@example.com',
+                'worker@example.com',
+                'template@example.com',
+                'job@example.com',
+            ]),
+            sorted(Job.objects.get(pk=1).get_notification_addresses())
         )
 
     def test_schedule_now(self):

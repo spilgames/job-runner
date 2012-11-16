@@ -1,4 +1,4 @@
-var JobsView = Backbone.View.extend({
+var JobView = Backbone.View.extend({
     template: _.template($('#job-template').html()),
     jobModalTemplate: _.template($('#job-modal-template').html()),
 
@@ -9,35 +9,67 @@ var JobsView = Backbone.View.extend({
 
     // initialization of the view
     initialize: function(options) {
+        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled');
+        this.activeProject = null;
+
+        this.groupCollection = options.groupCollection;
+        this.workerCollection = new WorkerCollection();
+        this.jobTemplateCollection = new JobTemplateCollection();
+        this.jobCollection = new JobCollection();
+        this.jobCollection.bind('add', this.renderItem);
+
         var self = this;
 
-        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob');
-
-        options.router.on('route:showJobs', function() {
+        // router callback
+        options.router.on('route:showJobs', function(project_id) {
             $('#job_runner section').addClass('hide');
             $('#jobs').removeClass('hide');
+
+            self.activeProject = options.projectCollection.get(project_id);
+            self.workerCollection.reset();
+            self.jobTemplateCollection.reset();
+            self.jobCollection.reset();
+            $('.jobs div.span2', self.el).remove();
+            self.initialFetch();
         });
-        
-        this.job_collection = new JobCollection();
-        this.server_collection = new ServerCollection();
-        this.job_collection.bind('add', this.renderItem);
+    },
 
-        this.server_collection.fetch_all({success: function() {
-            self.job_collection.fetch_all();
-        }});
+    // fetch data (based on active project)
+    initialFetch: function() {
+        var self = this;
 
+        this.workerCollection.fetch_all({
+            data: {
+                'project__id': self.activeProject.id
+            },
+            success: function() {
+                self.jobTemplateCollection.fetch_all({
+                    data: {
+                        'worker__project__id': self.activeProject.id
+                    },
+                    success: function() {
+                        self.jobCollection.fetch_all({
+                            data: {
+                                'job_template__worker__project__id': self.activeProject.id
+                            }
+                        });
+                    }
+                });
+            }
+        });
     },
 
     // render a job
-    renderItem: function(item) {
-        var server = this.server_collection.where({'resource_uri': item.attributes.server})[0];
+    renderItem: function(job) {
+        var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
+        var worker = this.workerCollection.where({'resource_uri': jobTemplate.attributes.worker})[0];
 
         $('#jobs .jobs').append(this.template({
-            id: item.id,
-            title: item.attributes.title,
-            hostname: server.attributes.hostname
+            id: job.id,
+            title: job.attributes.title,
+            hostname: worker.attributes.title
         }));
-        $('#job-'+ item.id).slideDown("slow");
+        $('#job-'+ job.id).slideDown("slow");
 
     },
 
@@ -46,29 +78,90 @@ var JobsView = Backbone.View.extend({
         e.preventDefault();
 
         var JobId = $(e.target.parentNode.parentNode).data('id');
-        var job = this.job_collection.get(JobId);
+        var job = this.jobCollection.get(JobId);
+        var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
 
         $('#modal').html(this.jobModalTemplate({
             title: job.attributes.title,
-            script_content: job.attributes.script_content_rendered,
-            job_url: job.url()
+            script_content: job.attributes.script_content,
+            job_url: job.url(),
+            id: job.id
         })).modal();
+
+        if (job.attributes.enqueue_is_enabled === true) {
+            $('.toggle-enable-job').addClass('btn-danger');
+            $('.toggle-enable-job span').html('Suspend enqueue');
+        } else {
+            $('.toggle-enable-job').addClass('btn-success');
+            $('.toggle-enable-job span').html('Enable enqueue');
+        }
+ 
+        $('.schedule-job').hide();
+        $('.toggle-enable-job').hide();
+
+        _(this.groupCollection.models).each(function(group) {
+            if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
+                $('.schedule-job').show();
+                $('.toggle-enable-job').show();
+            }
+        });
+
         $('.schedule-job').click(this.scheduleJob);
+        $('.toggle-enable-job').click(this.toggleJobIsEnabled);
     },
 
-    scheduleJob: function(e) {
-        if (confirm('Are you sure you want to schedule this job?')) {         
-            var run_collection = new RunCollection();
+    // callback for toggeling the enqueue_is_enabled attribute of a job
+    toggleJobIsEnabled: function(e) {
+        var jobId = $(e.target.parentNode).data('job_id');
 
-            var run = run_collection.create({
-                job: $(e.target).data('job_url'),
+        // firefox
+        if (jobId === undefined) {
+            jobId = $(e.target).data('job_id');
+        }
+
+        var job = this.jobCollection.get(jobId);
+
+        if (job.attributes.enqueue_is_enabled === true) {
+            if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
+                job.attributes.enqueue_is_enabled = false;
+                job.save({}, {success: function() {
+                    $('.toggle-enable-job').removeClass('btn-danger');
+                    $('.toggle-enable-job').addClass('btn-success');
+                    $('.toggle-enable-job span').html('Enable enqueue');
+                }});
+            }
+        } else {
+            if (confirm('Are you sure you want to enable the enqueueing of this job?')) {
+                job.attributes.enqueue_is_enabled = true;
+                job.save({}, {success: function() {
+                    $('.toggle-enable-job').removeClass('btn-success');
+                    $('.toggle-enable-job').addClass('btn-danger');
+                    $('.toggle-enable-job span').html('Suspend enqueue');
+                }});
+            }
+        }
+    },
+
+    // callback for scheduling a job
+    scheduleJob: function(e) {
+        var jobUrl = $(e.target.parentNode).data('job_url');
+
+        // firefox
+        if (jobUrl === undefined) {
+            jobUrl = $(e.target).data('job_url');
+        }
+
+        if (confirm('Are you sure you want to schedule this job?')) {
+            var runCollection = new RunCollection();
+            var run = runCollection.create({
+                job: jobUrl,
+                is_manual: true,
                 schedule_dts: moment.utc().format('YYYY-MM-DD HH:mm:ss')
             }, {
                 success: function() {
-                    alert('The job has been scheduled.');
-                },
-                error: function() {
-                    alert('The scheduling failed, make sure you have permission to schedule this job.');
+                    $('.schedule-job i').removeClass('icon-play').addClass('icon-ok');
+                    $('.schedule-job span').html('Job scheduled');
+                    $('.schedule-job').attr('disabled', 'disabled');
                 }
             });
         }

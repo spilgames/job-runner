@@ -29,7 +29,7 @@ The used HMAC is HMAC-SHA1, with a message in the following format::
 
 The format of the header is::
 
-    Authentication: ApiKey public_key:hmac_sha1
+    Authentication: ApiKey api_key:hmac_sha1
 
 
 Available end-points
@@ -38,20 +38,60 @@ Available end-points
 .. note:: You can append ``schema/`` to the end of the URL to get information
     about the schema!
 
+Groups
+~~~~~~
+
+``GET /api/v1/group/``
+    Returns a list of available (and thus assigned) groups.
+
+``GET /api/v1/group/{GROUP_ID}/``
+    Returns the details of a specific job-id.
+
+
+Projects
+~~~~~~~~
+
+``GET /api/v1/project/``
+    Returns a list of available projects.
+
+``GET /api/v1/project/{PROJECT_ID}/``
+    Returns the details of a specific project-id.
+
+
+Workers
+~~~~~~~
+
+``GET /api/v1/worker/``
+    Returns a list of available workers.
+
+``GET /api/v1/worker/{WORKER_ID}/``
+    Returns the details of a specific worker-id.
+
+
+Job-templates
+~~~~~~~~~~~~~
+
+``GET /api/v1/job_template/``
+    Returns a list of available job-templates.
+
+``GET /api/v1/job_template/{JOB_TEMPLATE_ID}/``
+    Returns the details of a specific job-template id.
+
+
 Jobs
 ~~~~
 
-``GET /api/job_runner/v1/job/``
+``GET /api/v1/job/``
     Returns a list of available jobs.
 
-``GET /api/job_runner/v1/job/{JOB_ID}/``
+``GET /api/v1/job/{JOB_ID}/``
     Returns the details of a specific job-id.
 
 
 Runs
 ~~~~
 
-``GET /api/job_runner/v1/run/``
+``GET /api/v1/run/``
     Returs a list of runs. You can filter the state by adding ``state`` as a
     keyword argument. Possible values are:
 
@@ -62,19 +102,9 @@ Runs
     * ``completed_successful`` (completed without error)
     * ``completed_with_errors`` (completed with error)
 
-``GET /api/job_runner/v1/run/{RUN_ID}/``
+``GET /api/v1/run/{RUN_ID}/``
     Returns the details of a specific job run.
 
-``PATCH /api/job_runner/v1/run/{RUN_ID}/``
+``PATCH /api/v1/run/{RUN_ID}/``
     When the ``return_dts`` is patched, the job will be automatically
     rescheduled (if needed).
-
-
-Servers
-~~~~~~~
-
-``GET /api/job_runner/v1/server/``
-    Returns a list of available servers.
-
-``GET /api/job_runner/v1/servers/{SERVER_ID}/``.
-    Returns the details of a specific server-id.

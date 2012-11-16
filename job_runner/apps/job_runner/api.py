@@ -1,47 +1,143 @@
+from django.contrib.auth.models import Group
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
-from tastypie.constants import ALL
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.resources import ModelResource
 
 from job_runner.apps.job_runner.auth import (
-    HmacAuthentication, RunAuthorization, JobAuthorization)
-from job_runner.apps.job_runner.models import Job, Run, Server
+    HmacAuthentication, ModelAuthorization)
+from job_runner.apps.job_runner.models import (
+    Job,
+    JobTemplate,
+    Project,
+    Run,
+    Worker,
+)
 
 
-class ServerResource(ModelResource):
+class GroupResource(ModelResource):
     """
-    RESTful resource for servers.
+    RESTful resource for Django groups.
     """
     class Meta:
-        queryset = Server.objects.all()
-        resource_name = 'server'
+        queryset = Group.objects.all()
+        resource_name = 'group'
         allowed_methods = ['get']
-        fields = ['hostname', 'id']
+        fields = ['name']
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='jobtemplate__worker__api_key',
+            user_groups_path='',
+        )
+
+
+class ProjectResource(ModelResource):
+    """
+    RESTful resource for projects.
+    """
+    class Meta:
+        queryset = Project.objects.all()
+        resource_name = 'project'
+        allowed_methods = ['get']
+        fields = ['title', 'id']
+        filtering = {
+            'id': ('exact',),
+        }
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='worker__api_key',
+            user_groups_path='groups',
+        )
+
+
+class WorkerResource(ModelResource):
+    """
+    RESTful resource for workers.
+    """
+    project = fields.ToOneField(
+        'job_runner.apps.job_runner.api.ProjectResource', 'project')
+
+    class Meta:
+        queryset = Worker.objects.all()
+        resource_name = 'worker'
+        allowed_methods = ['get']
+        fields = ['title', 'api_key']
+        filtering = {
+            'project': ALL_WITH_RELATIONS,
+        }
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='api_key',
+            user_groups_path='project__groups',
+        )
+
+
+class JobTemplateResource(ModelResource):
+    """
+    RESTful resource for job-templates.
+    """
+    worker = fields.ToOneField(
+        'job_runner.apps.job_runner.api.WorkerResource', 'worker')
+    auth_groups = fields.ToManyField(
+        'job_runner.apps.job_runner.api.GroupResource',
+        'auth_groups',
+        null=True
+    )
+
+    class Meta:
+        queryset = JobTemplate.objects.all()
+        resource_name = 'job_template'
+        allowed_methods = ['get']
+        fields = ['title']
+        filtering = {
+            'worker': ALL_WITH_RELATIONS,
+        }
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='worker__api_key',
+            user_groups_path='worker__project__groups',
+        )
 
 
 class JobResource(ModelResource):
     """
     RESTful resource for jobs.
     """
-    server = fields.ToOneField(
-        'job_runner.apps.job_runner.api.ServerResource', 'server')
+    job_template = fields.ToOneField(
+        'job_runner.apps.job_runner.api.JobTemplateResource', 'job_template')
     parent = fields.ToOneField('self', 'parent', null=True)
     children = fields.ToManyField('self', 'children', null=True)
 
     class Meta:
         queryset = Job.objects.all()
         resource_name = 'job'
-        allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'put']
+        list_allowed_methods = ['get']
+        fields = ['id', 'title', 'script_content', 'enqueue_is_enabled']
         filtering = {
-            'server': ALL,
+            'job_template': ALL_WITH_RELATIONS,
         }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
-        authorization = JobAuthorization()
+
+        authorization = ModelAuthorization(
+            api_key_path='job_template__worker__api_key',
+            user_groups_path='job_template__worker__project__groups',
+            auth_user_groups_path='job_template__auth_groups',
+        )
 
 
 class RunResource(ModelResource):
@@ -52,18 +148,23 @@ class RunResource(ModelResource):
         'job_runner.apps.job_runner.api.JobResource', 'job')
 
     class Meta:
-        queryset = Run.objects.all()
+        queryset = Run.objects.filter()
         resource_name = 'run'
         detail_allowed_methods = ['get', 'patch']
         list_allowed_methods = ['get', 'post']
         filtering = {
             'schedule_dts': ALL,
-            'job': ALL,
+            'job': ALL_WITH_RELATIONS,
         }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
-        authorization = RunAuthorization()
+
+        authorization = ModelAuthorization(
+            api_key_path='job__job_template__worker__api_key',
+            user_groups_path='job__job_template__worker__project__groups',
+            auth_user_groups_path='job__job_template__auth_groups',
+        )
 
     def build_filters(self, filters=None):
         if filters is None:

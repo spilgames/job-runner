@@ -1,11 +1,14 @@
-Server:
-{{ run.job.server.hostname }}
+Worker:
+{{ run.job.job_template.worker.title }}
 
 Job title:
 {{ run.job.title }}
 
+Admin link:
+http://{{ hostname }}{% url admin:job_runner_job_change run.job.pk %}
+
 Job script:
-{{ run.job.script_content_rendered|safe }}
+{{ run.job.script_content|safe }}
 
 Run id:
 {{ run.id }}

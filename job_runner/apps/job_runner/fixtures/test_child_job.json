@@ -1,15 +1,17 @@
 [
     {
-        "pk": 2,
-        "model": "job_runner.job",
+        "pk": 3, 
+        "model": "job_runner.job", 
         "fields": {
-            "parent": 1,
-            "server": 1,
-            "script_template": 1,
-            "script_content": "print \"Hello world\"\r\n",
-            "script_content_rendered": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n",
-            "title": "Test job",
-            "notification_addresses": "job1@example.com\n\rjob2@example.com"
+            "parent": 1, 
+            "reschedule_type": "", 
+            "script_content": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n", 
+            "job_template": 1, 
+            "title": "Test job 3", 
+            "notification_addresses": "job@example.com", 
+            "reschedule_interval": null, 
+            "script_content_partial": "print \"Hello world\"", 
+            "reschedule_interval_type": ""
         }
     }
 ]

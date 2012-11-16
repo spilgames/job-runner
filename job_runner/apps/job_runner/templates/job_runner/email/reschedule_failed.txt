@@ -4,7 +4,7 @@ Job title:
 {{ job.title }}
 
 Admin link:
-https://portal.priv.spillgroup.org/admin/job_runner/job/{{ job.pk }}/
+http://{{ hostname }}{% url admin:job_runner_job_change job.pk %}
 
 
 Probably this is because the server could not calculate a new schedule date

@@ -10,6 +10,17 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v0.7.0
+~~~~~~
+
+* **Major refactor:** It is now possible to use Sheldon assigned groups when
+  creating projects. Since basically all models are changed / renamed, it was
+  not possible to migrate old data to the new structure. Therefore you should
+  re-create the database!
+* Add ``broadcast_queue`` management command to publish enqueueable runs to
+  the workers.
+
+
 v0.6.2
 ~~~~~~
 

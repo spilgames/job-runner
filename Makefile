@@ -3,7 +3,7 @@ clean-pyc:
 	find . -type f -name "*.pyo" -delete
 
 documentation:
-	cd docs && DJANGO_SETTINGS_MODULE=job_runner.settings.env.testing make clean html
+	cd docs && make clean html
 
 
 unittest: clean-pyc

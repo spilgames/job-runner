@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     (r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
-    (r'^api/job_runner/', include('job_runner.apps.job_runner.api_urls')),
+    (r'^api/', include('job_runner.apps.job_runner.api_urls')),
 
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {

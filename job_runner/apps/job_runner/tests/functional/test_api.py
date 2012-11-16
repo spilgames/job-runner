@@ -7,7 +7,13 @@ from django.contrib.auth.models import Group
 from django.core import mail
 from django.test import TestCase
 
-from job_runner.apps.job_runner.models import Job, Run
+from job_runner.apps.job_runner.models import (
+    Job,
+    JobTemplate,
+    Project,
+    Run,
+    Worker,
+)
 
 
 class ApiTestBase(TestCase):
@@ -16,13 +22,13 @@ class ApiTestBase(TestCase):
     """
     def get(self, path, *args, **kwargs):
         api_key = hmac.new(
-            'key', 'GET{0}'.format(path), hashlib.sha1).hexdigest()
+            'verysecret', 'GET{0}'.format(path), hashlib.sha1).hexdigest()
 
         return self.client.get(
             path,
             *args,
             ACCEPT='application/json',
-            HTTP_AUTHORIZATION='ApiKey test:{0}'.format(api_key)
+            HTTP_AUTHORIZATION='ApiKey worker1:{0}'.format(api_key)
         )
 
     def get_json(self, path, *args, **kwargs):
@@ -32,7 +38,7 @@ class ApiTestBase(TestCase):
     def patch(self, path, data):
         json_data = json.dumps(data)
         api_key = hmac.new(
-            'key', 'PATCH{0}{1}'.format(path, json_data), hashlib.sha1
+            'verysecret', 'PATCH{0}{1}'.format(path, json_data), hashlib.sha1
         ).hexdigest()
 
         return self.client.post(
@@ -40,61 +46,228 @@ class ApiTestBase(TestCase):
             data=json_data,
             content_type='application/json',
             ACCEPT='application/json',
-            HTTP_AUTHORIZATION='ApiKey test:{0}'.format(api_key),
+            HTTP_AUTHORIZATION='ApiKey worker1:{0}'.format(api_key),
             HTTP_X_HTTP_METHOD_OVERRIDE='PATCH',
         )
 
 
-class JobTestCase(ApiTestBase):
+class ProjectTestCase(ApiTestBase):
     """
-    Tests for the job interface.
+    Tests for the project interface.
     """
-    fixtures = ['test_job', 'test_server', 'test_script_template']
+    fixtures = ['test_auth', 'test_project', 'test_worker']
 
-    def test_job_methods(self):
+    def test_project_methods(self):
         """
-        Test allowed methods on jobs.
+        Test allowed methods.
         """
-        response = self.get('/api/job_runner/v1/job/schema/')
+        response = self.get('/api/v1/project/schema/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
         self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
-    def test_get_jobs(self):
+    def test_projects_count(self):
         """
-        Test GET ``/api/job_runner/v1/job/``.
+        Test that we have two projects in the database.
         """
-        response = self.get('/api/job_runner/v1/job/')
+        self.assertEqual(2, Project.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/project/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
-        self.assertEqual('Test job', json_data['objects'][0]['title'])
+        self.assertEqual('Test project 1', json_data['objects'][0]['title'])
 
-    def test_get_job_1(self):
+    def test_user_authorization(self):
         """
-        Test GET ``/api/job_runner/v1/job/1/``.
+        Test user authorization (user has only access to one object).
         """
-        response = self.get('/api/job_runner/v1/job/1/')
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/project/', ACCEPT='application/json')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
-        self.assertEqual('Test job', json_data['title'])
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test project 1', json_data['objects'][0]['title'])
+
+
+class WorkerTestCase(ApiTestBase):
+    """
+    Tests for the worker interface.
+    """
+    fixtures = ['test_auth', 'test_project', 'test_worker']
+
+    def test_worker_methods(self):
+        """
+        Test allowed methods.
+        """
+        response = self.get('/api/v1/worker/schema/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+
+    def test_worker_count(self):
+        """
+        Test worker count in the DB.
+        """
+        self.assertEqual(2, Worker.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/worker/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test worker 1', json_data['objects'][0]['title'])
+
+    def test_user_authorization(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/worker/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test worker 1', json_data['objects'][0]['title'])
+
+
+class JobTemplateTestCase(ApiTestBase):
+    """
+    Tests for the job-template interface.
+    """
+    fixtures = [
+        'test_auth', 'test_project', 'test_worker', 'test_job_template']
+
+    def test_job_template_methods(self):
+        """
+        Test allowed methods.
+        """
+        response = self.get('/api/v1/job_template/schema/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+
+    def test_job_template_count(self):
+        """
+        Test job-template count in the db.
+        """
+        self.assertEqual(2, JobTemplate.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/job_template/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test template 1', json_data['objects'][0]['title'])
+
+    def test_user_authorization(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/job_template/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test template 1', json_data['objects'][0]['title'])
+
+
+class JobTestCase(ApiTestBase):
+    """
+    Tests for the job interface.
+    """
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+    ]
+
+    def test_job_methods(self):
+        """
+        Test allowed methods on jobs.
+        """
+        response = self.get('/api/v1/job/schema/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(
+            ['get', 'put'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+
+    def test_job_count(self):
+        """
+        Test the job count in the db.
+        """
+        self.assertEqual(2, Job.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/job/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test job 1', json_data['objects'][0]['title'])
+
+    def test_user_authorization(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/job/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Test job 1', json_data['objects'][0]['title'])
 
 
 class RunTestCase(ApiTestBase):
     """
     Tests for the run interface.
     """
-    fixtures = ['test_auth', 'test_job', 'test_server', 'test_script_template']
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+    ]
 
     def test_run_methods(self):
         """
         Test allowed methods on runs.
         """
-        response = self.get('/api/job_runner/v1/run/schema/')
+        response = self.get('/api/v1/run/schema/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
@@ -105,29 +278,35 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(
             ['get', 'post'], json_data['allowed_list_http_methods'])
 
-    def test_get_runs(self):
+    def test_run_count(self):
         """
-        Test GET ``/api/job_runner/v1/run/``.
+        Test the run count in the db.
         """
-        response = self.get('/api/job_runner/v1/run/')
+        self.assertEqual(2, Run.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/run/')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual(1, json_data['objects'][0]['id'])
-        self.assertEqual(
-            '/api/job_runner/v1/job/1/', json_data['objects'][0]['job'])
 
-    def test_get_run_1(self):
+    def test_user_authorization(self):
         """
-        Test GET ``/api/job_runner/v1/run/1/``.
+        Test user authorization (user has only access to one object).
         """
-        response = self.get('/api/job_runner/v1/run/1/')
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/run/', ACCEPT='application/json')
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
-        self.assertEqual(1, json_data['id'])
-        self.assertEqual('/api/job_runner/v1/job/1/', json_data['job'])
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual(1, json_data['objects'][0]['id'])
 
     def test_scheduled(self):
         """
@@ -144,7 +323,7 @@ class RunTestCase(ApiTestBase):
 
         for argument, expected in expected:
             json_data = self.get_json(
-                '/api/job_runner/v1/run/?state={0}'.format(argument))
+                '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
     def test_in_queue(self):
@@ -166,7 +345,7 @@ class RunTestCase(ApiTestBase):
 
         for argument, expected in expected:
             json_data = self.get_json(
-                '/api/job_runner/v1/run/?state={0}'.format(argument))
+                '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
     def test_started(self):
@@ -189,7 +368,7 @@ class RunTestCase(ApiTestBase):
 
         for argument, expected in expected:
             json_data = self.get_json(
-                '/api/job_runner/v1/run/?state={0}'.format(argument))
+                '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
     def test_completed(self):
@@ -214,7 +393,7 @@ class RunTestCase(ApiTestBase):
 
         for argument, expected in expected:
             json_data = self.get_json(
-                '/api/job_runner/v1/run/?state={0}'.format(argument))
+                '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
     def test_completed_with_error(self):
@@ -239,15 +418,15 @@ class RunTestCase(ApiTestBase):
 
         for argument, expected in expected:
             json_data = self.get_json(
-                '/api/job_runner/v1/run/?state={0}'.format(argument))
+                '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
     def test_patch_run_1(self):
         """
-        Test PATCH ``/api/job_runner/v1/run/1/``.
+        Test PATCH ``/api/v1/run/1/``.
         """
         response = self.patch(
-            '/api/job_runner/v1/run/1/',
+            '/api/v1/run/1/',
             {
                 'enqueue_dts': datetime.utcnow().isoformat(' ')
             }
@@ -257,10 +436,11 @@ class RunTestCase(ApiTestBase):
 
     def test_patch_with_reschedule(self):
         """
-        Test PATCH ``/api/job_runner/v1/run/1/`` causing a reschedule.
+        Test PATCH ``/api/v1/run/1/`` causing a reschedule.
         """
+        Run.objects.update(enqueue_dts=datetime.utcnow())
         response = self.patch(
-            '/api/job_runner/v1/run/1/',
+            '/api/v1/run/1/',
             {
                 'return_dts': datetime.utcnow().isoformat(' '),
                 'return_success': True,
@@ -268,11 +448,11 @@ class RunTestCase(ApiTestBase):
         )
 
         self.assertEqual(202, response.status_code)
-        self.assertEqual(2, Run.objects.count())
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
     def test_returned_with_error(self):
         """
-        Test PATCH ``/api/job_runner/v1/run/1/`` returned with error.
+        Test PATCH ``/api/v1/run/1/`` returned with error.
 
         This is expected to send e-mail notifications out.
 
@@ -282,7 +462,7 @@ class RunTestCase(ApiTestBase):
 
         """
         response = self.patch(
-            '/api/job_runner/v1/run/1/',
+            '/api/v1/run/1/',
             {
                 'return_dts': datetime.utcnow().isoformat(' '),
                 'return_success': False,
@@ -292,23 +472,19 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(202, response.status_code)
         self.assertTrue(hasattr(mail, 'outbox'))
         self.assertEqual(1, len(mail.outbox))
-        self.assertEqual(6, len(mail.outbox[0].to))
-        self.assertEqual('Run error for: Test job', mail.outbox[0].subject)
+        self.assertEqual(4, len(mail.outbox[0].to))
+        self.assertEqual('Run error for: Test job 1', mail.outbox[0].subject)
 
     def test_create_new_run(self):
         """
         Test create a new run by performing a ``POST``.
         """
-        job = Job.objects.get(pk=1)
-        job.one_of_groups.add(Group.objects.get(pk=1))
-        job.save()
-
         self.client.login(username='admin', password='admin')
 
         response = self.client.post(
-            '/api/job_runner/v1/run/',
+            '/api/v1/run/',
             data=json.dumps({
-                'job': '/api/job_runner/v1/job/1/',
+                'job': '/api/v1/job/1/',
                 'schedule_dts': '2013-01-01 00:00:00',
             }),
             content_type='application/json',
@@ -321,16 +497,16 @@ class RunTestCase(ApiTestBase):
         """
         Test create a new run by performing a ``POST`` with invalid group.
         """
-        job = Job.objects.get(pk=1)
-        job.one_of_groups = [Group.objects.get(pk=2)]
-        job.save()
+        template = JobTemplate.objects.get(pk=1)
+        template.auth_groups = [Group.objects.get(pk=2)]
+        template.save()
 
         self.client.login(username='admin', password='admin')
 
         response = self.client.post(
-            '/api/job_runner/v1/run/',
+            '/api/v1/run/',
             data=json.dumps({
-                'job': '/api/job_runner/v1/job/1/',
+                'job': '/api/v1/job/1/',
                 'schedule_dts': '2013-01-01 00:00:00',
             }),
             content_type='application/json',
@@ -345,15 +521,22 @@ class ChainedRunTestCase(ApiTestBase):
     Tests for the run interface with chaining.
     """
     fixtures = [
-        'test_job', 'test_child_job', 'test_server', 'test_script_template']
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+        'test_child_job',
+    ]
 
     def test_patch_with_reschedule(self):
         """
-        Test PATCH ``/api/job_runner/v1/run/1/`` for chained job.
+        Test PATCH ``/api/v1/run/1/`` for chained job.
 
         """
+        Run.objects.update(enqueue_dts=datetime.utcnow())
         response = self.patch(
-            '/api/job_runner/v1/run/1/',
+            '/api/v1/run/1/',
             {
                 'return_dts': datetime.utcnow().isoformat(' '),
                 'return_success': True,
@@ -362,4 +545,4 @@ class ChainedRunTestCase(ApiTestBase):
 
         self.assertEqual(202, response.status_code)
         self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
-        self.assertEqual(1, Job.objects.get(pk=2).run_set.count())
+        self.assertEqual(1, Job.objects.get(pk=3).run_set.count())
