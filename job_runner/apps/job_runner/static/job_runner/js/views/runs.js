@@ -218,14 +218,23 @@ var RunView = Backbone.View.extend({
         } else {
             run = new Run({'resource_uri': '/api/v1/run/' + event.run_id + '/'});
             run.fetch({success: function() {
-                self.runCollection.add(run);
 
                 var job = self.jobCollection.where({'resource_uri': run.attributes.job})[0];
                 if (job === undefined) {
                     job = new Job({'resource_uri': run.attributes.job});
                     job.fetch({success: function() {
-                        self.jobCollection.add(job);
+                        // make sure that job is within the current active project
+                        var jobTemplate = self.jobTemplateCollection.where({resource_uri: job.attributes.job_template})[0];
+                        var worker = self.workerCollection.where({resource_uri: jobTemplate.attributes.worker})[0];
+                        if (worker.attributes.project == self.activeProject.attributes.resource_uri) {
+                            self.jobCollection.add(job);
+                            self.runCollection.add(run);
+                        }
                     }});
+                } else {
+                    // when the job is already in the collection, we assume it
+                    // was previously checked and is in the current project
+                    self.runCollection.add(run);
                 }
 
             }});
