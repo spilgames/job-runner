@@ -10,11 +10,20 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v0.7.2
+~~~~~~
+
+* Fix issue where filtering the groups would result in duplicated results.
+* Remove WebKit browser notifications, since it was breaking the front-end in
+  Firefox.
+
+
 v0.7.1
 ~~~~~~
 
 * Check that runs received from the WebSocket server are within the current
   active project.
+* Add WebKit browser notifications.
 
 
 v0.7.0

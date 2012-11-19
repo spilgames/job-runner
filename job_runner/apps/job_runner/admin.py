@@ -57,7 +57,7 @@ class PermissionAdminMixin(object):
             else:
                 groups_or = groups_or | q_obj
 
-        return qs.filter(groups_or)
+        return qs.filter(groups_or).distinct()
 
     def queryset(self, request):
         """
