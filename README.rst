@@ -15,6 +15,7 @@ v0.7.1
 
 * Check that runs received from the WebSocket server are within the current
   active project.
+* Add WebKit browser notifications.
 
 
 v0.7.0
