@@ -104,7 +104,7 @@ class ModelAuthorization(Authorization):
             auth_header = request.META.get('HTTP_AUTHORIZATION')
             api_key_match = re.match(r'^ApiKey (.*?):(.*?)$', auth_header)
             return object_list.filter(
-                **{self.api_key_path: api_key_match.group(1)})
+                **{self.api_key_path: api_key_match.group(1)}).distinct()
 
         elif (request and request.user.is_authenticated()
               and request.user.groups.count() > 0):
@@ -122,7 +122,7 @@ class ModelAuthorization(Authorization):
                 else:
                     groups_or = groups_or | q_obj
 
-            object_list = object_list.filter(groups_or)
+            object_list = object_list.filter(groups_or).distinct()
 
             # apply extra filters when the request is not a GET
             if request.method != 'GET' and self.auth_user_groups_path != None:
@@ -140,7 +140,7 @@ class ModelAuthorization(Authorization):
                     else:
                         groups_or = groups_or | q_obj
 
-                object_list = object_list.filter(groups_or)
+                object_list = object_list.filter(groups_or).distinct()
 
             return object_list
 

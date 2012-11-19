@@ -11,7 +11,6 @@ var RunView = Backbone.View.extend({
     initialize: function(options) {
         _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent');
         this.activeProject = null;
-        this.notifier = options.notifier;
 
         this.workerCollection = new WorkerCollection();
         this.jobTemplateCollection = new JobTemplateCollection();
@@ -28,7 +27,6 @@ var RunView = Backbone.View.extend({
             $('#job_runner section').addClass('hide');
             $('#dashboard').removeClass('hide');
             self.activeProject = options.projectCollection.get(project_id);
-            self.notifier.RequestPermission();
 
             self.workerCollection.reset();
             self.jobTemplateCollection.reset();
@@ -197,10 +195,6 @@ var RunView = Backbone.View.extend({
 
     // callback used when an item has been changed
     changeRun: function(run) {
-        var job = this.jobCollection.where({resource_uri: run.attributes.job})[0];
-
-        this.notifier.Notify("", "Job-Runner", job.attributes.title + " changed to " + run.humanReadableState());
-
         var self = this;
         $('#run-' + run.id, self.el).fadeOut('fast', function() {
             $(this).remove();

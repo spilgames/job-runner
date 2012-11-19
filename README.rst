@@ -10,6 +10,14 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v0.7.2
+~~~~~~
+
+* Fix issue where filtering the groups would result in duplicated results.
+* Remove WebKit browser notifications, since it was breaking the front-end in
+  Firefox.
+
+
 v0.7.1
 ~~~~~~
 
