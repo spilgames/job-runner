@@ -11,6 +11,7 @@ var RunView = Backbone.View.extend({
     initialize: function(options) {
         _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent');
         this.activeProject = null;
+        this.notifier = options.notifier;
 
         this.workerCollection = new WorkerCollection();
         this.jobTemplateCollection = new JobTemplateCollection();
@@ -27,6 +28,7 @@ var RunView = Backbone.View.extend({
             $('#job_runner section').addClass('hide');
             $('#dashboard').removeClass('hide');
             self.activeProject = options.projectCollection.get(project_id);
+            self.notifier.RequestPermission();
 
             self.workerCollection.reset();
             self.jobTemplateCollection.reset();
@@ -195,6 +197,10 @@ var RunView = Backbone.View.extend({
 
     // callback used when an item has been changed
     changeRun: function(run) {
+        var job = this.jobCollection.where({resource_uri: run.attributes.job})[0];
+
+        this.notifier.Notify("", "Job-Runner", job.attributes.title + " changed to " + run.humanReadableState());
+
         var self = this;
         $('#run-' + run.id, self.el).fadeOut('fast', function() {
             $(this).remove();
@@ -218,14 +224,23 @@ var RunView = Backbone.View.extend({
         } else {
             run = new Run({'resource_uri': '/api/v1/run/' + event.run_id + '/'});
             run.fetch({success: function() {
-                self.runCollection.add(run);
 
                 var job = self.jobCollection.where({'resource_uri': run.attributes.job})[0];
                 if (job === undefined) {
                     job = new Job({'resource_uri': run.attributes.job});
                     job.fetch({success: function() {
-                        self.jobCollection.add(job);
+                        // make sure that job is within the current active project
+                        var jobTemplate = self.jobTemplateCollection.where({resource_uri: job.attributes.job_template})[0];
+                        var worker = self.workerCollection.where({resource_uri: jobTemplate.attributes.worker})[0];
+                        if (worker.attributes.project == self.activeProject.attributes.resource_uri) {
+                            self.jobCollection.add(job);
+                            self.runCollection.add(run);
+                        }
                     }});
+                } else {
+                    // when the job is already in the collection, we assume it
+                    // was previously checked and is in the current project
+                    self.runCollection.add(run);
                 }
 
             }});

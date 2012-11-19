@@ -1,3 +1,6 @@
+// notifier
+var notifier = new Notifier();
+
 // collections
 var groupCollection = new GroupCollection();
 var projectCollection = new ProjectCollection();
@@ -16,7 +19,8 @@ groupCollection.fetch_all({success: function() {
 
         var runView = new RunView({
             router: appRouter,
-            projectCollection: projectCollection
+            projectCollection: projectCollection,
+            notifier: notifier
         });
 
         var jobView = new JobView({
