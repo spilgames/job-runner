@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v0.7.3
+~~~~~~
+
+* Add ``job_runner.settings.env.production_longrun`` settings module for long
+  running processes to avoid "cached" results.
+
+
 v0.7.2
 ~~~~~~
 
