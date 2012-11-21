@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v0.7.4
+~~~~~~
+
+* Deployar related changes.
+
+
 v0.7.3
 ~~~~~~
 
