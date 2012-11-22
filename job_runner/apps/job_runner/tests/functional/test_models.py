@@ -2,6 +2,7 @@ from datetime import datetime, time, timedelta
 
 from django.core import mail
 from django.test import TestCase
+from django.utils import timezone
 
 from job_runner.apps.job_runner.models import (
     Job,
@@ -31,9 +32,9 @@ class RunTestCase(TestCase):
         self.assertEqual(1, Run.objects.filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
-        run.schedule_dts = datetime.utcnow()
-        run.enqueue_dts = datetime.utcnow()
-        run.return_dts = datetime.utcnow()
+        run.schedule_dts = timezone.now()
+        run.enqueue_dts = timezone.now()
+        run.return_dts = timezone.now()
         run.save()
 
         Job.objects.get(pk=1).reschedule()
@@ -49,7 +50,7 @@ class RunTestCase(TestCase):
         """
         Test reschedule after schedule dts is never in the past.
         """
-        dts_now = datetime.utcnow()
+        dts_now = timezone.now()
 
         run = Run.objects.get(pk=1)
         run.schedule_dts = dts_now - timedelta(days=31)
@@ -72,8 +73,8 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.utcnow()
-        run.return_dts = datetime.utcnow()
+        run.enqueue_dts = timezone.now()
+        run.return_dts = timezone.now()
         run.save()
 
         job.reschedule()
@@ -96,8 +97,9 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.utcnow()
-        run.return_dts = datetime(2032, 1, 1, 11, 59)
+        run.enqueue_dts = timezone.now()
+        run.return_dts = timezone.make_aware(
+            datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone())
         run.save()
 
         RescheduleExclude.objects.create(
@@ -111,7 +113,13 @@ class RunTestCase(TestCase):
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
         runs = Run.objects.all()
-        self.assertEqual(datetime(2032, 1, 1, 13, 59), runs[1].schedule_dts)
+        self.assertEqual(
+            timezone.make_aware(
+                datetime(2032, 1, 1, 13, 59),
+                timezone.get_default_timezone()
+            ),
+            runs[1].schedule_dts
+        )
 
     def test_reschedule_with_invalid_exclude(self):
         """
@@ -123,8 +131,9 @@ class RunTestCase(TestCase):
         job.save()
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.utcnow()
-        run.return_dts = datetime(2012, 1, 1, 11, 59)
+        run.enqueue_dts = timezone.now()
+        run.return_dts = timezone.make_aware(
+            datetime(2012, 1, 1, 11, 59), timezone.get_default_timezone())
         run.save()
 
         RescheduleExclude.objects.create(

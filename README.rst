@@ -16,6 +16,8 @@ v1.0.0
 * Fix size (height) of run / job headers
 * Fix order of run objects
 * Fix escaping of HTML characters in job script and log output
+* Enable timezone, all data is now presented (and expected to be) in the
+  *Europe/Amsterdam* timezone.
 
 
 v0.7.4

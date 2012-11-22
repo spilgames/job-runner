@@ -20,6 +20,7 @@ setup(
         'south',
         'uwsgi',
         'MySQL-python',
+        'pytz',
         'pyzmq',
         'django-tastypie==0.9.12-alpha',
         'mimeparse==0.1.3',
