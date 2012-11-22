@@ -15,6 +15,7 @@ v1.0.0
 
 * Fix size (height) of run / job headers
 * Fix order of run objects
+* Fix escaping of HTML characters in job script and log output
 
 
 v0.7.4

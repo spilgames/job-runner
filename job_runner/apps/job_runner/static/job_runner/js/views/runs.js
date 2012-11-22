@@ -270,8 +270,8 @@ var RunView = Backbone.View.extend({
             start_dts: this.formatDateTime(run.attributes.start_dts),
             return_dts: this.formatDateTime(run.attributes.return_dts),
             run_duration: this.formatDuration(run.attributes.start_dts, run.attributes.return_dts),
-            script_content: job.attributes.script_content,
-            return_log: run.attributes.return_log
+            script_content: _.escape(job.attributes.script_content),
+            return_log: _.escape(run.attributes.return_log)
         })).modal();
 
     },
