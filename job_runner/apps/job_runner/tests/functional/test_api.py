@@ -500,7 +500,7 @@ class RunTestCase(ApiTestBase):
         )
 
         self.assertEqual(201, response.status_code)
-        run = Run.objects.filter(job_id=1)[0]
+        run = Run.objects.filter(job_id=1)[1]
         self.assertEqual(
             timezone.make_aware(
                 datetime(2013, 1, 1),

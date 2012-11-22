@@ -333,7 +333,7 @@ class Run(models.Model):
 
     class Meta:
         ordering = (
-            '-return_dts', '-start_dts', '-enqueue_dts', '-schedule_dts')
+            '-return_dts', '-start_dts', '-enqueue_dts', 'schedule_dts')
 
     def send_error_notification(self):
         """

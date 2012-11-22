@@ -112,7 +112,7 @@ class RunTestCase(TestCase):
 
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
-        runs = Run.objects.all()
+        runs = Run.objects.filter(job_id=1)
         self.assertEqual(
             timezone.make_aware(
                 datetime(2032, 1, 1, 13, 59),
