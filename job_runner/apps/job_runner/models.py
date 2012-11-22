@@ -328,6 +328,8 @@ class Run(models.Model):
     return_log = models.TextField(null=True, default=None)
     is_manual = models.BooleanField(
         default=False, editable=False, db_index=True)
+    schedule_children = models.BooleanField(
+        default=True, editable=False, db_index=True)
 
     objects = RunManager()
 

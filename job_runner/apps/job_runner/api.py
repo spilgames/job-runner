@@ -234,7 +234,8 @@ class RunResource(ModelResource):
             and deserialized.get('return_success', None) == False):
                 bundle.obj.send_error_notification()
         elif (deserialized.get('return_dts', None)
-            and deserialized.get('return_success', None) == True):
+            and deserialized.get('return_success', None) == True
+            and bundle.obj.schedule_children):
                 for child in bundle.obj.job.children.all():
                     child.schedule_now()
 
