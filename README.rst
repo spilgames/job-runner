@@ -17,7 +17,8 @@ v1.0.0
 * Fix order of run objects
 * Fix escaping of HTML characters in job script and log output
 * Enable timezone, all data is now presented (and expected to be) in the
-  *Europe/Amsterdam* timezone.
+  *Europe/Amsterdam* timezone
+* Order scheduled runs ascending (first to run on top)
 
 
 v0.7.4

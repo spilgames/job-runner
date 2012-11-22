@@ -134,7 +134,7 @@ var RunView = Backbone.View.extend({
                 server: worker.attributes.title,
                 timestamp: self.formatDateTime(run.attributes.schedule_dts)
             }));
-            this.sortRuns('#scheduled-runs');
+            this.sortRuns('#scheduled-runs', 'asc');
 
         } else if (run.state() == 'in_queue') {
             $('#enqueued-runs', self.el).append(self.template({
@@ -145,7 +145,7 @@ var RunView = Backbone.View.extend({
                 server: worker.attributes.title,
                 timestamp: self.formatDateTime(run.attributes.enqueue_dts)
             }));
-            this.sortRuns('#enqueued-runs');
+            this.sortRuns('#enqueued-runs', 'desc');
 
         } else if (run.state() == 'started') {
             $('#started-runs', self.el).append(self.template({
@@ -156,7 +156,7 @@ var RunView = Backbone.View.extend({
                 server: worker.attributes.title,
                 timestamp: self.formatDateTime(run.attributes.start_dts)
             }));
-            this.sortRuns('#started-runs');
+            this.sortRuns('#started-runs', 'desc');
 
         } else if (run.state() == 'completed') {
             var old = $('#completed-with-error-runs div, #completed-runs div').filter(function() {
@@ -171,7 +171,7 @@ var RunView = Backbone.View.extend({
                 server: worker.attributes.title,
                 timestamp: self.formatDateTime(run.attributes.return_dts)
             }));
-            this.sortRuns('#completed-runs');
+            this.sortRuns('#completed-runs', 'desc');
 
         } else if (run.state() == 'completed_with_error') {
             var old = $('#completed-with-error-runs div, #completed-runs div').filter(function() {
@@ -186,7 +186,7 @@ var RunView = Backbone.View.extend({
                 server: worker.attributes.title,
                 timestamp: self.formatDateTime(run.attributes.return_dts)
             }));
-            this.sortRuns('#completed-with-error-runs');
+            this.sortRuns('#completed-with-error-runs', 'desc');
         }
 
         $('#run-'+ run.id).slideDown("slow");
@@ -203,10 +203,16 @@ var RunView = Backbone.View.extend({
     },
 
     // sort runs
-    sortRuns: function(column_id) {
-        $(column_id +' div').sort(function(a, b) {
-            return $(a).data('timestamp') < $(b).data('timestamp') ? 1 : -1;
-        }).appendTo(column_id);
+    sortRuns: function(column_id, order) {
+        if (order == 'desc') {
+            $(column_id +' div').sort(function(a, b) {
+                return $(a).data('timestamp') < $(b).data('timestamp') ? 1 : -1;
+            }).appendTo(column_id);
+        } else if (order == 'asc') {
+            $(column_id +' div').sort(function(a, b) {
+                return $(a).data('timestamp') > $(b).data('timestamp') ? 1 : -1;
+            }).appendTo(column_id);
+        }
     },
 
     // handle websocket event
