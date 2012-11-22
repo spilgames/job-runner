@@ -29,12 +29,12 @@ class CommandTestCase(TestCase):
 
         self.assertEqual([
             call([
-                'master.broadcast.worker2',
-                '{"action": "enqueue", "run_id": 2}'
-            ]),
-            call([
                 'master.broadcast.worker1',
                 '{"action": "enqueue", "run_id": 1}'
+            ]),
+            call([
+                'master.broadcast.worker2',
+                '{"action": "enqueue", "run_id": 2}'
             ]),
         ], publisher.send_multipart.call_args_list)
 

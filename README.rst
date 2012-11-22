@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.0.0
+~~~~~~
+
+* Fix size (height) of run / job headers
+* Fix order of run objects
+
+
 v0.7.4
 ~~~~~~
 

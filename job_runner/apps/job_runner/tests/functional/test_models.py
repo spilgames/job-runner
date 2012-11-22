@@ -41,8 +41,8 @@ class RunTestCase(TestCase):
 
         runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
-            runs[1].schedule_dts + timedelta(days=1),
-            runs[0].schedule_dts
+            runs[0].schedule_dts + timedelta(days=1),
+            runs[1].schedule_dts
         )
 
     def test_reschedule_after_schedule_dts_not_in_past(self):
@@ -82,8 +82,8 @@ class RunTestCase(TestCase):
 
         runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
-            runs[1].return_dts + timedelta(days=1),
-            runs[0].schedule_dts
+            runs[0].return_dts + timedelta(days=1),
+            runs[1].schedule_dts
         )
 
     def test_reschedule_with_exclude(self):
@@ -111,7 +111,7 @@ class RunTestCase(TestCase):
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
         runs = Run.objects.all()
-        self.assertEqual(datetime(2032, 1, 1, 13, 59), runs[0].schedule_dts)
+        self.assertEqual(datetime(2032, 1, 1, 13, 59), runs[1].schedule_dts)
 
     def test_reschedule_with_invalid_exclude(self):
         """

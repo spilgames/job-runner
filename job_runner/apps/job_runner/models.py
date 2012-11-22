@@ -156,6 +156,9 @@ class Job(models.Model):
         blank=True,
     )
 
+    class Meta:
+        ordering = ('title', )
+
     def __unicode__(self):
         return self.title
 
@@ -323,7 +326,8 @@ class Run(models.Model):
     objects = RunManager()
 
     class Meta:
-        ordering = ('-id',)
+        ordering = (
+            '-return_dts', '-start_dts', '-enqueue_dts', '-schedule_dts')
 
     def send_error_notification(self):
         """
