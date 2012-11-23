@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.1.0
+~~~~~~
+
+* Run and job details are made deeplinkable
+
+
 v1.0.0
 ~~~~~~
 

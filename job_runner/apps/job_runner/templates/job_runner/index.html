@@ -8,7 +8,7 @@
     <script type="text/html" id="run-template">
         <div style='display: none;' class='job-run job-<%= state %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'>
             <h5>
-                <a href='#' class='details'><%= title %></a>
+                <a href='<%= id %>/' class='details js-link'><%= title %></a>
             </h5>
             <ul>
                 <li><i class='icon-hdd'></i> <%= server %></li>
@@ -20,7 +20,7 @@
     <script type="text/html" id="run-modal-template">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title"><%= title %></h3>
+            <h3 id="run_modal_title">Run: <a href="../../jobs/<%= job_id %>/"><%= title %></a></h3>
         </div>
         <div class="modal-body" id="status-modal">
             <h3>Status</h3>
@@ -58,7 +58,7 @@
     <script type="text/html" id="job-modal-template">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title"><%= title %></h3>
+            <h3 id="run_modal_title">Job: <%= title %></h3>
         </div>
         <div class="modal-body" id="status-modal">
             <h3>Command</h3>
@@ -85,7 +85,7 @@
     <script type="text/html" id="job-template">
         <div class="span2">
         <div class="job" id="job-<%= id %>" data-id="<%= id %>" style="display: none;">
-            <h5><a href="#" class="details"><%= title %></a></h5>
+            <h5><a href="<%= id %>/" class="details js-link"><%= title %></a></h5>
             <ul>
                 <li>
                     <i class="icon-tag"></i> <%= hostname %>
