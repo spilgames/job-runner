@@ -13,3 +13,10 @@ DATABASES = {
 JOB_RUNNER_WS_SERVER = 'ws://localhost:5000/'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+
+# Make sure that test with naive datetime objects will fail
+import warnings
+warnings.filterwarnings(
+        'error', r"DateTimeField received a naive datetime",
+        RuntimeWarning, r'django\.db\.models\.fields')

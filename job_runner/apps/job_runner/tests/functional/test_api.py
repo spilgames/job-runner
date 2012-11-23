@@ -6,6 +6,7 @@ from datetime import datetime
 from django.contrib.auth.models import Group
 from django.core import mail
 from django.test import TestCase
+from django.utils import timezone
 
 from job_runner.apps.job_runner.models import (
     Job,
@@ -340,7 +341,7 @@ class RunTestCase(ApiTestBase):
         ]
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.utcnow()
+        run.enqueue_dts = timezone.now()
         run.save()
 
         for argument, expected in expected:
@@ -362,8 +363,8 @@ class RunTestCase(ApiTestBase):
         ]
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.utcnow()
-        run.start_dts = datetime.utcnow()
+        run.enqueue_dts = timezone.now()
+        run.start_dts = timezone.now()
         run.save()
 
         for argument, expected in expected:
@@ -385,9 +386,9 @@ class RunTestCase(ApiTestBase):
         ]
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.utcnow()
-        run.start_dts = datetime.utcnow()
-        run.return_dts = datetime.utcnow()
+        run.enqueue_dts = timezone.now()
+        run.start_dts = timezone.now()
+        run.return_dts = timezone.now()
         run.return_success = True
         run.save()
 
@@ -410,9 +411,9 @@ class RunTestCase(ApiTestBase):
         ]
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.utcnow()
-        run.start_dts = datetime.utcnow()
-        run.return_dts = datetime.utcnow()
+        run.enqueue_dts = timezone.now()
+        run.start_dts = timezone.now()
+        run.return_dts = timezone.now()
         run.return_success = False
         run.save()
 
@@ -425,30 +426,37 @@ class RunTestCase(ApiTestBase):
         """
         Test PATCH ``/api/v1/run/1/``.
         """
+        enqueue_dts = timezone.now()
+
         response = self.patch(
             '/api/v1/run/1/',
             {
-                'enqueue_dts': datetime.utcnow().isoformat(' ')
+                'enqueue_dts': enqueue_dts.isoformat(' ')
             }
         )
 
         self.assertEqual(202, response.status_code)
+        run = Run.objects.get(pk=1)
+        self.assertEqual(enqueue_dts, run.enqueue_dts)
 
     def test_patch_with_reschedule(self):
         """
         Test PATCH ``/api/v1/run/1/`` causing a reschedule.
         """
-        Run.objects.update(enqueue_dts=datetime.utcnow())
+        return_dts = timezone.now()
+        Run.objects.update(enqueue_dts=timezone.now())
         response = self.patch(
             '/api/v1/run/1/',
             {
-                'return_dts': datetime.utcnow().isoformat(' '),
+                'return_dts': return_dts.isoformat(' '),
                 'return_success': True,
             }
         )
 
         self.assertEqual(202, response.status_code)
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
+        self.assertEqual(
+            return_dts, Run.objects.filter(job_id=1)[0].return_dts)
 
     def test_returned_with_error(self):
         """
@@ -464,7 +472,7 @@ class RunTestCase(ApiTestBase):
         response = self.patch(
             '/api/v1/run/1/',
             {
-                'return_dts': datetime.utcnow().isoformat(' '),
+                'return_dts': timezone.now().isoformat(' '),
                 'return_success': False,
             }
         )
@@ -492,6 +500,14 @@ class RunTestCase(ApiTestBase):
         )
 
         self.assertEqual(201, response.status_code)
+        run = Run.objects.filter(job_id=1)[1]
+        self.assertEqual(
+            timezone.make_aware(
+                datetime(2013, 1, 1),
+                timezone.get_default_timezone()
+            ),
+            run.schedule_dts
+        )
 
     def test_create_new_run_no_permission(self):
         """
@@ -534,11 +550,11 @@ class ChainedRunTestCase(ApiTestBase):
         Test PATCH ``/api/v1/run/1/`` for chained job.
 
         """
-        Run.objects.update(enqueue_dts=datetime.utcnow())
+        Run.objects.update(enqueue_dts=timezone.now())
         response = self.patch(
             '/api/v1/run/1/',
             {
-                'return_dts': datetime.utcnow().isoformat(' '),
+                'return_dts': timezone.now().isoformat(' '),
                 'return_success': True,
             }
         )
@@ -546,3 +562,25 @@ class ChainedRunTestCase(ApiTestBase):
         self.assertEqual(202, response.status_code)
         self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
         self.assertEqual(1, Job.objects.get(pk=3).run_set.count())
+
+    def test_patch_with_reschedule_no_children_reschedule(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` for chained job but not reschedule
+        children.
+
+        """
+        Run.objects.update(
+            enqueue_dts=timezone.now(),
+            schedule_children=False,
+        )
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': timezone.now().isoformat(' '),
+                'return_success': True,
+            }
+        )
+
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
+        self.assertEqual(0, Job.objects.get(pk=3).run_set.count())

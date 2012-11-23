@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 from django.db import models
 from django.template import Context, Template
 from django.template.loader import get_template
+from django.utils import timezone
 
 from job_runner.apps.job_runner.managers import RunManager
 
@@ -156,6 +157,9 @@ class Job(models.Model):
         blank=True,
     )
 
+    class Meta:
+        ordering = ('title', )
+
     def __unicode__(self):
         return self.title
 
@@ -224,7 +228,7 @@ class Job(models.Model):
         """
         Run.objects.create(
             job=self,
-            schedule_dts=datetime.utcnow(),
+            schedule_dts=timezone.now(),
         )
 
     def save(self, *args, **kwargs):
@@ -272,7 +276,12 @@ class Job(models.Model):
             An instance of :class:`datetime.datetime`.
 
         """
-        while (reference_date + reschedule_delta) < datetime.utcnow():
+        # make sure the reference_date is in the current tz, because we are
+        # going to compare hours / minutes!
+        reference_date = reference_date.astimezone(
+            timezone.get_default_timezone())
+
+        while (reference_date + reschedule_delta) < timezone.now():
             reference_date = reference_date + reschedule_delta
 
         if not increment_date:
@@ -319,11 +328,14 @@ class Run(models.Model):
     return_log = models.TextField(null=True, default=None)
     is_manual = models.BooleanField(
         default=False, editable=False, db_index=True)
+    schedule_children = models.BooleanField(
+        default=True, editable=False, db_index=True)
 
     objects = RunManager()
 
     class Meta:
-        ordering = ('-id',)
+        ordering = (
+            '-return_dts', '-start_dts', '-enqueue_dts', 'schedule_dts')
 
     def send_error_notification(self):
         """

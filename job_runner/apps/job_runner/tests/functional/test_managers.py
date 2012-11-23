@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from django.test import TestCase
+from django.utils import timezone
 
 from job_runner.apps.job_runner.models import Run
 
@@ -19,7 +18,7 @@ class RunManagerTestCase(TestCase):
             1, Run.objects.awaiting_enqueue().filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
-        run.enqueue_dts = datetime.now()
+        run.enqueue_dts = timezone.now()
         run.save()
 
         self.assertEqual(

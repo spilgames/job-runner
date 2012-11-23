@@ -84,6 +84,7 @@ var JobView = Backbone.View.extend({
         $('#modal').html(this.jobModalTemplate({
             title: job.attributes.title,
             script_content: job.attributes.script_content,
+            children: job.attributes.children,
             job_url: job.url(),
             id: job.id
         })).modal();
@@ -145,10 +146,12 @@ var JobView = Backbone.View.extend({
     // callback for scheduling a job
     scheduleJob: function(e) {
         var jobUrl = $(e.target.parentNode).data('job_url');
+        var scheduleChildren = $(e.target.parentNode).data('schedule_children');
 
         // firefox
         if (jobUrl === undefined) {
             jobUrl = $(e.target).data('job_url');
+            scheduleChildren = $(e.target).data('schedule_children');
         }
 
         if (confirm('Are you sure you want to schedule this job?')) {
@@ -156,12 +159,13 @@ var JobView = Backbone.View.extend({
             var run = runCollection.create({
                 job: jobUrl,
                 is_manual: true,
-                schedule_dts: moment.utc().format('YYYY-MM-DD HH:mm:ss')
+                schedule_children: scheduleChildren,
+                schedule_dts: moment().format('YYYY-MM-DD HH:mm:ss')
             }, {
                 success: function() {
                     $('.schedule-job i').removeClass('icon-play').addClass('icon-ok');
                     $('.schedule-job span').html('Job scheduled');
-                    $('.schedule-job').attr('disabled', 'disabled');
+                    $('.schedule-job-group button').attr('disabled', 'disabled');
                 }
             });
         }

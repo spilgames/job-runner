@@ -25,12 +25,12 @@
             "is_active": true,
             "is_superuser": true,
             "is_staff": true,
-            "last_login": "2012-10-11 09:55:41",
+            "last_login": "2012-10-11 09:55:41Z",
             "groups": [1],
             "user_permissions": [],
             "password": "sha1$ca6f4$a9fe42a79778b31bc148a0133c17df3f200adab8",
             "email": "admin@admin.com",
-            "date_joined": "2012-06-21 09:37:33"
+            "date_joined": "2012-06-21 09:37:33Z"
         }
     }
 ]

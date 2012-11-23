@@ -2,6 +2,7 @@ django==1.4.2
 django-grappelli
 south
 sphinx
+pytz
 pyzmq
 
 # can be switched back to package version when 0.9.12 final has been released.

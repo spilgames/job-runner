@@ -1,11 +1,11 @@
 import json
 import logging
 import time
-from datetime import datetime
 
 import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
+from django.utils import timezone
 
 from job_runner.apps.job_runner.models import Run
 
@@ -46,7 +46,7 @@ class Command(NoArgsCommand):
 
         """
         enqueueable_runs = Run.objects.awaiting_enqueue().filter(
-            schedule_dts__lte=datetime.utcnow(),
+            schedule_dts__lte=timezone.now(),
         ).exclude(
             job__enqueue_is_enabled=False,
             is_manual=False,
