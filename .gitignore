@@ -1,0 +1,21 @@
+# hidden and python compiled files
+.*
+*.pyc
+*.egg-info
+
+
+# source distribution
+dist/
+
+
+# rendered documentation
+docs/_build
+
+
+# collected static files
+job_runner/static/static
+
+
+# dev and test databases
+database.sqlite
+test_database.sqlite
