@@ -12,7 +12,7 @@
             </h5>
             <ul>
                 <li><i class='icon-hdd'></i> <%= server %></li>
-                <li><i class='icon-time'></i> <%= timestamp %></li>
+                <li><i class='<% if(suspended) { %>icon-ban-circle<% } else { %>icon-time<% } %>'></i> <%= timestamp %></li>
             </ul>
         </div>
     </script>
