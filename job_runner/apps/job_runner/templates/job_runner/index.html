@@ -83,17 +83,16 @@
                     <div class="pull-right">
                         <div class="btn-group schedule-job-group">
                             <button class="btn schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="false"><i class="icon-play"></i> <span>Schedule now</span></button>
-                                <% if (children.length) { %>
-                                    <button class="btn dropdown-toggle" data-toggle="dropdown">
-                                        <span class="caret"></span>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#" class="schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="true">Schedule now incl. children</a></li>
-                                    </ul>
-                                <% } %>
-                            </div>
-                            <button class="btn toggle-enable-job" data-job_id="<%= id %>"><span></span></button>
+                            <% if (children.length) { %>
+                                <button class="btn dropdown-toggle" data-toggle="dropdown">
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#" class="schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="true">Schedule now incl. children</a></li>
+                                </ul>
+                            <% } %>
                         </div>
+                        <button class="btn toggle-enable-job" data-job_id="<%= id %>"><span></span></button>
                     </div>
                     <h5>Title:</h5>
                     <p><%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></p>
