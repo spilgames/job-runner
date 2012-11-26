@@ -6,13 +6,13 @@
     </script>
 
     <script type="text/html" id="run-template">
-        <div style='display: none;' class='job-run job-<%= state %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'>
+        <div style='display: none;' class='job-run job-<%= state %><% if(suspended) { %> suspended<% } %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'>
             <h5>
-                <a href='#' class='details'><%= title %></a>
+                <a href='<%= id %>/' class='details js-link'><%= title %></a>
             </h5>
             <ul>
                 <li><i class='icon-hdd'></i> <%= server %></li>
-                <li><i class='icon-time'></i> <%= timestamp %></li>
+                <li><i class='<% if(suspended) { %>icon-ban-circle<% } else { %>icon-time<% } %>'></i> <%= timestamp %></li>
             </ul>
         </div>
     </script>
@@ -20,11 +20,11 @@
     <script type="text/html" id="run-modal-template">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title"><%= title %></h3>
+            <h3 id="run_modal_title">Run: <a href="../../jobs/<%= job_id %>/"><%= title %></a></h3>
         </div>
         <div class="modal-body" id="status-modal">
             <h3>Status</h3>
-            <p class="state"><%= state %></p>
+            <p class="state"><%= state %><% if(suspended) { %> (suspended)<% } %></p>
             <h3>Scheduled</h3>
             <p class="schedule_dts"><%= schedule_dts %></p>
             <% if(enqueue_dts) { %>
@@ -58,7 +58,7 @@
     <script type="text/html" id="job-modal-template">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title"><%= title %></h3>
+            <h3 id="run_modal_title">Job: <%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></h3>
         </div>
         <div class="modal-body" id="status-modal">
             <h3>Command</h3>
@@ -83,23 +83,21 @@
     </script>
 
     <script type="text/html" id="job-template">
-        <div class="span2">
-        <div class="job" id="job-<%= id %>" data-id="<%= id %>" style="display: none;">
-            <h5><a href="#" class="details"><%= title %></a></h5>
+        <div class="span2 job<% if(!enqueue_is_enabled) { %> suspended<% } %>" id="job-<%= id %>" data-id="<%= id %>" style="display: none;">
+            <h5><a href="<%= id %>/" class="details js-link"><%= title %></a></h5>
             <ul>
                 <li>
                     <i class="icon-tag"></i> <%= hostname %>
                 </li>
             </ul>
         </div>
-        </div>
     </script>
 {% endblock %}
 
 {% block navbar %}
 <ul class="nav">
-    <li class="active dashboard"><a href="../runs/" class="js-link">Dashboard</a></li>
-    <li class="jobs"><a href="../jobs/" class="js-link">Jobs</a></li>
+    <li class="active dashboard"><a href="../runs/">Dashboard</a></li>
+    <li class="jobs"><a href="../jobs/">Jobs</a></li>
 </ul>
 
 <ul class="nav pull-right" id="project-list">

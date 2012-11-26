@@ -3,35 +3,49 @@ var JobView = Backbone.View.extend({
     jobModalTemplate: _.template($('#job-modal-template').html()),
 
     el: $('#jobs'),
-    events: {
-        'click .details': 'showDetails'
-    },
 
     // initialization of the view
     initialize: function(options) {
-        _.bindAll(this, 'renderItem', 'showDetails', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled');
+        _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
         this.activeProject = null;
+        this.initialized = false;
 
         this.groupCollection = options.groupCollection;
         this.workerCollection = new WorkerCollection();
         this.jobTemplateCollection = new JobTemplateCollection();
         this.jobCollection = new JobCollection();
         this.jobCollection.bind('add', this.renderItem);
+        this.jobCollection.bind('change', this.changeItem);
 
         var self = this;
 
         // router callback
         options.router.on('route:showJobs', function(project_id) {
-            $('#job_runner section').addClass('hide');
-            $('#jobs').removeClass('hide');
+            self.initializeView(options, project_id);
+        });
 
+        options.router.on('route:showJob', function(project_id, job_id) {
+            self.initializeView(options, project_id);
+            self.showJob(job_id);
+        });
+    },
+
+    // initialize the view for the given project_id
+    initializeView: function(options, project_id) {
+        var self = this;
+
+        $('#job_runner section').addClass('hide');
+        $('#jobs').removeClass('hide');
+
+        if (!this.initialized) {
             self.activeProject = options.projectCollection.get(project_id);
             self.workerCollection.reset();
             self.jobTemplateCollection.reset();
             self.jobCollection.reset();
             $('.jobs div.span2', self.el).remove();
             self.initialFetch();
-        });
+            self.initialized = true;
+        }
     },
 
     // fetch data (based on active project)
@@ -67,48 +81,61 @@ var JobView = Backbone.View.extend({
         $('#jobs .jobs').append(this.template({
             id: job.id,
             title: job.attributes.title,
-            hostname: worker.attributes.title
+            hostname: worker.attributes.title,
+            enqueue_is_enabled: job.attributes.enqueue_is_enabled
         }));
         $('#job-'+ job.id).slideDown("slow");
 
     },
 
-    // show job details
-    showDetails: function(e) {
-        e.preventDefault();
-
-        var JobId = $(e.target.parentNode.parentNode).data('id');
-        var job = this.jobCollection.get(JobId);
-        var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
-
-        $('#modal').html(this.jobModalTemplate({
-            title: job.attributes.title,
-            script_content: job.attributes.script_content,
-            children: job.attributes.children,
-            job_url: job.url(),
-            id: job.id
-        })).modal();
-
-        if (job.attributes.enqueue_is_enabled === true) {
-            $('.toggle-enable-job').addClass('btn-danger');
-            $('.toggle-enable-job span').html('Suspend enqueue');
-        } else {
-            $('.toggle-enable-job').addClass('btn-success');
-            $('.toggle-enable-job span').html('Enable enqueue');
-        }
- 
-        $('.schedule-job').hide();
-        $('.toggle-enable-job').hide();
-
-        _(this.groupCollection.models).each(function(group) {
-            if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
-                $('.schedule-job').show();
-                $('.toggle-enable-job').show();
-            }
+    // update a job
+    changeItem: function(job) {
+        var self = this;
+        $('#job-' + job.id, self.el).fadeOut('fast', function() {
+            $(this).remove();
+            self.renderItem(job);
         });
+    },
 
-        $('.schedule-job').click(this.scheduleJob);
-        $('.toggle-enable-job').click(this.toggleJobIsEnabled);
+    // show job details
+    showJob: function(jobId) {
+        var self = this;
+
+        var job = new Job({'resource_uri': '/api/v1/job/' + jobId + '/'});
+        job.fetch({success: function() {
+            var jobTemplate = new JobTemplate({'resource_uri': job.attributes.job_template});
+            jobTemplate.fetch({success: function() {
+                $('#modal').html(self.jobModalTemplate({
+                    title: job.attributes.title,
+                    script_content: job.attributes.script_content,
+                    children: job.attributes.children,
+                    job_url: job.url(),
+                    id: job.id,
+                    enqueue_is_enabled: job.attributes.enqueue_is_enabled
+                })).modal().on('hide', function() { history.back(); });
+
+                if (job.attributes.enqueue_is_enabled === true) {
+                    $('.toggle-enable-job').addClass('btn-danger');
+                    $('.toggle-enable-job span').html('Suspend enqueue');
+                } else {
+                    $('.toggle-enable-job').addClass('btn-success');
+                    $('.toggle-enable-job span').html('Enable enqueue');
+                }
+         
+                $('.schedule-job').hide();
+                $('.toggle-enable-job').hide();
+
+                _(self.groupCollection.models).each(function(group) {
+                    if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
+                        $('.schedule-job').show();
+                        $('.toggle-enable-job').show();
+                    }
+                });
+
+                $('.schedule-job').click(self.scheduleJob);
+                $('.toggle-enable-job').click(self.toggleJobIsEnabled);
+            }});
+        }});
     },
 
     // callback for toggeling the enqueue_is_enabled attribute of a job
@@ -124,8 +151,8 @@ var JobView = Backbone.View.extend({
 
         if (job.attributes.enqueue_is_enabled === true) {
             if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
-                job.attributes.enqueue_is_enabled = false;
-                job.save({}, {success: function() {
+                job.save({enqueue_is_enabled: false}, {success: function() {
+                    job.fetch();
                     $('.toggle-enable-job').removeClass('btn-danger');
                     $('.toggle-enable-job').addClass('btn-success');
                     $('.toggle-enable-job span').html('Enable enqueue');
@@ -133,8 +160,8 @@ var JobView = Backbone.View.extend({
             }
         } else {
             if (confirm('Are you sure you want to enable the enqueueing of this job?')) {
-                job.attributes.enqueue_is_enabled = true;
-                job.save({}, {success: function() {
+                job.save({enqueue_is_enabled: true}, {success: function() {
+                    job.fetch();
                     $('.toggle-enable-job').removeClass('btn-success');
                     $('.toggle-enable-job').addClass('btn-danger');
                     $('.toggle-enable-job span').html('Suspend enqueue');

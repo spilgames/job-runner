@@ -2,12 +2,14 @@
 var groupCollection = new GroupCollection();
 var projectCollection = new ProjectCollection();
 
+var appRouter = null;
+
 // pre-fetch all data
 groupCollection.fetch_all({success: function() {
     projectCollection.fetch_all({success: function() {
 
         // router
-        var appRouter = new AppRouter();
+        appRouter = new AppRouter();
         
         var projectView = new ProjectView({
             router: appRouter,

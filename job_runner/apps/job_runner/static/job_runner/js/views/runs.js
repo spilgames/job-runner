@@ -3,14 +3,12 @@ var RunView = Backbone.View.extend({
     runModalTemplate: _.template($('#run-modal-template').html()),
 
     el: $('#dashboard'),
-    events: {
-        'click .details': 'showDetails'
-    },
     
-    // initialization
+    // constructor
     initialize: function(options) {
-        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent');
+        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent', 'initializeView', 'showRun');
         this.activeProject = null;
+        this.initialized = false;
 
         this.workerCollection = new WorkerCollection();
         this.jobTemplateCollection = new JobTemplateCollection();
@@ -22,20 +20,35 @@ var RunView = Backbone.View.extend({
 
         var self = this;
 
-        // router callback
+        // router callbacks
         options.router.on('route:showDashboard', function(project_id) {
-            $('#job_runner section').addClass('hide');
-            $('#dashboard').removeClass('hide');
-            self.activeProject = options.projectCollection.get(project_id);
+            self.initializeView(options, project_id);
+        });
 
-            self.workerCollection.reset();
-            self.jobTemplateCollection.reset();
-            self.jobCollection.reset();
-            self.runCollection.reset();
+        options.router.on('route:showRun', function(project_id, run_id) {
+            self.initializeView(options, project_id);
+            self.showRun(run_id);
+        });
+    },
 
-            $('.job-run', self.el).remove();
+    // initialize the view for the given project_id
+    initializeView: function(options, project_id) {
+        $('#job_runner section').addClass('hide');
+        $('#dashboard').removeClass('hide');
 
-            self.initialFetch();
+        var self =  this;
+
+        if (!this.initialized) {
+            this.activeProject = options.projectCollection.get(project_id);
+            this.initialized = true;
+            this.workerCollection.reset();
+            this.jobTemplateCollection.reset();
+            this.jobCollection.reset();
+            this.runCollection.reset();
+
+            $('.job-run', this.el).remove();
+
+            this.initialFetch();
 
             var socket = new WebSocket(ws_server);
             socket.onerror = function(e) {
@@ -46,7 +59,8 @@ var RunView = Backbone.View.extend({
                 self.handleEvent(JSON.parse(e.data));
             };
 
-        });
+            this.initialized = true;
+        }
     },
 
     // fetch initial data (based on active project)
@@ -124,6 +138,7 @@ var RunView = Backbone.View.extend({
         var job = this.jobCollection.where({'resource_uri': run.attributes.job})[0];
         var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
         var worker = this.workerCollection.where({'resource_uri': jobTemplate.attributes.worker})[0];
+        var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
 
         if (run.state() == 'scheduled') {
             $('#scheduled-runs', self.el).append(self.template({
@@ -132,7 +147,8 @@ var RunView = Backbone.View.extend({
                 state: 'scheduled',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.schedule_dts)
+                timestamp: self.formatDateTime(run.attributes.schedule_dts),
+                suspended: suspended
             }));
             this.sortRuns('#scheduled-runs', 'asc');
 
@@ -143,7 +159,8 @@ var RunView = Backbone.View.extend({
                 state: 'in-queue',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.enqueue_dts)
+                timestamp: self.formatDateTime(run.attributes.enqueue_dts),
+                suspended: false
             }));
             this.sortRuns('#enqueued-runs', 'desc');
 
@@ -154,7 +171,8 @@ var RunView = Backbone.View.extend({
                 state: 'started',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.start_dts)
+                timestamp: self.formatDateTime(run.attributes.start_dts),
+                suspended: false
             }));
             this.sortRuns('#started-runs', 'desc');
 
@@ -169,7 +187,8 @@ var RunView = Backbone.View.extend({
                 state: 'completed',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts)
+                timestamp: self.formatDateTime(run.attributes.return_dts),
+                suspended: false
             }));
             this.sortRuns('#completed-runs', 'desc');
 
@@ -184,7 +203,8 @@ var RunView = Backbone.View.extend({
                 state: 'completed-with-error',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts)
+                timestamp: self.formatDateTime(run.attributes.return_dts),
+                suspended: false
             }));
             this.sortRuns('#completed-with-error-runs', 'desc');
         }
@@ -261,25 +281,34 @@ var RunView = Backbone.View.extend({
     },
 
     // show run details
-    showDetails: function(e) {
-        e.preventDefault();
+    showRun: function(runId) {
+        var self = this;
 
-        var runId = $(e.target.parentNode.parentNode).data('id');
-        var run = this.runCollection.get(runId);
-        var job = this.jobCollection.where({'resource_uri': run.attributes.job})[0];
+        // since we are working with a deeplinkable run, we can not assume
+        // that the runId is present in our collection (yet)
+        var run = new Run({'resource_uri': '/api/v1/run/' + runId + '/'});
+        run.fetch({success: function() {
+            var job = new Job({'resource_uri': run.attributes.job});
+            job.fetch({success: function() {
+                var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
 
-        $('#modal').html(this.runModalTemplate({
-            title: job.attributes.title,
-            state: run.humanReadableState(),
-            schedule_dts: this.formatDateTime(run.attributes.schedule_dts),
-            enqueue_dts: this.formatDateTime(run.attributes.enqueue_dts),
-            start_dts: this.formatDateTime(run.attributes.start_dts),
-            return_dts: this.formatDateTime(run.attributes.return_dts),
-            run_duration: this.formatDuration(run.attributes.start_dts, run.attributes.return_dts),
-            script_content: _.escape(job.attributes.script_content),
-            return_log: _.escape(run.attributes.return_log)
-        })).modal();
+                $('#modal').html(self.runModalTemplate({
+                    job_id: job.id,
+                    title: job.attributes.title,
+                    state: run.humanReadableState(),
+                    schedule_dts: self.formatDateTime(run.attributes.schedule_dts),
+                    enqueue_dts: self.formatDateTime(run.attributes.enqueue_dts),
+                    start_dts: self.formatDateTime(run.attributes.start_dts),
+                    return_dts: self.formatDateTime(run.attributes.return_dts),
+                    run_duration: self.formatDuration(run.attributes.start_dts, run.attributes.return_dts),
+                    script_content: _.escape(job.attributes.script_content),
+                    return_log: _.escape(run.attributes.return_log),
+                    suspended: suspended
+                })).modal().on('hide', function() { history.back(); });
 
+            }});
+            
+        }});
     },
 
     // helper for formatting datetime
