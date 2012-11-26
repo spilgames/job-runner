@@ -83,13 +83,15 @@
     </script>
 
     <script type="text/html" id="job-template">
-        <div class="span2 job<% if(!enqueue_is_enabled) { %> suspended<% } %>" id="job-<%= id %>" data-id="<%= id %>" style="display: none;">
-            <h5><a href="<%= id %>/" class="details js-link"><%= title %></a></h5>
-            <ul>
-                <li>
-                    <i class="icon-tag"></i> <%= hostname %>
-                </li>
-            </ul>
+        <div class="span2" id="job-<%= id %>" style="display: none;">
+            <div class="job<% if(!enqueue_is_enabled) { %> suspended<% } %>" data-id="<%= id %>">
+                <h5><a href="<%= id %>/" class="details js-link"><%= title %></a></h5>
+                <ul>
+                    <li>
+                        <i class="icon-tag"></i> <%= hostname %>
+                    </li>
+                </ul>
+            </div>
         </div>
     </script>
 {% endblock %}
@@ -147,7 +149,13 @@
 
     <section class="hide" id="jobs">
         <h1>Jobs</h1>
-        <div class="row jobs">
+        <div class="row">
+            <div class="span6 jobs"></div>
+            <div class="span6 job-details">
+                <div class="hero-unit">
+                    <p>Click on a job to see its details and run history...</p>
+                </div>
+            </div>
         </div>
     </section>
 
