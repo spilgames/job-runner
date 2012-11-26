@@ -1,6 +1,11 @@
 // base URL
 var urlRegex = new RegExp('(\/project\/\\d+\/)');
-var baseURL = urlRegex.exec(window.location.href)[1];
+var urlRegexMatch = urlRegex.exec(window.location.href);
+var baseURL = '';
+
+if (urlRegexMatch) {
+    baseURL = urlRegexMatch[1];
+}
 
 // fix navigation links
 $('a.js-patch-link').each(function(item, a) {

@@ -1,12 +1,13 @@
 var JobView = Backbone.View.extend({
     template: _.template($('#job-template').html()),
     jobDetailsTemplate: _.template($('#job-details-template').html()),
+    jobDetailsRunRowTemplate: _.template($('#job-details-run-row-template').html()),
 
     el: $('#jobs'),
 
     // initialization of the view
     initialize: function(options) {
-        _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
+        _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
         this.activeProject = null;
         this.initialized = false;
 
@@ -135,9 +136,35 @@ var JobView = Backbone.View.extend({
 
                 $('.schedule-job').click(self.scheduleJob);
                 $('.toggle-enable-job').click(self.toggleJobIsEnabled);
+                $('.show-runs').click(self.showRuns);
 
             }});
         }});
+    },
+
+    // show the historic runs
+    showRuns: function(e) {
+        var runCollection = new RunCollection();
+        var self = this;
+
+        runCollection.fetch_all({
+            data: {
+                state: 'completed',
+                job: $(e.target).data('job_id'),
+                limit: 100
+            },
+            success: function() {
+                _(runCollection.models).each(function(run) {
+                    $('#tab2 tbody').append(self.jobDetailsRunRowTemplate({
+                        id: run.id,
+                        return_success: run.attributes.return_success,
+                        start_dts: formatDateTime(run.attributes.start_dts),
+                        duration: formatDuration(run.attributes.start_dts, run.attributes.return_dts)
+                    }));
+                });
+            }
+        });
+
     },
 
     // callback for toggeling the enqueue_is_enabled attribute of a job

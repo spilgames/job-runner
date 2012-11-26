@@ -68,6 +68,14 @@
         </div>
     </script>
 
+    <script type="text/html" id="job-details-run-row-template">
+        <tr class="<% if(!return_success) { %>error<% } %>">
+            <td><a href="<%= baseURL %>runs/<%= id %>/"><%= start_dts %></a></td>
+            <td><%= duration %></td>
+            <td><% if(return_success) { %>OK<% } else { %>FAIL<% } %></td>
+        </tr>
+    </script>
+
     <script type="text/html" id="job-details-template">
         <div class="tabbable">
             <ul class="nav nav-tabs">
@@ -75,7 +83,7 @@
                     <a href="#tab1" data-toggle="tab">Details</a>
                 </li>
                 <li>
-                    <a href="#tab2" data-toggle="tab">Runs</a>
+                    <a href="#tab2" data-toggle="tab" class="show-runs" data-job_url="<%= job_url %>" data-job_id="<%= id %>">Runs</a>
                 </li>
             </ul>
             <div class="tab-content">
@@ -103,7 +111,17 @@
                     </p>
                 </div>
                 <div class="tab-pane" id="tab2">
-
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Start date</th>
+                                <th>Duration</th>
+                                <th>Return</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -186,6 +204,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/backbone.min.js"></script>
 
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/helpers.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/collections.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/projects.js"></script>

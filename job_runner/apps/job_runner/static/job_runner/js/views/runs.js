@@ -147,7 +147,7 @@ var RunView = Backbone.View.extend({
                 state: 'scheduled',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.schedule_dts),
+                timestamp: formatDateTime(run.attributes.schedule_dts),
                 suspended: suspended
             }));
             this.sortRuns('#scheduled-runs', 'asc');
@@ -159,7 +159,7 @@ var RunView = Backbone.View.extend({
                 state: 'in-queue',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.enqueue_dts),
+                timestamp: formatDateTime(run.attributes.enqueue_dts),
                 suspended: false
             }));
             this.sortRuns('#enqueued-runs', 'desc');
@@ -171,7 +171,7 @@ var RunView = Backbone.View.extend({
                 state: 'started',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.start_dts),
+                timestamp: formatDateTime(run.attributes.start_dts),
                 suspended: false
             }));
             this.sortRuns('#started-runs', 'desc');
@@ -187,7 +187,7 @@ var RunView = Backbone.View.extend({
                 state: 'completed',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts),
+                timestamp: formatDateTime(run.attributes.return_dts),
                 suspended: false
             }));
             this.sortRuns('#completed-runs', 'desc');
@@ -203,7 +203,7 @@ var RunView = Backbone.View.extend({
                 state: 'completed-with-error',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts),
+                timestamp: formatDateTime(run.attributes.return_dts),
                 suspended: false
             }));
             this.sortRuns('#completed-with-error-runs', 'desc');
@@ -296,11 +296,11 @@ var RunView = Backbone.View.extend({
                     job_id: job.id,
                     title: job.attributes.title,
                     state: run.humanReadableState(),
-                    schedule_dts: self.formatDateTime(run.attributes.schedule_dts),
-                    enqueue_dts: self.formatDateTime(run.attributes.enqueue_dts),
-                    start_dts: self.formatDateTime(run.attributes.start_dts),
-                    return_dts: self.formatDateTime(run.attributes.return_dts),
-                    run_duration: self.formatDuration(run.attributes.start_dts, run.attributes.return_dts),
+                    schedule_dts: formatDateTime(run.attributes.schedule_dts),
+                    enqueue_dts: formatDateTime(run.attributes.enqueue_dts),
+                    start_dts: formatDateTime(run.attributes.start_dts),
+                    return_dts: formatDateTime(run.attributes.return_dts),
+                    run_duration: formatDuration(run.attributes.start_dts, run.attributes.return_dts),
                     script_content: _.escape(job.attributes.script_content),
                     return_log: _.escape(run.attributes.return_log),
                     suspended: suspended
@@ -309,26 +309,6 @@ var RunView = Backbone.View.extend({
             }});
             
         }});
-    },
-
-    // helper for formatting datetime
-    formatDateTime: function(dateString) {
-        if (dateString !== null) {
-            return moment(dateString).format('YY-MM-DD HH:mm:ss');
-        } else {
-            return '';
-        }
-    },
-
-    // helper for formatting the duration
-    formatDuration: function(startDTS, endDTS) {
-        if (startDTS !== null && endDTS !== null) {
-            var start = moment(startDTS);
-            var end = moment(endDTS);
-            var duration = moment.duration(end.diff(start));
-
-            return duration.days() + ' days, ' + duration.hours() + ' hours, ' + duration.minutes() + ' minutes, ' + duration.seconds() + ' seconds';
-        }
     }
 
 });
