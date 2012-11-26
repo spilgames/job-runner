@@ -6,7 +6,7 @@ var JobView = Backbone.View.extend({
 
     // initialization of the view
     initialize: function(options) {
-        _.bindAll(this, 'renderItem', 'showJob', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
+        _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
         this.activeProject = null;
         this.initialized = false;
 
@@ -15,6 +15,7 @@ var JobView = Backbone.View.extend({
         this.jobTemplateCollection = new JobTemplateCollection();
         this.jobCollection = new JobCollection();
         this.jobCollection.bind('add', this.renderItem);
+        this.jobCollection.bind('change', this.changeItem);
 
         var self = this;
 
@@ -80,10 +81,20 @@ var JobView = Backbone.View.extend({
         $('#jobs .jobs').append(this.template({
             id: job.id,
             title: job.attributes.title,
-            hostname: worker.attributes.title
+            hostname: worker.attributes.title,
+            enqueue_is_enabled: job.attributes.enqueue_is_enabled
         }));
         $('#job-'+ job.id).slideDown("slow");
 
+    },
+
+    // update a job
+    changeItem: function(job) {
+        var self = this;
+        $('#job-' + job.id, self.el).fadeOut('fast', function() {
+            $(this).remove();
+            self.renderItem(job);
+        });
     },
 
     // show job details
@@ -99,7 +110,8 @@ var JobView = Backbone.View.extend({
                     script_content: job.attributes.script_content,
                     children: job.attributes.children,
                     job_url: job.url(),
-                    id: job.id
+                    id: job.id,
+                    enqueue_is_enabled: job.attributes.enqueue_is_enabled
                 })).modal().on('hide', function() { history.back(); });
 
                 if (job.attributes.enqueue_is_enabled === true) {
@@ -139,8 +151,8 @@ var JobView = Backbone.View.extend({
 
         if (job.attributes.enqueue_is_enabled === true) {
             if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
-                job.attributes.enqueue_is_enabled = false;
-                job.save({}, {success: function() {
+                job.save({enqueue_is_enabled: false}, {success: function() {
+                    job.fetch();
                     $('.toggle-enable-job').removeClass('btn-danger');
                     $('.toggle-enable-job').addClass('btn-success');
                     $('.toggle-enable-job span').html('Enable enqueue');
@@ -148,8 +160,8 @@ var JobView = Backbone.View.extend({
             }
         } else {
             if (confirm('Are you sure you want to enable the enqueueing of this job?')) {
-                job.attributes.enqueue_is_enabled = true;
-                job.save({}, {success: function() {
+                job.save({enqueue_is_enabled: true}, {success: function() {
+                    job.fetch();
                     $('.toggle-enable-job').removeClass('btn-success');
                     $('.toggle-enable-job').addClass('btn-danger');
                     $('.toggle-enable-job span').html('Suspend enqueue');

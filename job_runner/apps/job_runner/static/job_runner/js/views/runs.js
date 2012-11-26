@@ -138,6 +138,7 @@ var RunView = Backbone.View.extend({
         var job = this.jobCollection.where({'resource_uri': run.attributes.job})[0];
         var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
         var worker = this.workerCollection.where({'resource_uri': jobTemplate.attributes.worker})[0];
+        var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
 
         if (run.state() == 'scheduled') {
             $('#scheduled-runs', self.el).append(self.template({
@@ -146,7 +147,8 @@ var RunView = Backbone.View.extend({
                 state: 'scheduled',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.schedule_dts)
+                timestamp: self.formatDateTime(run.attributes.schedule_dts),
+                suspended: suspended
             }));
             this.sortRuns('#scheduled-runs', 'asc');
 
@@ -157,7 +159,8 @@ var RunView = Backbone.View.extend({
                 state: 'in-queue',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.enqueue_dts)
+                timestamp: self.formatDateTime(run.attributes.enqueue_dts),
+                suspended: false
             }));
             this.sortRuns('#enqueued-runs', 'desc');
 
@@ -168,7 +171,8 @@ var RunView = Backbone.View.extend({
                 state: 'started',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.start_dts)
+                timestamp: self.formatDateTime(run.attributes.start_dts),
+                suspended: false
             }));
             this.sortRuns('#started-runs', 'desc');
 
@@ -183,7 +187,8 @@ var RunView = Backbone.View.extend({
                 state: 'completed',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts)
+                timestamp: self.formatDateTime(run.attributes.return_dts),
+                suspended: false
             }));
             this.sortRuns('#completed-runs', 'desc');
 
@@ -198,7 +203,8 @@ var RunView = Backbone.View.extend({
                 state: 'completed-with-error',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts)
+                timestamp: self.formatDateTime(run.attributes.return_dts),
+                suspended: false
             }));
             this.sortRuns('#completed-with-error-runs', 'desc');
         }
@@ -284,6 +290,7 @@ var RunView = Backbone.View.extend({
         run.fetch({success: function() {
             var job = new Job({'resource_uri': run.attributes.job});
             job.fetch({success: function() {
+                var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
 
                 $('#modal').html(self.runModalTemplate({
                     job_id: job.id,
@@ -295,7 +302,8 @@ var RunView = Backbone.View.extend({
                     return_dts: self.formatDateTime(run.attributes.return_dts),
                     run_duration: self.formatDuration(run.attributes.start_dts, run.attributes.return_dts),
                     script_content: _.escape(job.attributes.script_content),
-                    return_log: _.escape(run.attributes.return_log)
+                    return_log: _.escape(run.attributes.return_log),
+                    suspended: suspended
                 })).modal().on('hide', function() { history.back(); });
 
             }});
