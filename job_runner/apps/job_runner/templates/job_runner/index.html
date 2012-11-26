@@ -8,7 +8,7 @@
     <script type="text/html" id="run-template">
         <div style='display: none;' class='job-run job-<%= state %><% if(suspended) { %> suspended<% } %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'>
             <h5>
-                <a href='<%= id %>/' class='details js-link'><%= title %></a>
+                <a href='<%= baseURL %>runs/<%= id %>/' class='details js-link'><%= title %></a>
             </h5>
             <ul>
                 <li><i class='icon-hdd'></i> <%= server %></li>
@@ -17,10 +17,23 @@
         </div>
     </script>
 
+    <script type="text/html" id="job-template">
+        <div class="span2" id="job-<%= id %>" style="display: none;">
+            <div class="job<% if(!enqueue_is_enabled) { %> suspended<% } %>" data-id="<%= id %>">
+                <h5><a href="<%= baseURL %>jobs/<%= id %>/" class="details js-link"><%= title %></a></h5>
+                <ul>
+                    <li>
+                        <i class="icon-tag"></i> <%= hostname %>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
     <script type="text/html" id="run-modal-template">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title">Run: <a href="../../jobs/<%= job_id %>/"><%= title %></a></h3>
+            <h3 id="run_modal_title">Run: <a href="<%= baseURL %>jobs/<%= job_id %>/"><%= title %></a></h3>
         </div>
         <div class="modal-body" id="status-modal">
             <h3>Status</h3>
@@ -55,6 +68,33 @@
         </div>
     </script>
 
+    <script type="text/html" id="job-details-template">
+        <div class="tabbable">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a href="#tab1" data-toggle="tab">Details</a>
+                </li>
+                <li>
+                    <a href="#tab2" data-toggle="tab">Runs</a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab1">
+                    <h5>Title:</h5>
+                    <p><%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></p>
+
+                    <h5>Command:</h5>
+                    <p>
+                        <pre><%= script_content %></pre>
+                    </p>
+                </div>
+                <div class="tab-pane" id="tab2">
+
+                </div>
+            </div>
+        </div>
+    </script>
+
     <script type="text/html" id="job-modal-template">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -82,24 +122,12 @@
         </div>
     </script>
 
-    <script type="text/html" id="job-template">
-        <div class="span2" id="job-<%= id %>" style="display: none;">
-            <div class="job<% if(!enqueue_is_enabled) { %> suspended<% } %>" data-id="<%= id %>">
-                <h5><a href="<%= id %>/" class="details js-link"><%= title %></a></h5>
-                <ul>
-                    <li>
-                        <i class="icon-tag"></i> <%= hostname %>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </script>
 {% endblock %}
 
 {% block navbar %}
 <ul class="nav">
-    <li class="active dashboard"><a href="../runs/">Dashboard</a></li>
-    <li class="jobs"><a href="../jobs/">Jobs</a></li>
+    <li class="active dashboard"><a href="runs/" class="js-patch-link">Dashboard</a></li>
+    <li class="jobs"><a href="jobs/" class="js-patch-link">Jobs</a></li>
 </ul>
 
 <ul class="nav pull-right" id="project-list">
@@ -148,10 +176,10 @@
     </section>
 
     <section class="hide" id="jobs">
-        <h1>Jobs</h1>
+        <div class="row"><h4>Available jobs and run history</h4></div>
         <div class="row">
             <div class="span6 jobs"></div>
-            <div class="span6 job-details">
+            <div class="span6 job-details" id="job-details">
                 <div class="hero-unit">
                     <p>Click on a job to see its details and run history...</p>
                 </div>

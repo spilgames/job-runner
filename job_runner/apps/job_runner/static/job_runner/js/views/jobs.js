@@ -1,5 +1,6 @@
 var JobView = Backbone.View.extend({
     template: _.template($('#job-template').html()),
+    jobDetailsTemplate: _.template($('#job-details-template').html()),
     jobModalTemplate: _.template($('#job-modal-template').html()),
 
     el: $('#jobs'),
@@ -105,35 +106,43 @@ var JobView = Backbone.View.extend({
         job.fetch({success: function() {
             var jobTemplate = new JobTemplate({'resource_uri': job.attributes.job_template});
             jobTemplate.fetch({success: function() {
-                $('#modal').html(self.jobModalTemplate({
+
+                $('#job-details').html(self.jobDetailsTemplate({
                     title: job.attributes.title,
-                    script_content: job.attributes.script_content,
-                    children: job.attributes.children,
-                    job_url: job.url(),
-                    id: job.id,
-                    enqueue_is_enabled: job.attributes.enqueue_is_enabled
-                })).modal().on('hide', function() { history.back(); });
+                    enqueue_is_enabled: job.attributes.enqueue_is_enabled,
+                    script_content: _.escape(job.attributes.script_content)
+                }));
 
-                if (job.attributes.enqueue_is_enabled === true) {
-                    $('.toggle-enable-job').addClass('btn-danger');
-                    $('.toggle-enable-job span').html('Suspend enqueue');
-                } else {
-                    $('.toggle-enable-job').addClass('btn-success');
-                    $('.toggle-enable-job span').html('Enable enqueue');
-                }
+                // $('#modal').html(self.jobModalTemplate({
+                //     title: job.attributes.title,
+                //     script_content: job.attributes.script_content,
+                //     children: job.attributes.children,
+                //     job_url: job.url(),
+                //     id: job.id,
+                //     enqueue_is_enabled: job.attributes.enqueue_is_enabled
+                // })).modal().on('hide', function() { history.back(); });
+
+                // if (job.attributes.enqueue_is_enabled === true) {
+                //     $('.toggle-enable-job').addClass('btn-danger');
+                //     $('.toggle-enable-job span').html('Suspend enqueue');
+                // } else {
+                //     $('.toggle-enable-job').addClass('btn-success');
+                //     $('.toggle-enable-job span').html('Enable enqueue');
+                // }
          
-                $('.schedule-job').hide();
-                $('.toggle-enable-job').hide();
+                // $('.schedule-job').hide();
+                // $('.toggle-enable-job').hide();
 
-                _(self.groupCollection.models).each(function(group) {
-                    if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
-                        $('.schedule-job').show();
-                        $('.toggle-enable-job').show();
-                    }
-                });
+                // _(self.groupCollection.models).each(function(group) {
+                //     if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
+                //         $('.schedule-job').show();
+                //         $('.toggle-enable-job').show();
+                //     }
+                // });
 
-                $('.schedule-job').click(self.scheduleJob);
-                $('.toggle-enable-job').click(self.toggleJobIsEnabled);
+                // $('.schedule-job').click(self.scheduleJob);
+                // $('.toggle-enable-job').click(self.toggleJobIsEnabled);
+
             }});
         }});
     },

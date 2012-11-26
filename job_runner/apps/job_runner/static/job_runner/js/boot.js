@@ -1,3 +1,13 @@
+// base URL
+var urlRegex = new RegExp('(\/project\/\\d+\/)');
+var baseURL = urlRegex.exec(window.location.href)[1];
+
+// fix navigation links
+$('a.js-patch-link').each(function(item, a) {
+    $(a).attr('href', baseURL +$(a).attr('href'));
+});
+
+
 // collections
 var groupCollection = new GroupCollection();
 var projectCollection = new ProjectCollection();
