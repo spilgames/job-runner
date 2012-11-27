@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.1.1
+~~~~~~
+
+* Fix dependencies in ``setup.py`` (was not using the development version
+  from GitHub).
+
+
 v1.1.0
 ~~~~~~
 
