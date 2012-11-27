@@ -150,7 +150,7 @@ var JobView = Backbone.View.extend({
         if (!fetched) {
             var runCollection = new RunCollection();
 
-            runCollection.fetch_all({
+            runCollection.fetch({
                 data: {
                     state: 'completed',
                     job: $(e.target).data('job_id'),
