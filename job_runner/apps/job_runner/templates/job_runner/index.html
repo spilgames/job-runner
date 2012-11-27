@@ -128,6 +128,7 @@
                     </p>
                 </div>
                 <div class="tab-pane" id="tab2">
+                    <div id="run-performance-graph" class="run-performance-graph"></div>
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -212,6 +213,8 @@
 {% endblock %}
 
 {% block extrajs %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-transition.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-tab.js"></script>

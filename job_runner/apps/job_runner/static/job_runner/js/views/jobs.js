@@ -114,8 +114,6 @@ var JobView = Backbone.View.extend({
     // sort jobs
     sortJobs: function() {
         $('.jobs > div', this.el).sort(function(a, b) {
-            console.log(a);
-            console.log(b);
             return $('div h5', $(a)).text() > $('div h5', $(b)).text() ? 1 : -1;
         }).appendTo('#jobs .jobs');
     },
@@ -189,7 +187,11 @@ var JobView = Backbone.View.extend({
                     limit: 100
                 },
                 success: function() {
+                    var chartData = [['Run', 'Duration (seconds)']];
+
                     _(runCollection.models).each(function(run) {
+                        chartData.push([formatDateTime(run.attributes.start_dts), getDurationInSec(run.attributes.start_dts, run.attributes.return_dts)]);
+
                         $('#tab2 tbody').append(self.jobDetailsRunRowTemplate({
                             job_id: $(e.target).data('job_id'),
                             id: run.id,
@@ -198,6 +200,17 @@ var JobView = Backbone.View.extend({
                             duration: formatDuration(run.attributes.start_dts, run.attributes.return_dts)
                         }));
                     });
+
+                    chartData = google.visualization.arrayToDataTable(chartData);
+
+                    var chart = new google.visualization.AreaChart(document.getElementById('run-performance-graph'));
+                    chart.draw(chartData, {
+                        'axisTitlesPosition': 'none',
+                        'legend': {'position': 'none'},
+                        'hAxis': {'direction': -1, 'textPosition': 'none', 'gridlines': {'count': 0}},
+                        'vAxis': {'gridlines': {'count': 3}}
+                    });
+
                 }
             });
             $(e.target).data('fetched', true);

@@ -1,3 +1,5 @@
+google.load("visualization", "1", {packages:["corechart"]});
+
 // base URL
 var urlRegex = new RegExp('(\/project\/\\d+\/)');
 var urlRegexMatch = urlRegex.exec(window.location.href);
