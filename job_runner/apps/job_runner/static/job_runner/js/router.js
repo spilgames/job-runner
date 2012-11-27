@@ -3,9 +3,10 @@ var AppRouter = Backbone.Router.extend({
     routes: {
         '': 'redirectToFirstProject',
         'project/:project/runs/': 'showDashboard',
-        'project/:project/runs/:run/': 'showRun',
+        'project/:project/runs/:run/': 'showRunInRunView',
         'project/:project/jobs/': 'showJobs',
-        'project/:project/jobs/:job/': 'showJob'
+        'project/:project/jobs/:job/': 'showJob',
+        'project/:project/jobs/:job/runs/:run/': 'showRunInJobView'
     },
 
     // constructor
@@ -24,22 +25,26 @@ var AppRouter = Backbone.Router.extend({
         window.location.href = '/project/'+ projectCollection.models[0].id + '/runs/';
     },
 
-    showDashboard: function(project) {
+    showDashboard: function(projectId) {
         this.activateNavigation('dashboard');
-        this.updateProjectNav(project);
+        this.updateProjectNav(projectId);
     },
 
-    showRun: function(project, run_id) {
-        this.showDashboard(project);
+    showRunInRunView: function(projectId, runId) {
+        this.showDashboard(projectId);
     },
 
-    showJobs: function(project) {
+    showJobs: function(projectId) {
         this.activateNavigation('jobs');
-        this.updateProjectNav(project);
+        this.updateProjectNav(projectId);
     },
 
-    showJob: function(project, job_id) {
-        this.showJobs(project);
+    showJob: function(projectId, jobId) {
+        this.showJobs(projectId);
+    },
+
+    showRunInJobView: function(projectId, jobId, runId) {
+        this.showJobs(projectId);
     },
 
 

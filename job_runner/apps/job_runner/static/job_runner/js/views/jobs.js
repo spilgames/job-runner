@@ -10,6 +10,7 @@ var JobView = Backbone.View.extend({
         _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'sortJobs', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
         this.activeProject = null;
         this.initialized = false;
+        this.selectedJobId = null;
 
         this.groupCollection = options.groupCollection;
         this.workerCollection = new WorkerCollection();
@@ -18,16 +19,25 @@ var JobView = Backbone.View.extend({
         this.jobCollection.bind('add', this.renderItem);
         this.jobCollection.bind('change', this.changeItem);
 
+
         var self = this;
 
         // router callback
-        options.router.on('route:showJobs', function(project_id) {
-            self.initializeView(options, project_id);
+        options.router.on('route:showJobs', function(projectId) {
+            self.initializeView(options, projectId);
         });
 
-        options.router.on('route:showJob', function(project_id, job_id) {
-            self.initializeView(options, project_id);
-            self.showJob(job_id);
+        options.router.on('route:showJob', function(projectId, jobId) {
+            self.selectedJobId = jobId;
+            self.initializeView(options, projectId);
+            self.showJob(jobId);
+        });
+
+        options.router.on('route:showRunInJobView', function(projectId, jobId, runId) {
+            self.selectedJobId = jobId;
+            self.initializeView(options, projectId);
+            self.showJob(jobId);
+            options.modalView.showRun(runId);
         });
     },
 
@@ -86,6 +96,11 @@ var JobView = Backbone.View.extend({
             enqueue_is_enabled: job.attributes.enqueue_is_enabled
         }));
         this.sortJobs();
+
+        if (this.selectedJobId == job.id) {
+            $('#job-' + job.id + ' > div').addClass('selected');
+        }
+
         $('#job-'+ job.id).show();
     },
 
@@ -109,6 +124,14 @@ var JobView = Backbone.View.extend({
     showJob: function(jobId) {
         var self = this;
 
+        $('.jobs > div > div', this.el).removeClass('selected');
+        $('#job-' + jobId + ' > div').addClass('selected');
+
+        // do nothing if the job is already displayed
+        if ($('#job-details').data('job_id') == jobId) {
+            return;
+        }
+
         var job = new Job({'resource_uri': '/api/v1/job/' + jobId + '/'});
         job.fetch({success: function() {
             var jobTemplate = new JobTemplate({'resource_uri': job.attributes.job_template});
@@ -122,6 +145,8 @@ var JobView = Backbone.View.extend({
                     job_url: job.url(),
                     id: job.id
                 }));
+
+                $('#job-details').data('job_id', jobId);
 
                 if (job.attributes.enqueue_is_enabled === true) {
                     $('.toggle-enable-job').addClass('btn-danger');
@@ -166,6 +191,7 @@ var JobView = Backbone.View.extend({
                 success: function() {
                     _(runCollection.models).each(function(run) {
                         $('#tab2 tbody').append(self.jobDetailsRunRowTemplate({
+                            job_id: $(e.target).data('job_id'),
                             id: run.id,
                             return_success: run.attributes.return_success,
                             start_dts: formatDateTime(run.attributes.start_dts),

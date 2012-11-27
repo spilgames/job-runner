@@ -6,7 +6,7 @@ var RunView = Backbone.View.extend({
     
     // constructor
     initialize: function(options) {
-        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent', 'initializeView', 'showRun');
+        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent', 'initializeView');
         this.activeProject = null;
         this.initialized = false;
 
@@ -25,9 +25,9 @@ var RunView = Backbone.View.extend({
             self.initializeView(options, project_id);
         });
 
-        options.router.on('route:showRun', function(project_id, run_id) {
+        options.router.on('route:showRunInRunView', function(project_id, run_id) {
             self.initializeView(options, project_id);
-            self.showRun(run_id);
+            options.modalView.showRun(run_id);
         });
     },
 
@@ -278,37 +278,6 @@ var RunView = Backbone.View.extend({
             });
         }
 
-    },
-
-    // show run details
-    showRun: function(runId) {
-        var self = this;
-
-        // since we are working with a deeplinkable run, we can not assume
-        // that the runId is present in our collection (yet)
-        var run = new Run({'resource_uri': '/api/v1/run/' + runId + '/'});
-        run.fetch({success: function() {
-            var job = new Job({'resource_uri': run.attributes.job});
-            job.fetch({success: function() {
-                var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
-
-                $('#modal').html(self.runModalTemplate({
-                    job_id: job.id,
-                    title: job.attributes.title,
-                    state: run.humanReadableState(),
-                    schedule_dts: formatDateTime(run.attributes.schedule_dts),
-                    enqueue_dts: formatDateTime(run.attributes.enqueue_dts),
-                    start_dts: formatDateTime(run.attributes.start_dts),
-                    return_dts: formatDateTime(run.attributes.return_dts),
-                    run_duration: formatDuration(run.attributes.start_dts, run.attributes.return_dts),
-                    script_content: _.escape(job.attributes.script_content),
-                    return_log: _.escape(run.attributes.return_log),
-                    suspended: suspended
-                })).modal().on('hide', function() { history.back(); });
-
-            }});
-            
-        }});
     }
 
 });

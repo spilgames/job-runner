@@ -17,14 +17,15 @@ $('a.js-patch-link').each(function(item, a) {
 var groupCollection = new GroupCollection();
 var projectCollection = new ProjectCollection();
 
-var appRouter = null;
-
 // pre-fetch all data
 groupCollection.fetch_all({success: function() {
     projectCollection.fetch_all({success: function() {
 
         // router
-        appRouter = new AppRouter();
+        var appRouter = new AppRouter();
+
+        // modal view
+        var modalView = new ModalView();
         
         var projectView = new ProjectView({
             router: appRouter,
@@ -33,13 +34,15 @@ groupCollection.fetch_all({success: function() {
 
         var runView = new RunView({
             router: appRouter,
-            projectCollection: projectCollection
+            projectCollection: projectCollection,
+            modalView: modalView
         });
 
         var jobView = new JobView({
             router: appRouter,
             groupCollection: groupCollection,
-            projectCollection: projectCollection
+            projectCollection: projectCollection,
+            modalView: modalView
         });
 
         Backbone.history.start({pushState: true});
