@@ -144,27 +144,31 @@ var JobView = Backbone.View.extend({
 
     // show the historic runs
     showRuns: function(e) {
-        var runCollection = new RunCollection();
+        var fetched = $(e.target).data('fetched');
         var self = this;
 
-        runCollection.fetch_all({
-            data: {
-                state: 'completed',
-                job: $(e.target).data('job_id'),
-                limit: 100
-            },
-            success: function() {
-                _(runCollection.models).each(function(run) {
-                    $('#tab2 tbody').append(self.jobDetailsRunRowTemplate({
-                        id: run.id,
-                        return_success: run.attributes.return_success,
-                        start_dts: formatDateTime(run.attributes.start_dts),
-                        duration: formatDuration(run.attributes.start_dts, run.attributes.return_dts)
-                    }));
-                });
-            }
-        });
+        if (!fetched) {
+            var runCollection = new RunCollection();
 
+            runCollection.fetch_all({
+                data: {
+                    state: 'completed',
+                    job: $(e.target).data('job_id'),
+                    limit: 100
+                },
+                success: function() {
+                    _(runCollection.models).each(function(run) {
+                        $('#tab2 tbody').append(self.jobDetailsRunRowTemplate({
+                            id: run.id,
+                            return_success: run.attributes.return_success,
+                            start_dts: formatDateTime(run.attributes.start_dts),
+                            duration: formatDuration(run.attributes.start_dts, run.attributes.return_dts)
+                        }));
+                    });
+                }
+            });
+            $(e.target).data('fetched', true);
+        }
     },
 
     // callback for toggeling the enqueue_is_enabled attribute of a job
