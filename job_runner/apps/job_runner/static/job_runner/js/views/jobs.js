@@ -7,7 +7,7 @@ var JobView = Backbone.View.extend({
 
     // initialization of the view
     initialize: function(options) {
-        _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
+        _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'sortJobs', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
         this.activeProject = null;
         this.initialized = false;
 
@@ -85,17 +85,24 @@ var JobView = Backbone.View.extend({
             hostname: worker.attributes.title,
             enqueue_is_enabled: job.attributes.enqueue_is_enabled
         }));
-        $('#job-'+ job.id).slideDown("slow");
-
+        this.sortJobs();
+        $('#job-'+ job.id).show();
     },
 
     // update a job
     changeItem: function(job) {
         var self = this;
-        $('#job-' + job.id, self.el).fadeOut('fast', function() {
-            $(this).remove();
-            self.renderItem(job);
-        });
+        $('#job-' + job.id, self.el).remove();
+        self.renderItem(job);
+    },
+
+    // sort jobs
+    sortJobs: function() {
+        $('.jobs > div', this.el).sort(function(a, b) {
+            console.log(a);
+            console.log(b);
+            return $('div h5', $(a)).text() > $('div h5', $(b)).text() ? 1 : -1;
+        }).appendTo('#jobs .jobs');
     },
 
     // show job details
