@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.0
+~~~~~~
+
+* Show last 100 runs of a job.
+
+
 v1.1.1
 ~~~~~~
 
