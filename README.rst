@@ -13,7 +13,10 @@ Changes
 v1.2.0
 ~~~~~~
 
-* Show last 100 runs of a job.
+* Show job details in a column instead of a modal
+* Show last 100 runs of a job incl. duration graph
+* Fix ``AUTHENTICATION_BACKENDS`` setting for staging and production
+  (without ``ModelBackend`` included, permissions are not working!)
 
 
 v1.1.1
