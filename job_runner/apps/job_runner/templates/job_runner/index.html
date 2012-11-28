@@ -8,7 +8,7 @@
     <script type="text/html" id="run-template">
         <div style='display: none;' class='job-run job-<%= state %><% if(suspended) { %> suspended<% } %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'>
             <h5>
-                <a href='<%= id %>/' class='details js-link'><%= title %></a>
+                <a href='<%= baseURL %>runs/<%= id %>/' class='details js-link'><%= title %></a>
             </h5>
             <ul>
                 <li><i class='icon-hdd'></i> <%= server %></li>
@@ -17,32 +17,62 @@
         </div>
     </script>
 
+    <script type="text/html" id="job-template">
+        <div class="span2" id="job-<%= id %>" style="display: none;">
+            <div class="job<% if(!enqueue_is_enabled) { %> suspended<% } %>" data-id="<%= id %>">
+                <h5><a href="<%= baseURL %>jobs/<%= id %>/" class="details js-link"><%= title %></a></h5>
+                <ul>
+                    <li>
+                        <i class="icon-tag"></i> <%= hostname %>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </script>
+
     <script type="text/html" id="run-modal-template">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title">Run: <a href="../../jobs/<%= job_id %>/"><%= title %></a></h3>
+            <h3 id="run_modal_title">Run: <a href="<%= baseURL %>jobs/<%= job_id %>/"><%= title %></a></h3>
         </div>
         <div class="modal-body" id="status-modal">
-            <h3>Status</h3>
-            <p class="state"><%= state %><% if(suspended) { %> (suspended)<% } %></p>
-            <h3>Scheduled</h3>
-            <p class="schedule_dts"><%= schedule_dts %></p>
-            <% if(enqueue_dts) { %>
-                <h3>In queue</h3>
-                <p class="enqueue_dts"><%= enqueue_dts %></p>
-            <% } %>
-            <% if(start_dts) { %>
-                <h3>Started</h3>
-                <p class="start_dts"><%= start_dts %></p>
-            <% } %>
-            <% if (return_dts) { %>
-                <h3>Returned</h3>
-                <p class="return_dts"><%= return_dts %></p>
-            <% } %>
-            <% if(run_duration) { %>
-                <h3>Run duration</h3>
-                <p class="run_duration"><%= run_duration %></p>
-            <% } %>
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <th>Status</th>
+                        <td><%= state %><% if(suspended) { %> (suspended)<% } %></td>
+                    </tr>
+                    <tr>
+                        <th>Scheduled</th>
+                        <td><%= schedule_dts %></td>
+                    </tr>
+                    <% if(enqueue_dts) { %>
+                        <tr>
+                            <th>In queue</th>
+                            <td><%= enqueue_dts %></td>
+                        </tr>
+                    <% } %>
+                    <% if(start_dts) { %>
+                        <tr>
+                            <th>Started</th>
+                            <td><%= start_dts %></td>
+                        </tr>
+                    <% } %>
+                    <% if (return_dts) { %>
+                        <tr>
+                            <th>Returned</th>
+                            <td><%= return_dts %></td>
+                        </tr>
+                    <% } %>
+                    <% if(run_duration) { %>
+                        <tr>
+                            <th>Run duration</th>
+                            <td><%= run_duration %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+
             <h3>Command</h3>
             <p><pre class="script_content"><%= script_content %></pre></p>
             <% if(return_log) { %>
@@ -55,49 +85,79 @@
         </div>
     </script>
 
-    <script type="text/html" id="job-modal-template">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title">Job: <%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></h3>
-        </div>
-        <div class="modal-body" id="status-modal">
-            <h3>Command</h3>
-            <p><pre class="script_content"><%= script_content %></pre></p>
-        </div>
-        <div class="modal-footer">
-            <div class="btn-group schedule-job-group">
-                <button class="btn schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="false"><i class="icon-play"></i> <span>Schedule now</span></button>
-                <% if (children.length) { %>
-                    <button class="btn dropdown-toggle" data-toggle="dropdown">
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a href="#" class="schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="true">Schedule now incl. children</a></li>
-                    </ul>
-                <% } %>
-            </div>
-
-            <button class="btn toggle-enable-job" data-job_id="<%= id %>"><span></span></button>
-            <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
+    <script type="text/html" id="job-details-run-row-template">
+        <tr class="<% if(!return_success) { %>error<% } %>">
+            <td><a href="<%= baseURL %>jobs/<%= job_id %>/runs/<%= id %>/" class="js-link"><%= start_dts %></a></td>
+            <td><%= duration %></td>
+            <td><% if(return_success) { %>OK<% } else { %>FAIL<% } %></td>
+        </tr>
     </script>
 
-    <script type="text/html" id="job-template">
-        <div class="span2 job<% if(!enqueue_is_enabled) { %> suspended<% } %>" id="job-<%= id %>" data-id="<%= id %>" style="display: none;">
-            <h5><a href="<%= id %>/" class="details js-link"><%= title %></a></h5>
-            <ul>
+    <script type="text/html" id="job-details-template">
+        <div class="tabbable">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a href="#tab1" data-toggle="tab">Job details</a>
+                </li>
                 <li>
-                    <i class="icon-tag"></i> <%= hostname %>
+                    <a href="#tab2" data-toggle="tab" class="show-runs" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-fetched="false">Last 100 completed runs</a>
                 </li>
             </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab1">
+                    <div class="pull-right">
+                        <div class="btn-group schedule-job-group">
+                            <button class="btn schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="false"><i class="icon-play"></i> <span>Schedule now</span></button>
+                            <% if (children.length) { %>
+                                <button class="btn dropdown-toggle" data-toggle="dropdown">
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#" class="schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="true">Schedule now incl. children</a></li>
+                                </ul>
+                            <% } %>
+                        </div>
+                        <button class="btn toggle-enable-job" data-job_id="<%= id %>"><span></span></button>
+                    </div>
+                    <h5>Title:</h5>
+                    <p><%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></p>
+
+                    <h5>Re-schedule interval:</h5>
+                    <% if (interval && interval_type) { %>
+                        <p>Every <%= interval %> <%= interval_type %><% if (!(interval == 1)) { %>s<% } %></p>
+                    <% } else { %>
+                        <p>No interval specified</p>
+                    <% } %>
+
+                    <h5>Command:</h5>
+                    <p>
+                        <pre><%= script_content %></pre>
+                    </p>
+                </div>
+                <div class="tab-pane" id="tab2">
+                    <div id="run-performance-graph" class="run-performance-graph"></div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Start date</th>
+                                <th>Duration</th>
+                                <th>Return</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </script>
+
 {% endblock %}
 
 {% block navbar %}
 <ul class="nav">
-    <li class="active dashboard"><a href="../runs/">Dashboard</a></li>
-    <li class="jobs"><a href="../jobs/">Jobs</a></li>
+    <li class="active dashboard"><a href="runs/" class="js-patch-link">Dashboard</a></li>
+    <li class="jobs"><a href="jobs/" class="js-patch-link">Jobs</a></li>
 </ul>
 
 <ul class="nav pull-right" id="project-list">
@@ -146,14 +206,22 @@
     </section>
 
     <section class="hide" id="jobs">
-        <h1>Jobs</h1>
-        <div class="row jobs">
+        <div class="row"><h4>Available jobs and run history</h4></div>
+        <div class="row">
+            <div class="span6 jobs"></div>
+            <div class="span6 job-details" id="job-details" data-job_id="null">
+                <div class="hero-unit">
+                    <p>Click on a job to see its details and run history...</p>
+                </div>
+            </div>
         </div>
     </section>
 
 {% endblock %}
 
 {% block extrajs %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-transition.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-tab.js"></script>
@@ -163,11 +231,13 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/backbone.min.js"></script>
 
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/helpers.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/collections.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/projects.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/runs.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/jobs.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/modals.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/router.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/boot.js"></script>
 {% endblock %}

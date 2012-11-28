@@ -15,5 +15,5 @@ urlpatterns = patterns('',
         'next_page': '/'
     }, name='logout'),
 
-    (r'^', include('job_runner.apps.job_runner.urls')),
+    (r'^', include('job_runner.apps.job_runner.urls', namespace='job_runner')),
 )

@@ -159,6 +159,7 @@ class Job(models.Model):
 
     class Meta:
         ordering = ('title', )
+        unique_together = (('title', 'job_template'),)
 
     def __unicode__(self):
         return self.title
@@ -336,6 +337,14 @@ class Run(models.Model):
     class Meta:
         ordering = (
             '-return_dts', '-start_dts', '-enqueue_dts', 'schedule_dts')
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('job_runner:job_run', (), {
+            'project_id': self.job.job_template.worker.project.pk,
+            'job_id': self.job.pk,
+            'run_id': self.pk,
+        })
 
     def send_error_notification(self):
         """

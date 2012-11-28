@@ -4,8 +4,9 @@ Worker:
 Job title:
 {{ run.job.title }}
 
-Admin link:
-http://{{ hostname }}{% url admin:job_runner_job_change run.job.pk %}
+Links:
+ * Dashboard - http://{{ hostname }}{{ run.get_absolute_url }}
+ * Admin - http://{{ hostname }}{% url admin:job_runner_job_change run.job.pk %}
 
 Job script:
 {{ run.job.script_content|safe }}

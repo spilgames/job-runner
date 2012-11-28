@@ -10,6 +10,17 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.0
+~~~~~~
+
+* Show job details in a column instead of a modal
+* Show last 100 runs of a job incl. duration graph
+* Fix ``AUTHENTICATION_BACKENDS`` setting for staging and production
+  (without ``ModelBackend`` included, permissions are not working!)
+* A job-title must now be unique per job-template
+* Show re-schedule interval in job details
+
+
 v1.1.1
 ~~~~~~
 

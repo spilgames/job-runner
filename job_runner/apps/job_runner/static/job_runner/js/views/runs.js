@@ -6,7 +6,7 @@ var RunView = Backbone.View.extend({
     
     // constructor
     initialize: function(options) {
-        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent', 'initializeView', 'showRun');
+        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent', 'initializeView');
         this.activeProject = null;
         this.initialized = false;
 
@@ -25,9 +25,9 @@ var RunView = Backbone.View.extend({
             self.initializeView(options, project_id);
         });
 
-        options.router.on('route:showRun', function(project_id, run_id) {
+        options.router.on('route:showRunInRunView', function(project_id, run_id) {
             self.initializeView(options, project_id);
-            self.showRun(run_id);
+            options.modalView.showRun(run_id, '/project/'+ project_id +'/runs/');
         });
     },
 
@@ -147,7 +147,7 @@ var RunView = Backbone.View.extend({
                 state: 'scheduled',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.schedule_dts),
+                timestamp: formatDateTime(run.attributes.schedule_dts),
                 suspended: suspended
             }));
             this.sortRuns('#scheduled-runs', 'asc');
@@ -159,7 +159,7 @@ var RunView = Backbone.View.extend({
                 state: 'in-queue',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.enqueue_dts),
+                timestamp: formatDateTime(run.attributes.enqueue_dts),
                 suspended: false
             }));
             this.sortRuns('#enqueued-runs', 'desc');
@@ -171,7 +171,7 @@ var RunView = Backbone.View.extend({
                 state: 'started',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.start_dts),
+                timestamp: formatDateTime(run.attributes.start_dts),
                 suspended: false
             }));
             this.sortRuns('#started-runs', 'desc');
@@ -187,7 +187,7 @@ var RunView = Backbone.View.extend({
                 state: 'completed',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts),
+                timestamp: formatDateTime(run.attributes.return_dts),
                 suspended: false
             }));
             this.sortRuns('#completed-runs', 'desc');
@@ -203,7 +203,7 @@ var RunView = Backbone.View.extend({
                 state: 'completed-with-error',
                 title: job.attributes.title,
                 server: worker.attributes.title,
-                timestamp: self.formatDateTime(run.attributes.return_dts),
+                timestamp: formatDateTime(run.attributes.return_dts),
                 suspended: false
             }));
             this.sortRuns('#completed-with-error-runs', 'desc');
@@ -278,57 +278,6 @@ var RunView = Backbone.View.extend({
             });
         }
 
-    },
-
-    // show run details
-    showRun: function(runId) {
-        var self = this;
-
-        // since we are working with a deeplinkable run, we can not assume
-        // that the runId is present in our collection (yet)
-        var run = new Run({'resource_uri': '/api/v1/run/' + runId + '/'});
-        run.fetch({success: function() {
-            var job = new Job({'resource_uri': run.attributes.job});
-            job.fetch({success: function() {
-                var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
-
-                $('#modal').html(self.runModalTemplate({
-                    job_id: job.id,
-                    title: job.attributes.title,
-                    state: run.humanReadableState(),
-                    schedule_dts: self.formatDateTime(run.attributes.schedule_dts),
-                    enqueue_dts: self.formatDateTime(run.attributes.enqueue_dts),
-                    start_dts: self.formatDateTime(run.attributes.start_dts),
-                    return_dts: self.formatDateTime(run.attributes.return_dts),
-                    run_duration: self.formatDuration(run.attributes.start_dts, run.attributes.return_dts),
-                    script_content: _.escape(job.attributes.script_content),
-                    return_log: _.escape(run.attributes.return_log),
-                    suspended: suspended
-                })).modal().on('hide', function() { history.back(); });
-
-            }});
-            
-        }});
-    },
-
-    // helper for formatting datetime
-    formatDateTime: function(dateString) {
-        if (dateString !== null) {
-            return moment(dateString).format('YY-MM-DD HH:mm:ss');
-        } else {
-            return '';
-        }
-    },
-
-    // helper for formatting the duration
-    formatDuration: function(startDTS, endDTS) {
-        if (startDTS !== null && endDTS !== null) {
-            var start = moment(startDTS);
-            var end = moment(endDTS);
-            var duration = moment.duration(end.diff(start));
-
-            return duration.days() + ' days, ' + duration.hours() + ' hours, ' + duration.minutes() + ' minutes, ' + duration.seconds() + ' seconds';
-        }
     }
 
 });

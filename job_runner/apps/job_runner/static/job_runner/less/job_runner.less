@@ -1,3 +1,5 @@
+@import "../../less/bootstrap/variables.less";
+
 #job_runner {
     h4 {
         margin-bottom: 30px;
@@ -43,6 +45,24 @@
 
     .suspended {
         background: #eee;
+    }
+
+    .selected {
+        box-shadow: 0 0 0 1px @blueDark inset;
+    }
+
+    .jobs .span2:nth-child(3n+1) {
+        margin-left: 0px;
+    }
+
+    .job-details {
+        pre {
+            font-size: 10px;
+        }
+    }
+
+    .run-performance-graph {
+        height: 120px;
     }
 
 }
