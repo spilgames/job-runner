@@ -19,12 +19,16 @@ $('a.js-patch-link').each(function(item, a) {
 var groupCollection = new GroupCollection();
 var projectCollection = new ProjectCollection();
 
+
+// make sure appRouter is accessible everywhere
+var appRouter = null;
+
 // pre-fetch all data
 groupCollection.fetch_all({success: function() {
     projectCollection.fetch_all({success: function() {
 
         // router
-        var appRouter = new AppRouter();
+        appRouter = new AppRouter();
 
         // modal view
         var modalView = new ModalView();

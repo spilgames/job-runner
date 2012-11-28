@@ -37,7 +37,7 @@ var JobView = Backbone.View.extend({
             self.selectedJobId = jobId;
             self.initializeView(options, projectId);
             self.showJob(jobId);
-            options.modalView.showRun(runId);
+            options.modalView.showRun(runId, '/project/'+ projectId +'/jobs/'+ jobId +'/');
         });
     },
 
