@@ -124,7 +124,7 @@
 
                     <h5>Re-schedule interval:</h5>
                     <% if (interval && interval_type) { %>
-                        <p>Every <%= interval %> <%= interval_type %></p>
+                        <p>Every <%= interval %> <%= interval_type %><% if (!(interval == 1)) { %>s<% } %></p>
                     <% } else { %>
                         <p>No interval specified</p>
                     <% } %>
