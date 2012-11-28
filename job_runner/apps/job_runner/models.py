@@ -159,6 +159,7 @@ class Job(models.Model):
 
     class Meta:
         ordering = ('title', )
+        unique_together = (('title', 'job_template'),)
 
     def __unicode__(self):
         return self.title

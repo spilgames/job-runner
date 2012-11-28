@@ -122,6 +122,13 @@
                     <h5>Title:</h5>
                     <p><%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></p>
 
+                    <h5>Re-schedule interval:</h5>
+                    <% if (interval && interval_type) { %>
+                        <p>Every <%= interval %> <%= interval_type %></p>
+                    <% } else { %>
+                        <p>No interval specified</p>
+                    <% } %>
+
                     <h5>Command:</h5>
                     <p>
                         <pre><%= script_content %></pre>

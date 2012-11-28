@@ -141,7 +141,9 @@ var JobView = Backbone.View.extend({
                     script_content: _.escape(job.attributes.script_content),
                     children: job.attributes.children,
                     job_url: job.url(),
-                    id: job.id
+                    id: job.id,
+                    interval: job.attributes.reschedule_interval,
+                    interval_type: job.attributes.reschedule_interval_type.toLowerCase()
                 }));
 
                 $('#job-details').data('job_id', jobId);

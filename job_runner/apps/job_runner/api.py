@@ -125,7 +125,15 @@ class JobResource(ModelResource):
         resource_name = 'job'
         detail_allowed_methods = ['get', 'put']
         list_allowed_methods = ['get']
-        fields = ['id', 'title', 'script_content', 'enqueue_is_enabled']
+        fields = [
+            'id',
+            'title',
+            'script_content',
+            'enqueue_is_enabled',
+            'reschedule_interval',
+            'reschedule_interval_type',
+            'reschedule_type',
+        ]
         filtering = {
             'job_template': ALL_WITH_RELATIONS,
         }
