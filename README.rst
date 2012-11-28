@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.1
+~~~~~~
+
+* Add description fields to projects, workers, job-templates and jobs
+
+
 v1.2.0
 ~~~~~~
 
