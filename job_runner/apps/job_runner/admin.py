@@ -104,6 +104,7 @@ class WorkerAdmin(admin.ModelAdmin):
     Admin interface for workers.
     """
     list_display = ('title', 'api_key', 'project',)
+    list_filter = ('project',)
 
 
 class JobTemplateAdmin(admin.ModelAdmin):
@@ -111,6 +112,10 @@ class JobTemplateAdmin(admin.ModelAdmin):
     Admin interface for job-templates.
     """
     list_display = ('title', 'worker',)
+    list_filter = (
+        'worker',
+        'worker__project',
+    )
 
 
 class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
@@ -123,6 +128,14 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         'enqueue_is_enabled',
         'reschedule_type',
         'parent'
+    )
+    list_filter = (
+        'enqueue_is_enabled',
+        'reschedule_interval_type',
+        'reschedule_type',
+        'job_template',
+        'job_template__worker',
+        'job_template__worker__project'
     )
     inlines = [
         RunInlineAdmin,
@@ -142,7 +155,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'job_template', 'parent',)
+            'fields': ('title', 'job_template', 'parent', 'description',)
         }),
         ('Script', {
             'fields': ('script_content_partial',)
