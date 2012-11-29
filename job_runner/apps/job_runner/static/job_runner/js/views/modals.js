@@ -10,7 +10,7 @@ var ModalView = Backbone.View.extend({
     },
 
     // show run details
-    showRun: function(runId) {
+    showRun: function(runId, backUrl) {
         var self = this;
 
         var run = new Run({'resource_uri': '/api/v1/run/' + runId + '/'});
@@ -31,7 +31,7 @@ var ModalView = Backbone.View.extend({
                     script_content: _.escape(job.attributes.script_content),
                     return_log: _.escape(run.attributes.return_log),
                     suspended: suspended
-                })).modal().on('hide', function() { history.back(); });
+                })).modal().on('hide', function() { appRouter.navigate(backUrl, {'trigger': true}); });
 
             }});
         }});

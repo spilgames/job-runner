@@ -343,6 +343,14 @@ class Run(models.Model):
         ordering = (
             '-return_dts', '-start_dts', '-enqueue_dts', 'schedule_dts')
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('job_runner:job_run', (), {
+            'project_id': self.job.job_template.worker.project.pk,
+            'job_id': self.job.pk,
+            'run_id': self.pk,
+        })
+
     def send_error_notification(self):
         """
         Send out an error notification e-mail.

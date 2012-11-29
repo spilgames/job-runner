@@ -27,7 +27,7 @@ var RunView = Backbone.View.extend({
 
         options.router.on('route:showRunInRunView', function(project_id, run_id) {
             self.initializeView(options, project_id);
-            options.modalView.showRun(run_id);
+            options.modalView.showRun(run_id, '/project/'+ project_id +'/runs/');
         });
     },
 
