@@ -10,6 +10,14 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.1
+~~~~~~
+
+* Add MySQL to requirements.txt (since the python setup.py install is
+  creating a zipped .egg which doesn't work when the user does not have
+  a homedir (or when the homedir is not executable).
+
+
 v1.2.0
 ~~~~~~
 
