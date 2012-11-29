@@ -179,7 +179,7 @@ class Job(models.Model):
         addresses that are setup for this job, script and server.
 
         """
-        if self.run_set.awaiting_enqueue().count():
+        if self.run_set.filter(return_dts__isnull=True).count():
             return
 
         if (self.reschedule_type and self.reschedule_interval_type
