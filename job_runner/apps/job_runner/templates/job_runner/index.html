@@ -73,6 +73,12 @@
                 </tbody>
             </table>
 
+            <% if(job_description) { %>
+                <p>
+                    <%= job_description %>
+                </p>
+            <% } %>
+
             <h3>Command</h3>
             <p><pre class="script_content"><%= script_content %></pre></p>
             <% if(return_log) { %>
@@ -121,6 +127,11 @@
                     </div>
                     <h5>Title:</h5>
                     <p><%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></p>
+
+                    <% if (description) { %>
+                        <h5>Description</h5>
+                        <p><%= description %>
+                    <% } %>
 
                     <h5>Re-schedule interval:</h5>
                     <% if (interval && interval_type) { %>

@@ -137,6 +137,7 @@ var JobView = Backbone.View.extend({
 
                 $('#job-details').html(self.jobDetailsTemplate({
                     title: job.attributes.title,
+                    description: job.attributes.description,
                     enqueue_is_enabled: job.attributes.enqueue_is_enabled,
                     script_content: _.escape(job.attributes.script_content),
                     children: job.attributes.children,

@@ -151,6 +151,53 @@ class RunTestCase(TestCase):
         self.assertEqual(
             'Reschedule error for: Test job 1', mail.outbox[0].subject)
 
+    def test_reschedule_with_run_scheduled(self):
+        """
+        Test reschedule when there is already a run scheduled.
+        """
+        job = Job.objects.get(pk=1)
+        self.assertEqual(1, Run.objects.filter(job=job).count())
+
+        run = Run.objects.get(pk=1)
+        run.schedule_dts = timezone.now()
+        run.enqueue_dts = timezone.now()
+        run.return_dts = timezone.now()
+        run.save()
+
+        Run.objects.create(
+            job=job,
+            schedule_dts=timezone.now()
+        )
+
+        self.assertEqual(2, Run.objects.filter(job=job).count())
+        job.reschedule()
+        self.assertEqual(2, Run.objects.filter(job=job).count())
+
+    def test_reschedule_with_started_run(self):
+        """
+        Test reschedule when there is already an other started run active.
+        """
+        job = Job.objects.get(pk=1)
+        self.assertEqual(1, Run.objects.filter(job=job).count())
+
+        run = Run.objects.get(pk=1)
+        run.schedule_dts = timezone.now()
+        run.enqueue_dts = timezone.now()
+        run.start_dts = timezone.now()
+        run.return_dts = timezone.now()
+        run.save()
+
+        Run.objects.create(
+            job=job,
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
+        )
+
+        self.assertEqual(2, Run.objects.filter(job=job).count())
+        job.reschedule()
+        self.assertEqual(2, Run.objects.filter(job=job).count())
+
     def test_get_notification_addresses(self):
         """
         Test ``get_notification_addresses`` methods on models.

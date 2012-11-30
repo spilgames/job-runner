@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.2
+
+* Add description fields to projects, workers, job-templates and jobs
+* Add ``TransactionMiddleware``
+* Fix rescheduling when two runs are active of the same job
+
+
 v1.2.1
 ~~~~~~
 

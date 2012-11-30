@@ -35,6 +35,7 @@ class Project(models.Model):
     Projects
     """
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     groups = models.ManyToManyField(Group)
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
@@ -57,6 +58,7 @@ class Worker(models.Model):
     Workers
     """
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     api_key = models.CharField(max_length=255, db_index=True, unique=True)
     secret = models.CharField(max_length=255, db_index=True)
     project = models.ForeignKey(Project)
@@ -83,6 +85,7 @@ class JobTemplate(models.Model):
     Job templates
     """
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     body = models.TextField(help_text=(
         'Use {{ content|safe }} at the place where you want to render the '
         'script content of the job'
@@ -127,6 +130,7 @@ class Job(models.Model):
         'self', blank=True, null=True, related_name='children')
     job_template = models.ForeignKey(JobTemplate)
     title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     script_content_partial = models.TextField('script content')
     script_content = models.TextField(editable=False)
     enqueue_is_enabled = models.BooleanField(
@@ -175,7 +179,10 @@ class Job(models.Model):
         addresses that are setup for this job, script and server.
 
         """
-        if self.run_set.awaiting_enqueue().count():
+        # there is already an other run which is not finished yet, do
+        # not re-schedule, it will be rescheduled when the other job
+        # finishes
+        if self.run_set.filter(return_dts__isnull=True).count():
             return
 
         if (self.reschedule_type and self.reschedule_interval_type
@@ -310,6 +317,7 @@ class RescheduleExclude(models.Model):
     job = models.ForeignKey(Job)
     start_time = models.TimeField()
     end_time = models.TimeField()
+    note = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         return u'{0} - {1}'.format(self.start_time, self.end_time)

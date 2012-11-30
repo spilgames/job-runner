@@ -22,6 +22,7 @@ var ModalView = Backbone.View.extend({
                 $('#modal').html(self.runModalTemplate({
                     job_id: job.id,
                     title: job.attributes.title,
+                    job_description: job.attributes.description,
                     state: run.humanReadableState(),
                     schedule_dts: formatDateTime(run.attributes.schedule_dts),
                     enqueue_dts: formatDateTime(run.attributes.enqueue_dts),
