@@ -7,16 +7,20 @@ var JobView = Backbone.View.extend({
 
     // initialization of the view
     initialize: function(options) {
-        _.bindAll(this, 'renderItem', 'changeItem', 'showJob', 'sortJobs', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView');
+        _.bindAll(this, 'renderJob', 'changeItem', 'showJob', 'sortJobs', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView', 'renderJobTemplate', 'renderWorker');
         this.activeProject = null;
         this.initialized = false;
         this.selectedJobId = null;
 
         this.groupCollection = options.groupCollection;
         this.workerCollection = new WorkerCollection();
+        this.workerCollection.bind('add', this.renderWorker);
+
         this.jobTemplateCollection = new JobTemplateCollection();
+        this.jobTemplateCollection.bind('add', this.renderJobTemplate);
+
         this.jobCollection = new JobCollection();
-        this.jobCollection.bind('add', this.renderItem);
+        this.jobCollection.bind('add', this.renderJob);
         this.jobCollection.bind('change', this.changeItem);
 
 
@@ -85,7 +89,13 @@ var JobView = Backbone.View.extend({
     },
 
     // render a job
-    renderItem: function(job) {
+    renderJob: function(job) {
+        // add the reschedule interval type to the filters
+        // if it isn't there already
+        if ($('#reschedule-interval-type-select option[value='+ job.attributes.reschedule_interval_type +']').length === 0) {
+            $('#reschedule-interval-type-select').append('<option value="'+ job.attributes.reschedule_interval_type +'">'+ job.attributes.reschedule_interval_type.toLowerCase() +'</option>');
+        }
+
         var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
         var worker = this.workerCollection.where({'resource_uri': jobTemplate.attributes.worker})[0];
 
@@ -108,7 +118,7 @@ var JobView = Backbone.View.extend({
     changeItem: function(job) {
         var self = this;
         $('#job-' + job.id, self.el).remove();
-        self.renderItem(job);
+        self.renderJob(job);
     },
 
     // sort jobs
@@ -278,5 +288,16 @@ var JobView = Backbone.View.extend({
                 }
             });
         }
+    },
+
+    // render the job template (add jt to filters)
+    renderJobTemplate: function(jobTemplate) {
+        $('#job-template-select').append('<option value="'+ jobTemplate.id +'">'+ jobTemplate.attributes.title +'</option>');
+    },
+
+    // render a worker (add worker to filters)
+    renderWorker: function(worker) {
+        $('#worker-select').append('<option value="'+ worker.id +'">'+ worker.attributes.title +'</option>');
     }
+
 });
