@@ -10,7 +10,14 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.3
+~~~~~~
+
+* Add filters to limit the number of displayed jobs
+
+
 v1.2.2
+~~~~~~
 
 * Add description fields to projects, workers, job-templates and jobs
 * Add ``TransactionMiddleware``
