@@ -7,7 +7,7 @@ var JobView = Backbone.View.extend({
 
     // initialization of the view
     initialize: function(options) {
-        _.bindAll(this, 'renderJob', 'changeItem', 'showJob', 'sortJobs', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView', 'renderJobTemplate', 'renderWorker');
+        _.bindAll(this, 'renderJob', 'changeItem', 'showJob', 'sortJobs', 'showRuns', 'scheduleJob', 'initialFetch', 'toggleJobIsEnabled', 'initializeView', 'renderJobTemplate', 'renderWorker', 'filterJobs');
         this.activeProject = null;
         this.initialized = false;
         this.selectedJobId = null;
@@ -51,6 +51,8 @@ var JobView = Backbone.View.extend({
 
         $('#job_runner section').addClass('hide');
         $('#jobs').removeClass('hide');
+
+        $('.job-filter', this.el).change(this.filterJobs);
 
         if (!this.initialized) {
             self.activeProject = options.projectCollection.get(project_id);
@@ -103,15 +105,16 @@ var JobView = Backbone.View.extend({
             id: job.id,
             title: job.attributes.title,
             hostname: worker.attributes.title,
-            enqueue_is_enabled: job.attributes.enqueue_is_enabled
+            enqueue_is_enabled: job.attributes.enqueue_is_enabled,
+            reschedule_interval_type: job.attributes.reschedule_interval_type,
+            job_template_url: job.attributes.job_template,
+            worker_url: jobTemplate.attributes.worker
         }));
         this.sortJobs();
 
         if (this.selectedJobId == job.id) {
             $('#job-' + job.id + ' > div').addClass('selected');
         }
-
-        $('#job-'+ job.id).show();
     },
 
     // update a job
@@ -124,7 +127,11 @@ var JobView = Backbone.View.extend({
     // sort jobs
     sortJobs: function() {
         $('.jobs > div', this.el).sort(function(a, b) {
-            return $('div h5', $(a)).text() > $('div h5', $(b)).text() ? 1 : -1;
+            if ($(a).is(':visible') == $(b).is(':visible')) {
+                return $('div h5', $(a)).text() > $('div h5', $(b)).text() ? 1 : -1;
+            } else {
+                return $(a).is(':visible') ? -1 : 1;
+            }
         }).appendTo('#jobs .jobs');
     },
 
@@ -292,12 +299,28 @@ var JobView = Backbone.View.extend({
 
     // render the job template (add jt to filters)
     renderJobTemplate: function(jobTemplate) {
-        $('#job-template-select').append('<option value="'+ jobTemplate.id +'">'+ jobTemplate.attributes.title +'</option>');
+        $('#job-template-select').append('<option value="'+ jobTemplate.url() +'">'+ jobTemplate.attributes.title +'</option>');
     },
 
     // render a worker (add worker to filters)
     renderWorker: function(worker) {
-        $('#worker-select').append('<option value="'+ worker.id +'">'+ worker.attributes.title +'</option>');
+        $('#worker-select').append('<option value="'+ worker.url() +'">'+ worker.attributes.title +'</option>');
+    },
+
+    // callback for when a filter is selected to limit the job items displayed
+    filterJobs: function() {
+        $('div.span2', this.el).show();
+        var self = this;
+
+        _($('.job-filter', this.el)).each(function(filter) {
+            filter = $(filter);
+            if (filter.val() !== '') {
+                var currentVisible = $('div.span2:visible', self.el);
+                currentVisible.hide();
+                currentVisible.filter('div[data-'+ filter.data('attr_name') +'="'+ filter.val() +'"]', self.el).show();
+            }
+        });
+        this.sortJobs();
     }
 
 });

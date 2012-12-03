@@ -18,7 +18,7 @@
     </script>
 
     <script type="text/html" id="job-template">
-        <div class="span2" id="job-<%= id %>" style="display: none;">
+        <div class="span2" id="job-<%= id %>" data-job_template_url="<%= job_template_url %>" data-reschedule_interval_type="<%= reschedule_interval_type %>" data-worker_url="<%= worker_url %>">
             <div class="job<% if(!enqueue_is_enabled) { %> suspended<% } %>" data-id="<%= id %>">
                 <h5><a href="<%= baseURL %>jobs/<%= id %>/" class="details js-link"><%= title %></a></h5>
                 <ul>
@@ -220,7 +220,7 @@
         <div class="row filters">
             <div class="span3">
                 <h5>Template</h5>
-                <select id="job-template-select" class="job-filter" data-attr_name="job_template">
+                <select id="job-template-select" class="job-filter" data-attr_name="job_template_url">
                     <option></option>
                 </select>
             </div>
@@ -232,7 +232,7 @@
             </div>
             <div class="span3">
                 <h5>Worker</h5>
-                <select id="worker-select" class="job-filter" data-attr_name="worker">
+                <select id="worker-select" class="job-filter" data-attr_name="worker_url">
                     <option></option>
                 </select>
             </div>
