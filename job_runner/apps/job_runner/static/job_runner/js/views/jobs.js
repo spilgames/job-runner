@@ -33,20 +33,22 @@ var JobView = Backbone.View.extend({
 
         options.router.on('route:showJob', function(projectId, jobId) {
             self.selectedJobId = jobId;
-            self.initializeView(options, projectId);
-            self.showJob(jobId);
+            self.initializeView(options, projectId, function() {
+                self.showJob(jobId);
+            });
         });
 
         options.router.on('route:showRunInJobView', function(projectId, jobId, runId) {
             self.selectedJobId = jobId;
-            self.initializeView(options, projectId);
-            self.showJob(jobId);
-            options.modalView.showRun(runId, '/project/'+ projectId +'/jobs/'+ jobId +'/');
+            self.initializeView(options, projectId, function() {
+                self.showJob(jobId);
+                options.modalView.showRun(runId, '/project/'+ projectId +'/jobs/'+ jobId +'/');
+            });
         });
     },
 
     // initialize the view for the given project_id
-    initializeView: function(options, project_id) {
+    initializeView: function(options, project_id, completedCallback) {
         var self = this;
 
         $('#job_runner section').addClass('hide');
@@ -60,13 +62,15 @@ var JobView = Backbone.View.extend({
             self.jobTemplateCollection.reset();
             self.jobCollection.reset();
             $('.jobs div.span2', self.el).remove();
-            self.initialFetch();
+            self.initialFetch(completedCallback);
             self.initialized = true;
+        } else {
+            completedCallback();
         }
     },
 
     // fetch data (based on active project)
-    initialFetch: function() {
+    initialFetch: function(completedCallback) {
         var self = this;
 
         this.workerCollection.fetch_all({
@@ -82,7 +86,8 @@ var JobView = Backbone.View.extend({
                         self.jobCollection.fetch_all({
                             data: {
                                 'job_template__worker__project__id': self.activeProject.id
-                            }
+                            },
+                            success: completedCallback
                         });
                     }
                 });
@@ -147,49 +152,44 @@ var JobView = Backbone.View.extend({
             return;
         }
 
-        var job = new Job({'resource_uri': '/api/v1/job/' + jobId + '/'});
-        job.fetch({success: function() {
-            var jobTemplate = new JobTemplate({'resource_uri': job.attributes.job_template});
-            jobTemplate.fetch({success: function() {
+        var job = this.jobCollection.get(jobId);
+        var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
 
-                $('#job-details').html(self.jobDetailsTemplate({
-                    title: job.attributes.title,
-                    description: job.attributes.description,
-                    enqueue_is_enabled: job.attributes.enqueue_is_enabled,
-                    script_content: _.escape(job.attributes.script_content),
-                    children: job.attributes.children,
-                    job_url: job.url(),
-                    id: job.id,
-                    interval: job.attributes.reschedule_interval,
-                    interval_type: job.attributes.reschedule_interval_type.toLowerCase()
-                }));
+        $('#job-details').html(self.jobDetailsTemplate({
+            title: job.attributes.title,
+            description: job.attributes.description,
+            enqueue_is_enabled: job.attributes.enqueue_is_enabled,
+            script_content: _.escape(job.attributes.script_content),
+            children: job.attributes.children,
+            job_url: job.url(),
+            id: job.id,
+            interval: job.attributes.reschedule_interval,
+            interval_type: job.attributes.reschedule_interval_type.toLowerCase()
+        }));
 
-                $('#job-details').data('job_id', jobId);
+        $('#job-details').data('job_id', jobId);
 
-                if (job.attributes.enqueue_is_enabled === true) {
-                    $('.toggle-enable-job').addClass('btn-danger');
-                    $('.toggle-enable-job span').html('Suspend enqueue');
-                } else {
-                    $('.toggle-enable-job').addClass('btn-success');
-                    $('.toggle-enable-job span').html('Enable enqueue');
-                }
-         
-                $('.schedule-job').hide();
-                $('.toggle-enable-job').hide();
+        if (job.attributes.enqueue_is_enabled === true) {
+            $('.toggle-enable-job').addClass('btn-danger');
+            $('.toggle-enable-job span').html('Suspend enqueue');
+        } else {
+            $('.toggle-enable-job').addClass('btn-success');
+            $('.toggle-enable-job span').html('Enable enqueue');
+        }
+ 
+        $('.schedule-job').hide();
+        $('.toggle-enable-job').hide();
 
-                _(self.groupCollection.models).each(function(group) {
-                    if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
-                        $('.schedule-job').show();
-                        $('.toggle-enable-job').show();
-                    }
-                });
+        _(self.groupCollection.models).each(function(group) {
+            if (jobTemplate.attributes.auth_groups.indexOf(group.attributes.resource_uri) >= 0) {
+                $('.schedule-job').show();
+                $('.toggle-enable-job').show();
+            }
+        });
 
-                $('.schedule-job').click(self.scheduleJob);
-                $('.toggle-enable-job').click(self.toggleJobIsEnabled);
-                $('.show-runs').click(self.showRuns);
-
-            }});
-        }});
+        $('.schedule-job').click(self.scheduleJob);
+        $('.toggle-enable-job').click(self.toggleJobIsEnabled);
+        $('.show-runs').click(self.showRuns);
     },
 
     // show the historic runs
