@@ -62,11 +62,18 @@ class Command(NoArgsCommand):
             job__in=active_jobs,
         ).select_related()
 
+        broadcasted_job_ids = []
+
         for run in enqueueable_runs:
-            worker = run.job.job_template.worker
-            message = [
-                'master.broadcast.{0}'.format(worker.api_key),
-                json.dumps({'run_id': run.id, 'action': 'enqueue'})
-            ]
-            logger.debug('Sending: {0}'.format(message))
-            publisher.send_multipart(message)
+            if run.job.pk not in broadcasted_job_ids:
+                worker = run.job.job_template.worker
+                message = [
+                    'master.broadcast.{0}'.format(worker.api_key),
+                    json.dumps({'run_id': run.id, 'action': 'enqueue'})
+                ]
+                logger.debug('Sending: {0}'.format(message))
+                publisher.send_multipart(message)
+
+                # in raw sql, this can be avoided, I couldn't find a way how
+                # this can be done with the django orm
+                broadcasted_job_ids.append(run.job.pk)

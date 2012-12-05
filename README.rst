@@ -10,6 +10,14 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.5
+~~~~~~
+
+* Display parent - child relationships in job details.
+* Fix an other issue with the run broadcaster to make sure it doesn't broadcast
+  multiple runs for the same job.
+
+
 v1.2.4
 ~~~~~~
 
