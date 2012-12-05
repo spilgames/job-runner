@@ -10,11 +10,23 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.4
+~~~~~~
+
+* Fix run broadcaster so that it doesn't send runs to the workers when there
+  is still an other run for the same job active (in queue or started).
+* Fix autoselect environment settings.
+* Update hostnames in configuration.
+
+
 v1.2.3
 ~~~~~~
 
-* Add filters to limit the number of displayed jobs
+* Add filters to limit the number of displayed jobs.
 * Add status icon to display if there is a connection with the WebSocket server
+* Add option for monthly re-scheduling **Note:** monthly re-scheduling works
+  by incrementing the ``dts`` with the number of days that are in the ``dts``.
+  When incrementing by multiple months, it will check the days for each month.
 
 
 v1.2.2

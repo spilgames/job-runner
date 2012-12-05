@@ -62,15 +62,18 @@ var RunView = Backbone.View.extend({
 
         // update status icon to ok
         socket.onopen = function() {
-            $('header .nav .dashboard i').removeClass();
-            $('header .nav .dashboard i').addClass('icon-ok-sign');
+            $('header .navbar .ws-status').removeClass('hidden');
+            $('header .navbar .ws-status li span').removeClass('label-important');
+            $('header .navbar .ws-status li span').addClass('label-success');
+            $('header .navbar .ws-status li span').html('live');
         };
 
         // update status icon to not ok
         socket.onclose = function() {
-            $('header .nav .dashboard i').removeClass();
-            $('header .nav .dashboard i').addClass('icon-exclamation-sign');
-
+            $('header .navbar .ws-status').removeClass('hidden');
+            $('header .navbar .ws-status li span').removeClass('label-success');
+            $('header .navbar .ws-status li span').addClass('label-important');
+            $('header .navbar .ws-status li span').html('dashboard is not live');
             setTimeout(function() {self.connectWebSocket();}, 1000);
         };
 

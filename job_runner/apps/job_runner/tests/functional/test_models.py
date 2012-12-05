@@ -87,6 +87,46 @@ class RunTestCase(TestCase):
             runs[1].schedule_dts
         )
 
+    def test_reschedule_monthly_after_schedule_dts(self):
+        """
+        Test monthy reschedule after schedule dts.
+        """
+        in_and_expected = [
+            (datetime(2032, 1, 1), datetime(2032, 2, 1)),
+            (datetime(2032, 2, 1), datetime(2032, 3, 1)),
+            (datetime(2032, 3, 1), datetime(2032, 4, 1)),
+            (datetime(2032, 4, 1), datetime(2032, 5, 1)),
+            (datetime(2032, 6, 1), datetime(2032, 7, 1)),
+            (datetime(2032, 12, 1), datetime(2033, 1, 1)),
+        ]
+
+        for in_dts, expected_dts in in_and_expected:
+
+            # if you do not use utc as a timezone here, you get funny results
+            # because of day light saving time switching
+            in_dts = timezone.make_aware(
+                in_dts, timezone.utc)
+            expected_dts = timezone.make_aware(
+                expected_dts, timezone.utc)
+
+            job = Job.objects.get(pk=1)
+            job.reschedule_interval_type = 'MONTH'
+            job.save()
+
+            job.run_set.all().delete()
+
+            Run.objects.create(
+                job=job,
+                schedule_dts=in_dts,
+                enqueue_dts=in_dts,
+                start_dts=in_dts,
+                return_dts=in_dts,
+            )
+
+            job.reschedule()
+            run = Run.objects.filter(job=1, enqueue_dts__isnull=True)[0]
+            self.assertEqual(expected_dts, run.schedule_dts)
+
     def test_reschedule_with_exclude(self):
         """
         Test reschedule with exclude time.
