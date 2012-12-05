@@ -154,13 +154,24 @@ var JobView = Backbone.View.extend({
 
         var job = this.jobCollection.get(jobId);
         var jobTemplate = this.jobTemplateCollection.where({'resource_uri': job.attributes.job_template})[0];
+        var jobChildren = [];
+        var parentJob = null;
+
+        if (job.attributes.parent) {
+            parentJob = this.jobCollection.where({'resource_uri': job.attributes.parent})[0];
+        }
+
+        _(job.attributes.children).each(function(child) {
+            jobChildren.push(self.jobCollection.where({'resource_uri': child})[0]);
+        });
 
         $('#job-details').html(self.jobDetailsTemplate({
             title: job.attributes.title,
             description: job.attributes.description,
             enqueue_is_enabled: job.attributes.enqueue_is_enabled,
             script_content: _.escape(job.attributes.script_content),
-            children: job.attributes.children,
+            children: jobChildren,
+            parent: parentJob,
             job_url: job.url(),
             id: job.id,
             interval: job.attributes.reschedule_interval,
