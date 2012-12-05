@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.4
+~~~~~~
+
+* Fix run broadcaster so that it doesn't send runs to the workers when there
+  is still an other run for the same job active (in queue or started).
+
+
 v1.2.3
 ~~~~~~
 
@@ -18,8 +25,6 @@ v1.2.3
 * Add option for monthly re-scheduling **Note:** monthly re-scheduling works
   by incrementing the ``dts`` with the number of days that are in the ``dts``.
   When incrementing by multiple months, it will check the days for each month.
-* Fix run broadcaster so that it doesn't send runs to the workers when there
-  is still an other run for the same job active (in queue or started).
 
 
 v1.2.2
