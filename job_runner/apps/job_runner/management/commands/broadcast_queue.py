@@ -4,7 +4,6 @@ import time
 
 import zmq
 from django.conf import settings
-from django.db.models import Q
 from django.core.management.base import NoArgsCommand
 from django.utils import timezone
 
