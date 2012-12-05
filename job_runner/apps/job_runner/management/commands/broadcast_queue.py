@@ -47,9 +47,7 @@ class Command(NoArgsCommand):
 
         """
         active_jobs = Job.objects.filter(
-            Q(run__enqueue_dts__isnull=False) |
-            Q(run__start_dts__isnull=False)
-        ).filter(
+            run__enqueue_dts__isnull=False,
             run__return_dts__isnull=True,
         )
 

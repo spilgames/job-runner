@@ -152,6 +152,7 @@ class Job(models.Model):
         max_length=6,
         blank=True,
         choices=RESCHEDULE_INTERVAL_TYPE_CHOICES,
+        db_index=True,
         help_text=(
             'Note: with montly re-scheduling, the date will be incremented '
             'by the number of days in the month.'
@@ -161,6 +162,7 @@ class Job(models.Model):
         max_length=18,
         blank=True,
         choices=RESCHEDULE_TYPE_CHOICES,
+        db_index=True,
     )
     notification_addresses = models.TextField(
         help_text='Separate addresses by a newline',
@@ -355,11 +357,11 @@ class Run(models.Model):
     """
     job = models.ForeignKey(Job)
     schedule_dts = models.DateTimeField(db_index=True)
-    enqueue_dts = models.DateTimeField(null=True)
+    enqueue_dts = models.DateTimeField(null=True, db_index=True)
     start_dts = models.DateTimeField(null=True, db_index=True)
-    return_dts = models.DateTimeField(null=True)
+    return_dts = models.DateTimeField(null=True, db_index=True)
     return_success = models.NullBooleanField(
-        default=None, null=True)
+        default=None, null=True, db_index=True)
     return_log = models.TextField(null=True, default=None)
     is_manual = models.BooleanField(
         default=False, editable=False, db_index=True)
