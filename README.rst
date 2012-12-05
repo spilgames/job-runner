@@ -15,6 +15,8 @@ v1.2.4
 
 * Fix run broadcaster so that it doesn't send runs to the workers when there
   is still an other run for the same job active (in queue or started).
+* Fix autoselect environment settings.
+* Update hostnames in configuration.
 
 
 v1.2.3
