@@ -18,12 +18,12 @@
     </script>
 
     <script type="text/html" id="job-template">
-        <div class="span2" id="job-<%= id %>" style="display: none;">
+        <div class="span2" id="job-<%= id %>" data-job_template_url="<%= job_template_url %>" data-reschedule_interval_type="<%= reschedule_interval_type %>" data-worker_url="<%= worker_url %>">
             <div class="job<% if(!enqueue_is_enabled) { %> suspended<% } %>" data-id="<%= id %>">
                 <h5><a href="<%= baseURL %>jobs/<%= id %>/" class="details js-link"><%= title %></a></h5>
                 <ul>
                     <li>
-                        <i class="icon-tag"></i> <%= hostname %>
+                        <i class="icon-hdd"></i> <%= hostname %>
                     </li>
                 </ul>
             </div>
@@ -217,7 +217,26 @@
     </section>
 
     <section class="hide" id="jobs">
-        <div class="row"><h4>Available jobs and run history</h4></div>
+        <div class="row filters">
+            <div class="span3">
+                <h5>Template</h5>
+                <select id="job-template-select" class="job-filter" data-attr_name="job_template_url">
+                    <option></option>
+                </select>
+            </div>
+            <div class="span3">
+                <h5>Reschedule interval type</h5>
+                <select id="reschedule-interval-type-select" class="job-filter" data-attr_name="reschedule_interval_type">
+                    <option></option>
+                </select>
+            </div>
+            <div class="span3">
+                <h5>Worker</h5>
+                <select id="worker-select" class="job-filter" data-attr_name="worker_url">
+                    <option></option>
+                </select>
+            </div>
+        </div>
         <div class="row">
             <div class="span6 jobs"></div>
             <div class="span6 job-details" id="job-details" data-job_id="null">

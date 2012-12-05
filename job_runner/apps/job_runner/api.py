@@ -67,7 +67,7 @@ class WorkerResource(ModelResource):
         queryset = Worker.objects.all()
         resource_name = 'worker'
         allowed_methods = ['get']
-        fields = ['title', 'api_key', 'description']
+        fields = ['id', 'title', 'api_key', 'description']
         filtering = {
             'project': ALL_WITH_RELATIONS,
         }
@@ -97,7 +97,7 @@ class JobTemplateResource(ModelResource):
         queryset = JobTemplate.objects.all()
         resource_name = 'job_template'
         allowed_methods = ['get']
-        fields = ['title', 'description']
+        fields = ['id', 'title', 'description']
         filtering = {
             'worker': ALL_WITH_RELATIONS,
         }

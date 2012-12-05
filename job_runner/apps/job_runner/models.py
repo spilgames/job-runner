@@ -1,3 +1,4 @@
+import calendar
 import copy
 from datetime import timedelta
 
@@ -16,6 +17,7 @@ RESCHEDULE_INTERVAL_TYPE_CHOICES = (
     ('MINUTE', 'Every x minutes'),
     ('HOUR', 'Every x hours'),
     ('DAY', 'Every x days'),
+    ('MONTH', 'Every x months'),
 )
 
 RESCHEDULE_TYPE_CHOICES = (
@@ -150,6 +152,10 @@ class Job(models.Model):
         max_length=6,
         blank=True,
         choices=RESCHEDULE_INTERVAL_TYPE_CHOICES,
+        help_text=(
+            'Note: with montly re-scheduling, the date will be incremented '
+            'by the number of days in the month.'
+        )
     )
     reschedule_type = models.CharField(
         max_length=18,
@@ -195,16 +201,8 @@ class Job(models.Model):
                 elif self.reschedule_type == 'AFTER_COMPLETE_DTS':
                     reference_date = last_run.return_dts
 
-                if self.reschedule_interval_type == 'MINUTE':
-                    delta = timedelta(minutes=self.reschedule_interval)
-                elif self.reschedule_interval_type == 'HOUR':
-                    delta = timedelta(hours=self.reschedule_interval)
-                elif self.reschedule_interval_type == 'DAY':
-                    delta = timedelta(days=self.reschedule_interval)
-
                 try:
-                    reschedule_date = self._get_reschedule_date(
-                        reference_date, delta)
+                    reschedule_date = self._get_reschedule_date(reference_date)
 
                     Run.objects.create(
                         job=self,
@@ -254,8 +252,39 @@ class Job(models.Model):
         addresses.extend(self.job_template.get_notification_addresses())
         return addresses
 
+    def _get_reschedule_incremented_dts(self, increment_date):
+        """
+        Increment the given ``reference_date`` with the reschedule interval.
+
+        :param increment_date:
+            An instance of :class:`!datetime.datetime` to increment.
+
+        :return:
+            An instance of :class:`!datetime.datetime`.
+
+        """
+        if self.reschedule_interval_type == 'MINUTE':
+            return increment_date + timedelta(minutes=self.reschedule_interval)
+        elif self.reschedule_interval_type == 'HOUR':
+            return increment_date + timedelta(hours=self.reschedule_interval)
+        elif self.reschedule_interval_type == 'DAY':
+            return increment_date + timedelta(days=self.reschedule_interval)
+        elif self.reschedule_interval_type == 'MONTH':
+            # increment the dts with the number of days that are in the
+            # ``reschedule_date``.
+            reschedule_date = increment_date
+            for x in range(self.reschedule_interval):
+                days_in_month = calendar.monthrange(
+                    reschedule_date.year, reschedule_date.month)
+                reschedule_date = reschedule_date + timedelta(
+                    days=days_in_month[1])
+            return reschedule_date
+
     def _get_reschedule_date(
-            self, reference_date, reschedule_delta, increment_date=None):
+                self,
+                reference_date,
+                increment_date=None
+            ):
         """
         Return a reschedule datetime.
 
@@ -265,10 +294,6 @@ class Job(models.Model):
         :param reference_date:
             The reference :class:`datetime.datetime` to generate the
             reschedule date from.
-
-        :param reschedule_delta:
-            The :class:`datetime.timedelta` to increment the
-            ``reference_date`` with.
 
         :param increment_date:
             The :class:`datetime.datetime` to increment for calculating the
@@ -289,23 +314,24 @@ class Job(models.Model):
         reference_date = reference_date.astimezone(
             timezone.get_default_timezone())
 
-        while (reference_date + reschedule_delta) < timezone.now():
-            reference_date = reference_date + reschedule_delta
-
         if not increment_date:
             increment_date = reference_date
 
-        elif (increment_date - reference_date) > timedelta(days=1):
+        reschedule_date = self._get_reschedule_incremented_dts(increment_date)
+
+        while reschedule_date < timezone.now():
+            reschedule_date = self._get_reschedule_incremented_dts(
+                reschedule_date)
+
+        if (increment_date - reference_date) > timedelta(days=1):
             raise RescheduleException(
                 'Unable to reschedule due to reschedule excludes')
-
-        reschedule_date = increment_date + reschedule_delta
 
         for exclude in self.rescheduleexclude_set.all():
             if (reschedule_date.time() >= exclude.start_time
                 and reschedule_date.time() <= exclude.end_time):
                 return self._get_reschedule_date(
-                    reference_date, reschedule_delta, reschedule_date)
+                    reference_date, reschedule_date)
 
         return reschedule_date
 
