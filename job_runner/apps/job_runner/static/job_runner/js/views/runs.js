@@ -6,7 +6,7 @@ var RunView = Backbone.View.extend({
     
     // constructor
     initialize: function(options) {
-        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent', 'initializeView');
+        _.bindAll(this, 'renderRun', 'changeRun', 'initialFetch', 'initialFetchRuns', 'sortRuns', 'handleEvent', 'initializeView', 'connectWebSocket');
         this.activeProject = null;
         this.initialized = false;
 
@@ -49,18 +49,38 @@ var RunView = Backbone.View.extend({
             $('.job-run', this.el).remove();
 
             this.initialFetch();
-
-            var socket = new WebSocket(ws_server);
-            socket.onerror = function(e) {
-                alert('A WebSocket error occured while connecting to ' + ws_server);
-            };
-            socket.onmessage = function(e) {
-                console.log(e.data);
-                self.handleEvent(JSON.parse(e.data));
-            };
+            this.connectWebSocket();
 
             this.initialized = true;
         }
+    },
+
+    // setup WebSocket connection
+    connectWebSocket: function() {
+        var socket = new WebSocket(ws_server);
+        var self = this;
+
+        // update status icon to ok
+        socket.onopen = function() {
+            $('header .navbar .ws-status').removeClass('hidden');
+            $('header .navbar .ws-status li span').removeClass('label-important');
+            $('header .navbar .ws-status li span').addClass('label-success');
+            $('header .navbar .ws-status li span').html('live');
+        };
+
+        // update status icon to not ok
+        socket.onclose = function() {
+            $('header .navbar .ws-status').removeClass('hidden');
+            $('header .navbar .ws-status li span').removeClass('label-success');
+            $('header .navbar .ws-status li span').addClass('label-important');
+            $('header .navbar .ws-status li span').html('dashboard is not live');
+            setTimeout(function() {self.connectWebSocket();}, 1000);
+        };
+
+        socket.onmessage = function(e) {
+            console.log(e.data);
+            self.handleEvent(JSON.parse(e.data));
+        };
     },
 
     // fetch initial data (based on active project)
