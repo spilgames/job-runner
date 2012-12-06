@@ -140,6 +140,22 @@
                         <p>No interval specified</p>
                     <% } %>
 
+                    <% if (parent) { %>
+                        <h5>Parent</h5>
+                        <p>
+                            <a href="<%= baseURL %>jobs/<%= parent.id %>/" class="js-link"><%= parent.attributes.title %></a>
+                        </p>
+                    <% } %>
+
+                    <% if (children.length) { %>
+                        <h5>Children</h5>
+                        <ul>
+                            <% _.each(children, function(child) { %>
+                                <li><a href="<%= baseURL %>jobs/<%= child.id %>/" class="js-link"><%= child.attributes.title %></a></li>
+                            <% }); %>
+                        </ul>
+                    <% } %>
+
                     <h5>Command:</h5>
                     <p>
                         <pre><%= script_content %></pre>

@@ -10,6 +10,16 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.5
+~~~~~~
+
+* Display parent - child relationships in job details.
+* Fix an other issue with the run broadcaster to make sure it doesn't broadcast
+  multiple runs for the same job.
+* Fix styling glitches by adding a ``boot.css`` which is used as long the
+  ``.less`` files aren't compiled yet.
+
+
 v1.2.4
 ~~~~~~
 
