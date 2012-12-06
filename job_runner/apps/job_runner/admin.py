@@ -89,7 +89,7 @@ class RunInlineAdmin(admin.TabularInline):
     max_num = 1
 
     def queryset(self, request):
-        return self.model.objects.awaiting_enqueue()
+        return self.model.objects.scheduled()
 
 
 class RescheduleExcludeInlineAdmin(admin.TabularInline):

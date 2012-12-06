@@ -50,7 +50,7 @@ class Command(NoArgsCommand):
             run__return_dts__isnull=True,
         )
 
-        enqueueable_runs = Run.objects.awaiting_enqueue().filter(
+        enqueueable_runs = Run.objects.scheduled().filter(
             # make sure it should be running now
             schedule_dts__lte=timezone.now(),
         ).exclude(

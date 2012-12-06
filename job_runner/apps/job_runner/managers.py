@@ -5,7 +5,7 @@ class RunManager(models.Manager):
     """
     Custom manager for the Run model.
     """
-    def awaiting_enqueue(self):
+    def scheduled(self):
         """
         Return a QS filtered on run's that aren't enqueued yet.
         """
