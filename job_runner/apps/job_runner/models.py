@@ -43,6 +43,14 @@ class Project(models.Model):
         help_text='Separate e-mail addresses by a newline',
         blank=True,
     )
+    enqueue_is_enabled = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text=(
+            'If unchecked, nothing for this project will be added to '
+            'the worker queue. This will not affect already running jobs.'
+        )
+    )
 
     def __unicode__(self):
         return self.title
@@ -67,6 +75,14 @@ class Worker(models.Model):
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
+    )
+    enqueue_is_enabled = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text=(
+            'If unchecked, nothing for this worker will be added to '
+            'the worker queue. This will not affect already running jobs.'
+        )
     )
 
     def __unicode__(self):
@@ -97,6 +113,14 @@ class JobTemplate(models.Model):
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
+    )
+    enqueue_is_enabled = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text=(
+            'If unchecked, nothing for this template will be added to '
+            'the worker queue. This will not affect already running jobs.'
+        )
     )
 
     def __unicode__(self):
