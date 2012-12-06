@@ -31,7 +31,22 @@ class RunManager(models.Manager):
             schedule_dts__lte=timezone.now(),
         ).exclude(
             # exclude auto scheduled jobs when enqueue is disabled
-            Q(job__enqueue_is_enabled=False, is_manual=False) |
+            Q(
+                job__enqueue_is_enabled=False,
+                is_manual=False
+            ) |
+            Q(
+                job__job_template__enqueue_is_enabled=False,
+                is_manual=False
+            ) |
+            Q(
+                job__job_template__worker__enqueue_is_enabled=False,
+                is_manual=False
+            ) |
+            Q(
+                job__job_template__worker__project__enqueue_is_enabled=False,
+                is_manual=False
+            ) |
 
             # exclude jobs that are still active
             Q(job__in=active_jobs)

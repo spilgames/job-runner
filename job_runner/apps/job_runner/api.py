@@ -42,7 +42,7 @@ class ProjectResource(ModelResource):
         queryset = Project.objects.all()
         resource_name = 'project'
         allowed_methods = ['get']
-        fields = ['title', 'id', 'description']
+        fields = ['title', 'id', 'description', 'enqueue_is_enabled']
         filtering = {
             'id': ('exact',),
         }
@@ -67,7 +67,8 @@ class WorkerResource(ModelResource):
         queryset = Worker.objects.all()
         resource_name = 'worker'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'api_key', 'description']
+        fields = [
+            'id', 'title', 'api_key', 'description', 'enqueue_is_enabled']
         filtering = {
             'project': ALL_WITH_RELATIONS,
         }
@@ -97,7 +98,7 @@ class JobTemplateResource(ModelResource):
         queryset = JobTemplate.objects.all()
         resource_name = 'job_template'
         allowed_methods = ['get']
-        fields = ['id', 'title', 'description']
+        fields = ['id', 'title', 'description', 'enqueue_is_enabled']
         filtering = {
             'worker': ALL_WITH_RELATIONS,
         }

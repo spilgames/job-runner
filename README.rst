@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.6
+~~~~~~
+
+* Make it possible to disable the enqueue of a project, worker or job-template.
+
+
 v1.2.5
 ~~~~~~
 
