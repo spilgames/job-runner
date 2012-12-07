@@ -171,16 +171,10 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         ('Scheduling', {
             'fields': (
                 'enqueue_is_enabled',
+                'disable_enqueue_after_fails',
                 'reschedule_interval',
                 'reschedule_interval_type',
                 'reschedule_type',
-            ),
-        }),
-        ('Scheduling after a job failed', {
-            'fields': (
-                'direct_reschedule_on_fail',
-                'direct_reschedule_on_fail_sleep_time',
-                'disable_enqueue_after_fails',
             ),
         }),
     )

@@ -18,16 +18,6 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True),
                       keep_default=False)
 
-        # Adding field 'Job.direct_reschedule_on_fail'
-        db.add_column('job_runner_job', 'direct_reschedule_on_fail',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
-
-        # Adding field 'Job.direct_reschedule_on_fail_sleep_time'
-        db.add_column('job_runner_job', 'direct_reschedule_on_fail_sleep_time',
-                      self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
-                      keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'Job.fail_times'
@@ -35,12 +25,6 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Job.disable_enqueue_after_fails'
         db.delete_column('job_runner_job', 'disable_enqueue_after_fails')
-
-        # Deleting field 'Job.direct_reschedule_on_fail'
-        db.delete_column('job_runner_job', 'direct_reschedule_on_fail')
-
-        # Deleting field 'Job.direct_reschedule_on_fail_sleep_time'
-        db.delete_column('job_runner_job', 'direct_reschedule_on_fail_sleep_time')
 
 
     models = {
@@ -67,8 +51,6 @@ class Migration(SchemaMigration):
         'job_runner.job': {
             'Meta': {'ordering': "('title',)", 'unique_together': "(('title', 'job_template'),)", 'object_name': 'Job'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'direct_reschedule_on_fail': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'direct_reschedule_on_fail_sleep_time': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'disable_enqueue_after_fails': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'enqueue_is_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
             'fail_times': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),

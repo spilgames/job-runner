@@ -220,21 +220,6 @@ class Job(models.Model):
             'be disabled when it failed (blank = never disable enqeueue).'
         )
     )
-    direct_reschedule_on_fail = models.BooleanField(
-        default=False,
-        help_text=(
-            'Perform a direct-reschedule instead of waiting for the next '
-            're-schedule date. This will count as a manual reschedule so '
-            'it doesn\'t interfere with the normal interval.'
-        )
-    )
-    direct_reschedule_on_fail_sleep_time = models.PositiveIntegerField(
-        default=0,
-        help_text=(
-            'The number of minutes to wait before the direct-reschedule after '
-            'a failed job.'
-        )
-    )
 
     class Meta:
         ordering = ('title', )
