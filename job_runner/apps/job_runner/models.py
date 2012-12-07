@@ -297,22 +297,13 @@ class Job(models.Model):
                             addresses
                         )
 
-    def schedule_now(self, sleep_time=timedelta(0), is_manual=False):
+    def schedule_now(self):
         """
         Schedule the job to run now.
-
-        :param start_time:
-            An instance of :class:`datetime.timedelta` which should be added
-            to the current date/time.
-
-        :param is_manual:
-            A ``bool`` defining if this is a manual schedule.
-
         """
         Run.objects.create(
             job=self,
-            schedule_dts=timezone.now() + sleep_time,
-            is_manual=is_manual,
+            schedule_dts=timezone.now(),
         )
 
     def save(self, *args, **kwargs):
