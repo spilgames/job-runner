@@ -11,6 +11,7 @@ from django.utils import timezone
 from job_runner.apps.job_runner.models import (
     Job,
     JobTemplate,
+    KillRequest,
     Project,
     Run,
     Worker,
@@ -36,10 +37,11 @@ class ApiTestBase(TestCase):
         response = self.get(path, *args, **kwargs)
         return json.loads(response.content)
 
-    def patch(self, path, data):
+    def post(self, path, data, method_override='POST'):
         json_data = json.dumps(data)
         api_key = hmac.new(
-            'verysecret', 'PATCH{0}{1}'.format(path, json_data), hashlib.sha1
+            'verysecret', '{0}{1}{2}'.format(method_override, path, json_data),
+            hashlib.sha1
         ).hexdigest()
 
         return self.client.post(
@@ -48,8 +50,11 @@ class ApiTestBase(TestCase):
             content_type='application/json',
             ACCEPT='application/json',
             HTTP_AUTHORIZATION='ApiKey worker1:{0}'.format(api_key),
-            HTTP_X_HTTP_METHOD_OVERRIDE='PATCH',
+            HTTP_X_HTTP_METHOD_OVERRIDE=method_override,
         )
+
+    def patch(self, path, data):
+        return self.post(path, data, method_override='PATCH')
 
 
 class ProjectTestCase(ApiTestBase):
@@ -616,3 +621,31 @@ class ChainedRunTestCase(ApiTestBase):
         self.assertEqual(202, response.status_code)
         self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
         self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
+
+
+class KillRequestTestCase(ApiTestBase):
+    """
+    Tests for the kill request interface.
+    """
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+        'test_child_job',
+    ]
+
+    def test_post_new_kill_request(self):
+        """
+        Test POST ``/api/v1/kill_request/``.
+        """
+        response = self.post(
+            '/api/v1/kill_request/',
+            {
+                'run': '/api/v1/run/1/',
+            }
+        )
+
+        self.assertEqual(201, response.status_code)
+        self.assertEqual(1, KillRequest.objects.filter(run_id=1).count())

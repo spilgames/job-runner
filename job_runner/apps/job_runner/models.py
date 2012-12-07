@@ -456,3 +456,13 @@ class Run(models.Model):
                 settings.DEFAULT_FROM_EMAIL,
                 addresses
             )
+
+
+class KillRequest(models.Model):
+    """
+    Contains requests to kill active runs.
+    """
+    run = models.ForeignKey(Run)
+    schedule_dts = models.DateTimeField(auto_now_add=True)
+    enqueue_dts = models.DateTimeField(null=True, db_index=True)
+    execute_dts = models.DateTimeField(null=True, db_index=True)

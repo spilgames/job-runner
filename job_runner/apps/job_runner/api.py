@@ -9,6 +9,7 @@ from job_runner.apps.job_runner.auth import (
 from job_runner.apps.job_runner.models import (
     Job,
     JobTemplate,
+    KillRequest,
     Project,
     Run,
     Worker,
@@ -271,3 +272,26 @@ class RunResource(ModelResource):
                     child.schedule_now()
 
         return result
+
+
+class KillRequestResource(ModelResource):
+    """
+    RESTful resource for kill requests.
+    """
+    run = fields.ToOneField(
+        'job_runner.apps.job_runner.api.RunResource', 'run')
+
+    class Meta:
+        queryset = KillRequest.objects.all()
+        resource_name = 'kill_request'
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'patch']
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='run__job__job_template__worker__api_key',
+            user_groups_path='run__job__job_template__worker__project__groups',
+            auth_user_groups_path='run__job__job_template__auth_groups',
+        )
