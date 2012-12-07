@@ -414,6 +414,7 @@ class Run(models.Model):
     return_dts = models.DateTimeField(null=True, db_index=True)
     return_success = models.NullBooleanField(
         default=None, null=True, db_index=True)
+    pid = models.PositiveIntegerField(null=True, default=None)
     return_log = models.TextField(null=True, default=None)
     is_manual = models.BooleanField(
         default=False, editable=False, db_index=True)
