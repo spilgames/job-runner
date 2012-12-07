@@ -10,16 +10,16 @@ class RunManagerTestCase(TestCase):
     """
     fixtures = ['test_job']
 
-    def test_awaiting_enqueue(self):
+    def test_scheduled(self):
         """
-        Test :meth:`.Run.awaiting_enqueue`.
+        Test :meth:`.Run.scheduled`.
         """
         self.assertEqual(
-            1, Run.objects.awaiting_enqueue().filter(job_id=1).count())
+            1, Run.objects.scheduled().filter(job_id=1).count())
 
         run = Run.objects.get(pk=1)
         run.enqueue_dts = timezone.now()
         run.save()
 
         self.assertEqual(
-            0, Run.objects.awaiting_enqueue().filter(job_id=1).count())
+            0, Run.objects.scheduled().filter(job_id=1).count())

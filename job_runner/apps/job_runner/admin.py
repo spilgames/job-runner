@@ -89,7 +89,7 @@ class RunInlineAdmin(admin.TabularInline):
     max_num = 1
 
     def queryset(self, request):
-        return self.model.objects.awaiting_enqueue()
+        return self.model.objects.scheduled()
 
 
 class RescheduleExcludeInlineAdmin(admin.TabularInline):
@@ -99,23 +99,28 @@ class RescheduleExcludeInlineAdmin(admin.TabularInline):
     model = RescheduleExclude
 
 
+class ProjectAdmin(admin.ModelAdmin):
+    """
+    Admin interface for projects.
+    """
+    list_display = ('title', 'enqueue_is_enabled')
+    list_filter = ('enqueue_is_enabled',)
+
+
 class WorkerAdmin(admin.ModelAdmin):
     """
     Admin interface for workers.
     """
-    list_display = ('title', 'api_key', 'project',)
-    list_filter = ('project',)
+    list_display = ('title', 'api_key', 'project', 'enqueue_is_enabled')
+    list_filter = ('project', 'enqueue_is_enabled')
 
 
 class JobTemplateAdmin(admin.ModelAdmin):
     """
     Admin interface for job-templates.
     """
-    list_display = ('title', 'worker',)
-    list_filter = (
-        'worker',
-        'worker__project',
-    )
+    list_display = ('title', 'worker', 'enqueue_is_enabled')
+    list_filter = ('worker', 'worker__project', 'enqueue_is_enabled')
 
 
 class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
@@ -175,5 +180,5 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
 
 admin.site.register(Job, JobAdmin)
 admin.site.register(JobTemplate, JobTemplateAdmin)
-admin.site.register(Project)
+admin.site.register(Project, ProjectAdmin)
 admin.site.register(Worker, WorkerAdmin)

@@ -5,9 +5,8 @@ import time
 import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
-from django.utils import timezone
 
-from job_runner.apps.job_runner.models import Job, Run
+from job_runner.apps.job_runner.models import Run
 
 
 logger = logging.getLogger(__name__)
@@ -45,22 +44,7 @@ class Command(NoArgsCommand):
             A ``zmq`` publisher.
 
         """
-        active_jobs = Job.objects.filter(
-            run__enqueue_dts__isnull=False,
-            run__return_dts__isnull=True,
-        )
-
-        enqueueable_runs = Run.objects.awaiting_enqueue().filter(
-            # make sure it should be running now
-            schedule_dts__lte=timezone.now(),
-        ).exclude(
-            # exclude auto scheduled jobs when enqueue is disabled
-            job__enqueue_is_enabled=False,
-            is_manual=False,
-        ).exclude(
-            # exclude jobs that are still active
-            job__in=active_jobs,
-        ).select_related()
+        enqueueable_runs = Run.objects.enqueueable().select_related()
 
         broadcasted_job_ids = []
 
