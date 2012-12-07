@@ -464,10 +464,6 @@ class RunTestCase(ApiTestBase):
 
         This is expected to send e-mail notifications out.
 
-        .. note:: Make sure you test this with the following setting::
-
-            EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
-
         """
         response = self.patch(
             '/api/v1/run/1/',
@@ -482,6 +478,42 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(4, len(mail.outbox[0].to))
         self.assertEqual('Run error for: Test job 1', mail.outbox[0].subject)
+
+    def test_returned_with_error_disable_enqueue(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` error disables enqueue.
+
+        This is expected to disable the enqueue.
+
+        """
+        job = Job.objects.get(pk=1)
+        job.disable_enqueue_after_fails = 3
+        job.save()
+
+        for i in range(3):
+            response = self.patch(
+                '/api/v1/run/1/',
+                {
+                    'return_dts': timezone.now().isoformat(' '),
+                    'return_success': False,
+                }
+            )
+
+            self.assertEqual(202, response.status_code)
+            job = Job.objects.get(pk=1)
+            self.assertTrue(job.enqueue_is_enabled)
+            self.assertEqual(i + 1, job.fail_times)
+
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': timezone.now().isoformat(' '),
+                'return_success': False,
+            }
+        )
+
+        job = Job.objects.get(pk=1)
+        self.assertFalse(job.enqueue_is_enabled)
 
     def test_create_new_run(self):
         """

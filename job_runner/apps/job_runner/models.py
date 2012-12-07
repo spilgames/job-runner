@@ -207,6 +207,11 @@ class Job(models.Model):
         help_text='Separate addresses by a newline',
         blank=True,
     )
+    fail_times = models.PositiveIntegerField(
+        editable=False,
+        default=0,
+        help_text='The number of times this job failed in a row.',
+    )
     disable_enqueue_after_fails = models.PositiveIntegerField(
         blank=True,
         null=True,

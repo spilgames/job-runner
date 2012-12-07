@@ -8,6 +8,11 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding field 'Job.fail_times'
+        db.add_column('job_runner_job', 'fail_times',
+                      self.gf('django.db.models.fields.PositiveIntegerField')(default=0),
+                      keep_default=False)
+
         # Adding field 'Job.disable_enqueue_after_fails'
         db.add_column('job_runner_job', 'disable_enqueue_after_fails',
                       self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True),
@@ -25,6 +30,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting field 'Job.fail_times'
+        db.delete_column('job_runner_job', 'fail_times')
+
         # Deleting field 'Job.disable_enqueue_after_fails'
         db.delete_column('job_runner_job', 'disable_enqueue_after_fails')
 
@@ -63,6 +71,7 @@ class Migration(SchemaMigration):
             'direct_reschedule_on_fail_sleep_time': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'disable_enqueue_after_fails': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'enqueue_is_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
+            'fail_times': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'job_template': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.JobTemplate']"}),
             'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
