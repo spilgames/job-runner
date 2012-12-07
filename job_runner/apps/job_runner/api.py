@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import Group
 from tastypie import fields
 from tastypie.authentication import MultiAuthentication, SessionAuthentication
@@ -251,6 +253,12 @@ class RunResource(ModelResource):
                     bundle.obj.job.fail_times >
                     bundle.obj.job.disable_enqueue_after_fails):
                         job.enqueue_is_enabled = False
+                elif job.direct_reschedule_on_fail:
+                    job.schedule_now(
+                        timedelta(
+                            minutes=job.direct_reschedule_on_fail_sleep_time),
+                        is_manual=True,
+                    )
 
                 job.save()
 

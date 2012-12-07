@@ -1,12 +1,13 @@
 import hashlib
 import hmac
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.auth.models import Group
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
+from mock import patch
 
 from job_runner.apps.job_runner.models import (
     Job,
@@ -514,6 +515,39 @@ class RunTestCase(ApiTestBase):
 
         job = Job.objects.get(pk=1)
         self.assertFalse(job.enqueue_is_enabled)
+
+    @patch('job_runner.apps.job_runner.models.timezone')
+    def test_returned_with_error_direct_reschedule(self, tz_mock):
+        """
+        Test PATCH ``/api/v1/run/1/`` direct reschedule on fail.
+        """
+        timezone_now = timezone.now()
+
+        tz_mock.now.return_value = timezone_now
+
+        job = Job.objects.get(pk=1)
+        job.direct_reschedule_on_fail = True
+        job.direct_reschedule_on_fail_sleep_time = 5
+        job.save()
+
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'enqueue_dts': timezone_now.isoformat(' '),
+                'return_dts': timezone_now.isoformat(' '),
+                'return_success': False,
+            }
+        )
+
+        scheduled_runs = Run.objects.scheduled().filter(job=job)
+
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(1, scheduled_runs.count())
+        self.assertEqual(0, Run.objects.enqueueable().filter(job=job).count())
+        self.assertEqual(
+            timezone_now + timedelta(minutes=5),
+            scheduled_runs[0].schedule_dts
+        )
 
     def test_create_new_run(self):
         """

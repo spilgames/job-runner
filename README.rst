@@ -14,6 +14,8 @@ v1.2.7
 ~~~~~~
 
 * Disable the job when it failed more than x times (optional setting).
+* Re-schedule a job directly (or after x minutes) again when it fails
+  (optional setting).
 
 
 v1.2.6
