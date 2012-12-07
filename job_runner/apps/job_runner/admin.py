@@ -173,7 +173,15 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
                 'enqueue_is_enabled',
                 'reschedule_interval',
                 'reschedule_interval_type',
-                'reschedule_type',)
+                'reschedule_type',
+            ),
+        }),
+        ('Scheduling after a job failed', {
+            'fields': (
+                'direct_reschedule_on_fail',
+                'direct_reschedule_on_fail_sleep_time',
+                'disable_enqueue_after_fails',
+            ),
         }),
     )
 
