@@ -10,7 +10,7 @@ from django.template import Context, Template
 from django.template.loader import get_template
 from django.utils import timezone
 
-from job_runner.apps.job_runner.managers import RunManager
+from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
 
 
 RESCHEDULE_INTERVAL_TYPE_CHOICES = (
@@ -466,3 +466,5 @@ class KillRequest(models.Model):
     schedule_dts = models.DateTimeField(auto_now_add=True)
     enqueue_dts = models.DateTimeField(null=True, db_index=True)
     execute_dts = models.DateTimeField(null=True, db_index=True)
+
+    objects = KillRequestManager()
