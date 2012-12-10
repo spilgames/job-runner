@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(NoArgsCommand):
-    help = 'Broadcast runs in queue to workers'
+    help = 'Broadcast runs and kill-requests to workers'
 
     def handle_noargs(self, **options):
         logger.info('Starting queue broadcaster')
@@ -26,13 +26,13 @@ class Command(NoArgsCommand):
         time.sleep(2)
 
         while True:
-            self._broadcast(publisher)
+            self._broadcast_runs(publisher)
             time.sleep(5)
 
         publisher.close()
         context.term()
 
-    def _broadcast(self, publisher):
+    def _broadcast_runs(self, publisher):
         """
         Broadcast runs that are scheduled to run now.
 
