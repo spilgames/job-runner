@@ -6,7 +6,7 @@ import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
-from job_runner.apps.job_runner.models import Run
+from job_runner.apps.job_runner.models import KillRequest, Run
 
 
 logger = logging.getLogger(__name__)
@@ -27,6 +27,7 @@ class Command(NoArgsCommand):
 
         while True:
             self._broadcast_runs(publisher)
+            self._broadcast_kill_requests(publisher)
             time.sleep(5)
 
         publisher.close()
@@ -61,3 +62,26 @@ class Command(NoArgsCommand):
                 # in raw sql, this can be avoided, I couldn't find a way how
                 # this can be done with the django orm
                 broadcasted_job_ids.append(run.job.pk)
+
+    def _broadcast_kill_requests(self, publisher):
+        """
+        Broadcast kill-requests.
+
+        :param publisher:
+            A ``zmq`` publisher.
+
+        """
+        kill_requests = KillRequest.objects.killable().select_related()
+
+        for kill_request in kill_requests:
+            run = kill_request.run
+            worker = run.job.job_template.worker
+            message = [
+                'master.broadcast.{0}'.format(worker.api_key),
+                json.dumps({
+                    'run_id': run.id,
+                    'action': 'kill',
+                })
+            ]
+            logger.debug('Sending: {0}'.format(message))
+            publisher.send_multipart(message)

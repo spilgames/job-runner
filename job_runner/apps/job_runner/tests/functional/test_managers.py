@@ -39,7 +39,7 @@ class KillRequestManagerTestCase(TestCase):
         run.start_dts = timezone.now()
         run.save()
 
-        KillRequest.objects.killable().create(
+        KillRequest.objects.create(
             run=run,
             schedule_dts=timezone.now(),
         )
