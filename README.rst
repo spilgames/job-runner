@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.8
+~~~~~~
+
+* Add option in dashboard to kill job-runs.
+
+
 v1.2.7
 ~~~~~~
 
