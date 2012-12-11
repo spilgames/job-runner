@@ -26,6 +26,7 @@ class CommandTestCase(TestCase):
         """
         run = Run.objects.get(pk=1)
         run.start_dts = timezone.now()
+        run.pid = 1234
         run.save()
         KillRequest.objects.create(
             run=run,

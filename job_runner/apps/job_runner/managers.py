@@ -71,6 +71,9 @@ class KillRequestManager(models.Manager):
             enqueue_dts__isnull=True,
             execute_dts__isnull=True,
 
+            # make sure a pid is assigned to the run
+            run__pid__isnull=False,
+
             # make sure the run is active
             run__start_dts__isnull=False,
 

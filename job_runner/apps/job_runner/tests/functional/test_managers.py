@@ -37,6 +37,7 @@ class KillRequestManagerTestCase(TestCase):
         """
         run = Run.objects.get(pk=1)
         run.start_dts = timezone.now()
+        run.pid = 1234
         run.save()
 
         KillRequest.objects.create(
@@ -64,6 +65,7 @@ class KillRequestManagerTestCase(TestCase):
         run = Run.objects.get(pk=1)
         run.start_dts = timezone.now()
         run.return_dts = timezone.now()
+        run.pid = 1234
         run.save()
 
         KillRequest.objects.create(
@@ -79,6 +81,7 @@ class KillRequestManagerTestCase(TestCase):
         """
         run = Run.objects.get(pk=1)
         run.start_dts = timezone.now()
+        run.pid = 1234
         run.save()
 
         KillRequest.objects.killable().create(
@@ -95,6 +98,7 @@ class KillRequestManagerTestCase(TestCase):
         """
         run = Run.objects.get(pk=1)
         run.start_dts = timezone.now()
+        run.pid = 1234
         run.save()
 
         KillRequest.objects.killable().create(
