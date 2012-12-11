@@ -241,35 +241,35 @@ class RunResource(ModelResource):
 
         job = bundle.obj.job
 
-        if (deserialized.get('return_dts', None)
-            and deserialized.get('return_success', None) == False):
-                # the job failed
-                bundle.obj.send_error_notification()
-                job.fail_times = bundle.obj.job.fail_times + 1
+        if (deserialized.get('return_dts', None) and
+                deserialized.get('return_success', None) is False):
+            # the job failed
+            bundle.obj.send_error_notification()
+            job.fail_times = bundle.obj.job.fail_times + 1
 
-                # disable job when it failed more than x times
-                if (job.disable_enqueue_after_fails and
+            # disable job when it failed more than x times
+            if (job.disable_enqueue_after_fails and
                     bundle.obj.job.fail_times >
                     bundle.obj.job.disable_enqueue_after_fails):
-                        job.enqueue_is_enabled = False
+                job.enqueue_is_enabled = False
 
-                job.save()
+            job.save()
 
         job.reschedule()
 
-        if (deserialized.get('return_dts', None)
-            and deserialized.get('return_success', None) == True):
-                # reset the fail count
-                bundle.obj.job.fail_times = 0
-                bundle.obj.job.save()
+        if (deserialized.get('return_dts', None) and
+                deserialized.get('return_success', None) is True):
+            # reset the fail count
+            bundle.obj.job.fail_times = 0
+            bundle.obj.job.save()
 
-        if (deserialized.get('return_dts', None)
-            and deserialized.get('return_success', None) == True
-            and bundle.obj.schedule_children):
-                # the job completed successfully and has children to
-                # schedule now
-                for child in bundle.obj.job.children.all():
-                    child.schedule_now()
+        if (deserialized.get('return_dts', None) and
+                deserialized.get('return_success', None) is True and
+                bundle.obj.schedule_children):
+            # the job completed successfully and has children to
+            # schedule now
+            for child in bundle.obj.job.children.all():
+                child.schedule_now()
 
         return result
 

@@ -335,10 +335,9 @@ class Job(models.Model):
             return reschedule_date
 
     def _get_reschedule_date(
-                self,
-                reference_date,
-                increment_date=None
-            ):
+            self,
+            reference_date,
+            increment_date=None):
         """
         Return a reschedule datetime.
 
@@ -382,8 +381,8 @@ class Job(models.Model):
                 'Unable to reschedule due to reschedule excludes')
 
         for exclude in self.rescheduleexclude_set.all():
-            if (reschedule_date.time() >= exclude.start_time
-                and reschedule_date.time() <= exclude.end_time):
+            if (reschedule_date.time() >= exclude.start_time and
+                    reschedule_date.time() <= exclude.end_time):
                 return self._get_reschedule_date(
                     reference_date, reschedule_date)
 

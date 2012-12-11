@@ -21,6 +21,7 @@ v1_api.register(ProjectResource())
 v1_api.register(RunResource())
 v1_api.register(WorkerResource())
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     (r'', include(v1_api.urls)),
 )
