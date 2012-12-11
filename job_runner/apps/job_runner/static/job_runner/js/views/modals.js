@@ -20,6 +20,7 @@ var ModalView = Backbone.View.extend({
                 var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
 
                 $('#modal').html(self.runModalTemplate({
+                    id: run.id,
                     job_id: job.id,
                     title: job.attributes.title,
                     job_description: job.attributes.description,
