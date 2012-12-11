@@ -95,3 +95,4 @@ var Project = TastypieModel.extend();
 var Worker = TastypieModel.extend();
 var Job = TastypieModel.extend();
 var JobTemplate = TastypieModel.extend();
+var KillRequest = TastypieModel.extend();

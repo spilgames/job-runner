@@ -30,3 +30,8 @@ var RunCollection = TastypieCollection.extend({
     model: Run,
     url: '/api/v1/run/'
 });
+
+var KillRequestCollection = TastypieCollection.extend({
+    model: KillRequest,
+    url: '/api/v1/kill_request/'
+});
