@@ -440,6 +440,7 @@ class Run(models.Model):
         """
         t = get_template('job_runner/email/job_failed.txt')
         c = Context({
+            'time_zone': settings.TIME_ZONE,
             'run': self,
             'hostname': settings.HOSTNAME,
         })

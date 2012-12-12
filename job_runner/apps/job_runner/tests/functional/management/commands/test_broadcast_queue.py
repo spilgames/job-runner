@@ -41,7 +41,7 @@ class CommandTestCase(TestCase):
         self.assertEqual([
             call([
                 'master.broadcast.worker1',
-                '{"action": "kill", "run_id": 1}'
+                '{"action": "kill", "kill_request_id": 1}'
             ])
         ], publisher.send_multipart.call_args_list)
 

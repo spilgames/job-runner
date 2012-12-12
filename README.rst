@@ -14,6 +14,8 @@ v1.2.8
 ~~~~~~
 
 * Add option in dashboard to kill job-runs.
+* Fix time-zone in failed-run e-mail template (will now use the time-zone
+  configured in the Django config).
 
 
 v1.2.7

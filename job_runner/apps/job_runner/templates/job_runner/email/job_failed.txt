@@ -14,7 +14,7 @@ Job script:
 Run id:
 {{ run.id }}
 
-Run returned at (in UTC):
+Run returned at ({{ time_zone }} time-zone):
 {{ run.return_dts }}
 
 Run log:

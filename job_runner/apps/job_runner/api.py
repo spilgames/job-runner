@@ -16,6 +16,32 @@ from job_runner.apps.job_runner.models import (
 )
 
 
+class NoRelatedSaveMixin(object):
+    def save_related(self, *args, **kwargs):
+        """
+        Override to NOT save related models.
+
+        In this case there is no need for it (it will update the related run
+        every time a kill-requests is updated). Case where it goes wrong:
+
+        * Kill requests has been executed -> PATCH kill_request
+        * Run returned                    -> PATCH run
+
+        Since the PATCH kill_request will do a select on the run (and getting
+        the old data), around the same time the PATCH run will update the run
+        and around the same time the PATCH kill_request will update the run
+        as well, we will end-up with a not-updated run.
+
+        An other option to work around this is to use the SERIALIZE transaction
+        level. However, this seems not to be possible with all Django DB
+        backends.
+
+        See: https://github.com/toastdriven/django-tastypie/issues/742
+
+        """
+        pass
+
+
 class GroupResource(ModelResource):
     """
     RESTful resource for Django groups.
@@ -113,7 +139,7 @@ class JobTemplateResource(ModelResource):
         )
 
 
-class JobResource(ModelResource):
+class JobResource(NoRelatedSaveMixin, ModelResource):
     """
     RESTful resource for jobs.
     """
@@ -151,7 +177,7 @@ class JobResource(ModelResource):
         )
 
 
-class RunResource(ModelResource):
+class RunResource(NoRelatedSaveMixin, ModelResource):
     """
     RESTful resource for job runs.
     """
@@ -245,12 +271,11 @@ class RunResource(ModelResource):
                 deserialized.get('return_success', None) is False):
             # the job failed
             bundle.obj.send_error_notification()
-            job.fail_times = bundle.obj.job.fail_times + 1
+            job.fail_times = job.fail_times + 1
 
             # disable job when it failed more than x times
             if (job.disable_enqueue_after_fails and
-                    bundle.obj.job.fail_times >
-                    bundle.obj.job.disable_enqueue_after_fails):
+                    job.fail_times > job.disable_enqueue_after_fails):
                 job.enqueue_is_enabled = False
 
             job.save()
@@ -260,8 +285,8 @@ class RunResource(ModelResource):
         if (deserialized.get('return_dts', None) and
                 deserialized.get('return_success', None) is True):
             # reset the fail count
-            bundle.obj.job.fail_times = 0
-            bundle.obj.job.save()
+            job.fail_times = 0
+            job.save()
 
         if (deserialized.get('return_dts', None) and
                 deserialized.get('return_success', None) is True and
@@ -274,7 +299,7 @@ class RunResource(ModelResource):
         return result
 
 
-class KillRequestResource(ModelResource):
+class KillRequestResource(NoRelatedSaveMixin, ModelResource):
     """
     RESTful resource for kill requests.
     """

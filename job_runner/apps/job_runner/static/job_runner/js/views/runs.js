@@ -257,6 +257,10 @@ var RunView = Backbone.View.extend({
 
     // handle websocket event
     handleEvent: function(event) {
+        if (event.kind != 'run') {
+            return;
+        }
+
         var self = this;
         var run = this.runCollection.get(event.run_id);
         if (run !== undefined) {

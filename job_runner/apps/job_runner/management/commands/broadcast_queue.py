@@ -79,7 +79,7 @@ class Command(NoArgsCommand):
             message = [
                 'master.broadcast.{0}'.format(worker.api_key),
                 json.dumps({
-                    'run_id': run.id,
+                    'kill_request_id': kill_request.id,
                     'action': 'kill',
                 })
             ]
