@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.7
+~~~~~~
+
+* Disable the job when it failed more than x times (optional setting).
+
+
 v1.2.6
 ~~~~~~
 

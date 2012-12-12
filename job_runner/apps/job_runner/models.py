@@ -38,7 +38,14 @@ class Project(models.Model):
     """
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    groups = models.ManyToManyField(Group)
+    groups = models.ManyToManyField(
+        Group,
+        help_text=(
+            'These are the groups that can see the project in the dashboard. '
+            'The admin permissions are set on template level. '
+
+        )
+    )
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
@@ -109,7 +116,15 @@ class JobTemplate(models.Model):
         'script content of the job'
     ))
     worker = models.ForeignKey(Worker)
-    auth_groups = models.ManyToManyField(Group, blank=True)
+    auth_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        help_text=(
+            'These are the groups that are authorized to see this template '
+            'and its jobs in the admin and are able to re-schedule the jobs '
+            'using this template in the dashboard.'
+        )
+    )
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
@@ -191,6 +206,19 @@ class Job(models.Model):
     notification_addresses = models.TextField(
         help_text='Separate addresses by a newline',
         blank=True,
+    )
+    fail_times = models.PositiveIntegerField(
+        editable=False,
+        default=0,
+        help_text='The number of times this job failed in a row.',
+    )
+    disable_enqueue_after_fails = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text=(
+            'The number of times after which the enqueue-ing of a job should '
+            'be disabled when it failed (blank = never disable enqeueue).'
+        )
     )
 
     class Meta:
