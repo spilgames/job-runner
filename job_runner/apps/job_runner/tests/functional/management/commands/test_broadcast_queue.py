@@ -5,7 +5,7 @@ from mock import Mock, call
 from job_runner.apps.job_runner.management.commands.broadcast_queue import (
     Command)
 from job_runner.apps.job_runner.models import (
-    Job, JobTemplate, Project, Run, Worker)
+    Job, JobTemplate, KillRequest, Project, Run, Worker)
 
 
 class CommandTestCase(TestCase):
@@ -20,14 +20,39 @@ class CommandTestCase(TestCase):
         'test_job',
     ]
 
-    def test__broadcast(self):
+    def test__broadcast_kill_requests(self):
         """
-        Test :meth:`.Command._broadcast`.
+        Test :meth:`.Command._broadcast_kill_requests`.
+        """
+        run = Run.objects.get(pk=1)
+        run.start_dts = timezone.now()
+        run.pid = 1234
+        run.save()
+        KillRequest.objects.create(
+            run=run,
+            schedule_dts=timezone.now()
+        )
+
+        command = Command()
+
+        publisher = Mock()
+        command._broadcast_kill_requests(publisher)
+
+        self.assertEqual([
+            call([
+                'master.broadcast.worker1',
+                '{"action": "kill", "kill_request_id": 1}'
+            ])
+        ], publisher.send_multipart.call_args_list)
+
+    def test__broadcast_runs(self):
+        """
+        Test :meth:`.Command._broadcast_runs`.
         """
         command = Command()
 
         publisher = Mock()
-        command._broadcast(publisher)
+        command._broadcast_runs(publisher)
 
         self.assertEqual([
             call([
@@ -40,65 +65,65 @@ class CommandTestCase(TestCase):
             ]),
         ], publisher.send_multipart.call_args_list)
 
-    def test__broadcast_project_disabled_enqueue(self):
+    def test__broadcast_runs_project_disabled_enqueue(self):
         """
-        Test :meth:`.Command._broadcast` with ``enqueue_is_enabled=False``
+        Test :meth:`.Command._broadcast_runs` with ``enqueue_is_enabled=False``
         for :class:`.Project`.
         """
         Project.objects.update(enqueue_is_enabled=False)
         command = Command()
 
         publisher = Mock()
-        command._broadcast(publisher)
+        command._broadcast_runs(publisher)
 
         self.assertEqual([
         ], publisher.send_multipart.call_args_list)
 
-    def test__broadcast_worker_disabled_enqueue(self):
+    def test__broadcast_runs_worker_disabled_enqueue(self):
         """
-        Test :meth:`.Command._broadcast` with ``enqueue_is_enabled=False``
+        Test :meth:`.Command._broadcast_runs` with ``enqueue_is_enabled=False``
         for :class:`.Worker`.
         """
         Worker.objects.update(enqueue_is_enabled=False)
         command = Command()
 
         publisher = Mock()
-        command._broadcast(publisher)
+        command._broadcast_runs(publisher)
 
         self.assertEqual([
         ], publisher.send_multipart.call_args_list)
 
-    def test__broadcast_job_template_disabled_enqueue(self):
+    def test__broadcast_runs_job_template_disabled_enqueue(self):
         """
-        Test :meth:`.Command._broadcast` with ``enqueue_is_enabled=False``
+        Test :meth:`.Command._broadcast_runs` with ``enqueue_is_enabled=False``
         for :class:`.JobTemplate`.
         """
         JobTemplate.objects.update(enqueue_is_enabled=False)
         command = Command()
 
         publisher = Mock()
-        command._broadcast(publisher)
+        command._broadcast_runs(publisher)
 
         self.assertEqual([
         ], publisher.send_multipart.call_args_list)
 
-    def test__broadcast_run_disabled_enqueue(self):
+    def test__broadcast_runs_disabled_enqueue(self):
         """
-        Test :meth:`.Command._broadcast` with ``enqueue_is_enabled=False``
+        Test :meth:`.Command._broadcast_runs` with ``enqueue_is_enabled=False``
         for :class:`.Run`.
         """
         Job.objects.update(enqueue_is_enabled=False)
         command = Command()
 
         publisher = Mock()
-        command._broadcast(publisher)
+        command._broadcast_runs(publisher)
 
         self.assertEqual([
         ], publisher.send_multipart.call_args_list)
 
-    def test__broadcast_with_active_run(self):
+    def test__broadcast_runs_with_active_run(self):
         """
-        Test :meth:`.Command._broadcast` with still one active run.
+        Test :meth:`.Command._broadcast_runs` with still one active run.
         """
         Run.objects.create(
             job=Job.objects.get(pk=1),
@@ -114,13 +139,13 @@ class CommandTestCase(TestCase):
 
         command = Command()
         publisher = Mock()
-        command._broadcast(publisher)
+        command._broadcast_runs(publisher)
 
         self.assertEqual([], publisher.send_multipart.call_args_list)
 
-    def test__broadcast_disabled_enqueue_with_manual(self):
+    def test__broadcast_runs_disabled_enqueue_with_manual(self):
         """
-        Test :meth:`.Command._broadcast` with ``enqueue_is_enabled=False``,
+        Test :meth:`.Command._broadcast_runs` with ``enqueue_is_enabled=False``
         but with manual one.
         """
         Job.objects.update(enqueue_is_enabled=False)
@@ -128,7 +153,7 @@ class CommandTestCase(TestCase):
         command = Command()
 
         publisher = Mock()
-        command._broadcast(publisher)
+        command._broadcast_runs(publisher)
 
         self.assertEqual([
             call([

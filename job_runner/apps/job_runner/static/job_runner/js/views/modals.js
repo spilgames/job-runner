@@ -20,6 +20,7 @@ var ModalView = Backbone.View.extend({
                 var suspended = job.attributes.enqueue_is_enabled === false && run.attributes.is_manual === false;
 
                 $('#modal').html(self.runModalTemplate({
+                    url: run.url(),
                     job_id: job.id,
                     title: job.attributes.title,
                     job_description: job.attributes.description,
@@ -34,8 +35,32 @@ var ModalView = Backbone.View.extend({
                     suspended: suspended
                 })).modal().on('hide', function() { appRouter.navigate(backUrl, {'trigger': true}); });
 
+                $('#modal .kill-run').click(self.killRun);
+
             }});
         }});
+    },
+
+    killRun: function(e) {
+        var runUrl = $(e.target.parentNode).data('run_url');
+
+        // firefox
+        if (runUrl === undefined) {
+            runUrl = $(e.target).data('run_url');
+        }
+        
+        if (confirm('Are you sure you want to kill this run?')) {
+            var killRequestCollection = new KillRequestCollection();
+            killRequestCollection.create({
+                run: runUrl
+            }, {
+                success: function() {
+                    $('#modal .kill-run').addClass('disabled');
+                    $('#modal .kill-run i').removeClass('icon-remove').addClass('icon-ok');
+                    $('#modal .kill-run span').html('Kill-request has been sent');
+                }
+            });
+        }
     }
 
 });

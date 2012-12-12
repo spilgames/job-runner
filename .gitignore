@@ -18,5 +18,4 @@ job_runner/static/static
 
 
 # dev and test databases
-database.sqlite
-test_database.sqlite
+*.sqlite

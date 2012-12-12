@@ -10,7 +10,7 @@ from django.template import Context, Template
 from django.template.loader import get_template
 from django.utils import timezone
 
-from job_runner.apps.job_runner.managers import RunManager
+from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
 
 
 RESCHEDULE_INTERVAL_TYPE_CHOICES = (
@@ -335,10 +335,9 @@ class Job(models.Model):
             return reschedule_date
 
     def _get_reschedule_date(
-                self,
-                reference_date,
-                increment_date=None
-            ):
+            self,
+            reference_date,
+            increment_date=None):
         """
         Return a reschedule datetime.
 
@@ -382,8 +381,8 @@ class Job(models.Model):
                 'Unable to reschedule due to reschedule excludes')
 
         for exclude in self.rescheduleexclude_set.all():
-            if (reschedule_date.time() >= exclude.start_time
-                and reschedule_date.time() <= exclude.end_time):
+            if (reschedule_date.time() >= exclude.start_time and
+                    reschedule_date.time() <= exclude.end_time):
                 return self._get_reschedule_date(
                     reference_date, reschedule_date)
 
@@ -414,6 +413,7 @@ class Run(models.Model):
     return_dts = models.DateTimeField(null=True, db_index=True)
     return_success = models.NullBooleanField(
         default=None, null=True, db_index=True)
+    pid = models.PositiveIntegerField(null=True, default=None)
     return_log = models.TextField(null=True, default=None)
     is_manual = models.BooleanField(
         default=False, editable=False, db_index=True)
@@ -440,6 +440,7 @@ class Run(models.Model):
         """
         t = get_template('job_runner/email/job_failed.txt')
         c = Context({
+            'time_zone': settings.TIME_ZONE,
             'run': self,
             'hostname': settings.HOSTNAME,
         })
@@ -455,3 +456,15 @@ class Run(models.Model):
                 settings.DEFAULT_FROM_EMAIL,
                 addresses
             )
+
+
+class KillRequest(models.Model):
+    """
+    Contains requests to kill active runs.
+    """
+    run = models.ForeignKey(Run)
+    schedule_dts = models.DateTimeField(auto_now_add=True, db_index=True)
+    enqueue_dts = models.DateTimeField(null=True, db_index=True)
+    execute_dts = models.DateTimeField(null=True, db_index=True)
+
+    objects = KillRequestManager()

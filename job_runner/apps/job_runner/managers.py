@@ -16,7 +16,7 @@ class RunManager(models.Manager):
 
     def enqueueable(self):
         """
-        Return a QS filterd on runs's that are ready to enqueue.
+        Return a QS filtered on runs's that are ready to enqueue.
         """
         job_qs = self.model.job.get_query_set()
 
@@ -50,4 +50,33 @@ class RunManager(models.Manager):
 
             # exclude jobs that are still active
             Q(job__in=active_jobs)
+        )
+
+
+class KillRequestManager(models.Manager):
+    """
+    Custom manager for the KillRequest model.
+    """
+    def killable(self):
+        """
+        Return a QS filtered on requests that are killable.
+        """
+        qs = self.get_query_set()
+
+        return qs.filter(
+            # this should be always the case
+            schedule_dts__lte=timezone.now(),
+
+            # make sure it hasn't been executed already
+            enqueue_dts__isnull=True,
+            execute_dts__isnull=True,
+
+            # make sure a pid is assigned to the run
+            run__pid__isnull=False,
+
+            # make sure the run is active
+            run__start_dts__isnull=False,
+
+            # make sure the run hasn't returned already
+            run__return_dts__isnull=True,
         )

@@ -7,7 +7,8 @@ from job_runner.apps.job_runner.views import DashboardView
 view = login_required(DashboardView.as_view())
 
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(
         r'^project/(?P<project_id>\d+)/$',
         view,
