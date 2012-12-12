@@ -12,7 +12,7 @@ class Migration(SchemaMigration):
         db.create_table('job_runner_killrequest', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('run', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['job_runner.Run'])),
-            ('schedule_dts', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('schedule_dts', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, db_index=True, blank=True)),
             ('enqueue_dts', self.gf('django.db.models.fields.DateTimeField')(null=True, db_index=True)),
             ('execute_dts', self.gf('django.db.models.fields.DateTimeField')(null=True, db_index=True)),
         ))
@@ -87,7 +87,7 @@ class Migration(SchemaMigration):
             'execute_dts': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'run': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Run']"}),
-            'schedule_dts': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'})
+            'schedule_dts': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'})
         },
         'job_runner.project': {
             'Meta': {'object_name': 'Project'},
