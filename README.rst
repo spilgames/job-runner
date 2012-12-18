@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.9
+~~~~~~
+
+* Fix kill button so that it is only visible when the user has permission to
+  kill a job-run (would else result in a HTTP error).
+
+
 v1.2.8
 ~~~~~~
 

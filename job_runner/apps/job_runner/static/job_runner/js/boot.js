@@ -31,7 +31,9 @@ groupCollection.fetch_all({success: function() {
         appRouter = new AppRouter();
 
         // modal view
-        var modalView = new ModalView();
+        var modalView = new ModalView({
+            groupCollection: groupCollection
+        });
         
         var projectView = new ProjectView({
             router: appRouter,
