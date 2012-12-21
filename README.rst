@@ -14,6 +14,7 @@ v1.2.10
 ~~~~~~~
 
 * Show full path (project - template - worker ...) in object title.
+* Improve ordering of objects in the admin.
 
 
 v1.2.9

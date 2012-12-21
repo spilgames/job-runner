@@ -69,6 +69,9 @@ class Project(models.Model):
         addresses = self.notification_addresses.strip().split('\n')
         return [x.strip() for x in addresses if x.strip() != '']
 
+    class Meta:
+        ordering = ('title', )
+
 
 class Worker(models.Model):
     """
@@ -103,6 +106,9 @@ class Worker(models.Model):
         addresses = [x.strip() for x in addresses if x.strip() != '']
         addresses.extend(self.project.get_notification_addresses())
         return addresses
+
+    class Meta:
+        ordering = ('title', )
 
 
 class JobTemplate(models.Model):
@@ -161,6 +167,9 @@ class JobTemplate(models.Model):
         addresses = [x.strip() for x in addresses if x.strip() != '']
         addresses.extend(self.worker.get_notification_addresses())
         return addresses
+
+    class Meta:
+        ordering = ('title', )
 
 
 class Job(models.Model):
