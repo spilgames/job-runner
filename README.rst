@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.2.10
+~~~~~~~
+
+* Show full path (project - template - worker ...) in object title.
+
+
 v1.2.9
 ~~~~~~
 
