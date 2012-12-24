@@ -28,7 +28,8 @@ Install all components
        $ mkvirtualenv job-runner-ws-server && deactivate
        $ mkvirtualenv job-runner-worker && deactivate
 
-   .. seealso:: http://virtualenvwrapper.readthedocs.org/en/latest/
+   .. seealso:: http://virtualenvwrapper.readthedocs.org/en/latest/ if you are
+      not familiar with virtualenvwrapper and virtualenv
 
 
 #. Install the **Job-Runner** in the ``job-runner`` virtualenv. To activate
@@ -60,7 +61,7 @@ Job-Runner
        $ workon job-runner
        $ manage.py broadcast_queue
 
-#. Open a browser and point it to ``http://localhost:8000/admin/``. This will
+#. Open a browser and point it to http://localhost:8000/admin/. This will
    open the admin interface of the **Job-Runner**. While executing
    ``manage.py syncdb`` you were asked to create superuser credentials, use
    these to login. If you did not create any, open a new console and execute::
@@ -147,3 +148,62 @@ browser to http://localhost:8000/, you will see an empty dashboard, with
 top-right a label **live**, meaning that the dashboard is connected to the
 WebSocket server. If this is red with a warning, please make sure the
 ``job_runner_ws_server`` process is still running!
+
+
+Your first job
+--------------
+
+In this part, you'll setup and schedule your first job! This will be a simple
+Python script, printing "Hello world!" and then sleeping between 3 - 15 sec.
+
+#. Point your browser to http://localhost:8000/admin/
+
+#. First create a Python template which will form the base for all future
+   Python jobs:
+
+
+
+   #. Go to *Job-Runner - Job templates*
+   #. Click the **Add job template** button
+   #. Enter the following:
+
+      * Title: Python
+      * Body::
+
+            #!/usr/bin/env python
+
+            {{ content|safe }}
+
+      * Worker: Select *Test Worker*
+      * Auth groups: Select *Test Group*
+
+   #. Click the save button
+
+#. Now create the actual job:
+
+   #. Go to *Job-Runner - Jobs*
+   #. Click the **Add job** button
+   #. Enter the following:
+
+      * Title: Hello world!
+      * Job template: Python
+      * Script content::
+
+            import random
+            import time
+
+            print "Hello world!"
+            time.sleep(random.randint(3, 15))
+
+      * Reschedule interval: 1
+      * Reschedule interval type: select *Every x minutes*
+      * Reschedule type: select *Increment schedule dts by interval*
+
+   #. Under *Runs*, select the current date and type by clicking on the
+      date-picker and time-picker icons.
+
+   #. Save the job.
+
+#. Now go to http://localhost:8000/. If all components are set-up correctly,
+   you should see the job you just created moving from scheduled > in queue >
+   started > completed!
