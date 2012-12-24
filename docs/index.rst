@@ -8,5 +8,6 @@ Contents:
 
    overview
    setup
+   getting_started
    settings
    apps/index
