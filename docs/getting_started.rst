@@ -155,6 +155,8 @@ Your first job
 
 In this part, you'll setup and schedule your first job! This will be a simple
 Python script, printing "Hello world!" and then sleeping between 3 - 15 sec.
+This script will be re-scheduled every 1 minute after the schedule dts
+of the previous run.
 
 #. Point your browser to http://localhost:8000/admin/
 
