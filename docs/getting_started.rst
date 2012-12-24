@@ -44,8 +44,8 @@ Install all components
    installation instructions.
 
 
-Run all components
-------------------
+Get all components up and running
+---------------------------------
 
 Job-Runner
 ~~~~~~~~~~
@@ -100,3 +100,50 @@ Job-Runner
 
 #. You now have created a group, project and worker :) Leave both processes you
    started in the first step running!
+
+
+Job-Runner WebSocket Server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#. Open a new console tab and execute::
+
+       $ workon job-runner-ws-server
+       $ job_runner_ws_server
+
+#. That's it! Leave this process running :)
+
+
+Job-Runner Worker
+~~~~~~~~~~~~~~~~~
+
+#. Open a new console tab and execute::
+
+       $ workon job-runner-worker
+
+#. Create a file named ``job-runner-worker.ini`` with the following content::
+
+       [job_runner_worker]
+       api_base_url=http://localhost:8000/
+       api_key=testworker
+       secret=verysecret 
+       concurrent_jobs=4 
+       log_level=debug 
+       script_temp_path=/tmp 
+       ws_server_hostname=localhost
+       ws_server_port=5555 
+       broadcaster_server_hostname=localhost
+       broadcaster_server_port=5556
+
+   Please refer to the documentation in the ``job-runner-worker`` repository
+   for the meaning of these variables.
+
+#. Now start the worker by executing::
+
+       $ job_runner_worker --config-path job-runner-worker.ini
+
+
+Congratulations! You now have all components up and running. If you point your
+browser to http://localhost:8000/, you will see an empty dashboard, with
+top-right a label **live**, meaning that the dashboard is connected to the
+WebSocket server. If this is red with a warning, please make sure the
+``job_runner_ws_server`` process is still running!
