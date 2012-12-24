@@ -18,7 +18,6 @@ setup(
         'django==1.4.2',
         'django-grappelli',
         'south',
-        'uwsgi',
         'MySQL-python',
         'pytz',
         'pyzmq',
