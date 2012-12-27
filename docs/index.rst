@@ -10,4 +10,5 @@ Contents:
    setup
    getting_started
    settings
+   permission_management
    apps/index
