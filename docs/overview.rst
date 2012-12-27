@@ -1,7 +1,9 @@
 Overview
 ========
 
-The Job-Runner consists of 3 separate components (and repositories):
+The **Job-Runner** is a crontab like tool, with a nice web-frontend for
+admistration and monitoring the current status. It consists of 3 separate
+components (and repositories):
 
 * **Job-Runner** (this repository): provides the REST interface,
   admin interface and (live) dashboard. As well this contains a long-running
