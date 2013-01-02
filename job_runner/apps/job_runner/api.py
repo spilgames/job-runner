@@ -186,7 +186,10 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         'job_runner.apps.job_runner.api.JobResource', 'job')
 
     run_log = fields.ToOneField(
-        'job_runner.apps.job_runner.api.RunLogResource', 'runlog', null=True)
+        'job_runner.apps.job_runner.api.RunLogResource', 'runlog',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         queryset = Run.objects.filter()
