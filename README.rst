@@ -13,7 +13,8 @@ Changes
 v1.3.0
 ~~~~~~
 
-* Move logs to separate model and RESTful resource.
+* Move logs to separate model and RESTful resource. Make sure that you update
+  the worker to >= v1.1.0.
 
 
 v1.2.10
