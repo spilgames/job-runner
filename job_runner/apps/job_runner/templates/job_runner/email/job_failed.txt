@@ -16,6 +16,7 @@ Run id:
 
 Run returned at ({{ time_zone }} time-zone):
 {{ run.return_dts }}
-
+{% if run.run_log %}
 Run log:
-{{ run.return_log|safe }}
+{{ run.run_log.content|safe }}
+{% endif %}

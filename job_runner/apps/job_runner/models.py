@@ -423,7 +423,6 @@ class Run(models.Model):
     return_success = models.NullBooleanField(
         default=None, null=True, db_index=True)
     pid = models.PositiveIntegerField(null=True, default=None)
-    return_log = models.TextField(null=True, default=None)
     is_manual = models.BooleanField(
         default=False, editable=False, db_index=True)
     schedule_children = models.BooleanField(
@@ -477,3 +476,14 @@ class KillRequest(models.Model):
     execute_dts = models.DateTimeField(null=True, db_index=True)
 
     objects = KillRequestManager()
+
+
+class RunLog(models.Model):
+    """
+    Contains log output for runs.
+    """
+    run = models.OneToOneField(Run)
+    content = models.TextField(null=True, default=None)
+
+    class Meta:
+        ordering = ('-run',)

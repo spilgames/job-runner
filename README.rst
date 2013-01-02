@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.3.0
+~~~~~~
+
+* Move logs to separate model and RESTful resource.
+
+
 v1.2.10
 ~~~~~~~
 

@@ -12,6 +12,7 @@ from job_runner.apps.job_runner.models import (
     KillRequest,
     Project,
     Run,
+    RunLog,
     Worker,
 )
 
@@ -309,6 +310,29 @@ class KillRequestResource(NoRelatedSaveMixin, ModelResource):
     class Meta:
         queryset = KillRequest.objects.all()
         resource_name = 'kill_request'
+        list_allowed_methods = ['get', 'post']
+        detail_allowed_methods = ['get', 'patch']
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='run__job__job_template__worker__api_key',
+            user_groups_path='run__job__job_template__worker__project__groups',
+            auth_user_groups_path='run__job__job_template__auth_groups',
+        )
+
+
+class RunLogResource(NoRelatedSaveMixin, ModelResource):
+    """
+    RESTful resource for run log-output.
+    """
+    run = fields.ToOneField(
+        'job_runner.apps.job_runner.api.RunResource', 'run')
+
+    class Meta:
+        queryset = RunLog.objects.all()
+        resource_name = 'run_log'
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'patch']
 

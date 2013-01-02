@@ -7,6 +7,7 @@ from job_runner.apps.job_runner.api import (
     JobTemplateResource,
     KillRequestResource,
     ProjectResource,
+    RunLogResource,
     RunResource,
     WorkerResource,
 )
@@ -18,6 +19,7 @@ v1_api.register(JobResource())
 v1_api.register(JobTemplateResource())
 v1_api.register(KillRequestResource())
 v1_api.register(ProjectResource())
+v1_api.register(RunLogResource())
 v1_api.register(RunResource())
 v1_api.register(WorkerResource())
 
