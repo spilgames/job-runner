@@ -9,7 +9,7 @@ Welcome to Job-Runner's documentation!
    getting_started
    settings
    permission_management
-   contributing
+
 
 Internals
 ---------

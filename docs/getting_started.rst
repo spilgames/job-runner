@@ -33,7 +33,7 @@ Install all components
 
 
 #. Install the **Job-Runner** in the ``job-runner`` virtualenv. To activate
-   this virtualenv, execute ``workon job-runner-worker``. See :doc:`setup` for
+   this virtualenv, execute ``workon job-runner``. See :doc:`setup` for
    installation details.
 
 #. Install the **Job-Runner WebSocket Server** in the ``job-runner-ws-server``
