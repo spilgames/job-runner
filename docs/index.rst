@@ -1,12 +1,20 @@
 Welcome to Job-Runner's documentation!
 ======================================
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
 
    overview
    setup
+   getting_started
    settings
-   apps/index
+   permission_management
+
+
+Internals
+---------
+
+.. toctree::
+    :maxdepth: 2
+
+    apps/index

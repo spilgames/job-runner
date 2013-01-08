@@ -67,7 +67,10 @@ class Project(models.Model):
         Return a ``list`` notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        return [x.strip() for x in addresses]
+        return [x.strip() for x in addresses if x.strip() != '']
+
+    class Meta:
+        ordering = ('title', )
 
 
 class Worker(models.Model):
@@ -93,16 +96,19 @@ class Worker(models.Model):
     )
 
     def __unicode__(self):
-        return self.title
+        return u'{0} - {1}'.format(self.title, self.project)
 
     def get_notification_addresses(self):
         """
         Return a ``list`` of notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        addresses = [x.strip() for x in addresses]
+        addresses = [x.strip() for x in addresses if x.strip() != '']
         addresses.extend(self.project.get_notification_addresses())
         return addresses
+
+    class Meta:
+        ordering = ('title', )
 
 
 class JobTemplate(models.Model):
@@ -139,7 +145,7 @@ class JobTemplate(models.Model):
     )
 
     def __unicode__(self):
-        return self.title
+        return u'{0} - {1}'.format(self.title, self.worker)
 
     def save(self, *args, **kwargs):
         """
@@ -158,9 +164,12 @@ class JobTemplate(models.Model):
         Return a ``list`` of notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        addresses = [x.strip() for x in addresses]
+        addresses = [x.strip() for x in addresses if x.strip() != '']
         addresses.extend(self.worker.get_notification_addresses())
         return addresses
+
+    class Meta:
+        ordering = ('title', )
 
 
 class Job(models.Model):
@@ -226,7 +235,7 @@ class Job(models.Model):
         unique_together = (('title', 'job_template'),)
 
     def __unicode__(self):
-        return self.title
+        return u'{0} - {1}'.format(self.title, self.job_template)
 
     def reschedule(self):
         """
@@ -302,7 +311,7 @@ class Job(models.Model):
         Return a ``list`` of notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        addresses = [x.strip() for x in addresses]
+        addresses = [x.strip() for x in addresses if x.strip() != '']
         addresses.extend(self.job_template.get_notification_addresses())
         return addresses
 

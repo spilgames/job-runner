@@ -13,7 +13,7 @@ from job_runner.apps.job_runner.models import (
 
 class PermissionAdminMixin(object):
     """
-    Mixin class to limit the number of items displayed.
+    Mixin class to limit the number of visible items.
     """
 
     groups_path = None
