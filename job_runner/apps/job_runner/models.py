@@ -96,7 +96,7 @@ class Worker(models.Model):
     )
 
     def __unicode__(self):
-        return u'{0} - {1}'.format(self.title, self.project)
+        return u'{0} > {1}'.format(self.project, self.title)
 
     def get_notification_addresses(self):
         """
@@ -145,7 +145,7 @@ class JobTemplate(models.Model):
     )
 
     def __unicode__(self):
-        return u'{0} - {1}'.format(self.title, self.worker)
+        return u'{0} > {1}'.format(self.worker, self.title)
 
     def save(self, *args, **kwargs):
         """
@@ -235,7 +235,7 @@ class Job(models.Model):
         unique_together = (('title', 'job_template'),)
 
     def __unicode__(self):
-        return u'{0} - {1}'.format(self.title, self.job_template)
+        return u'{0} > {1}'.format(self.job_template, self.title)
 
     def reschedule(self):
         """
