@@ -37,7 +37,6 @@
             "return_success": null, 
             "return_dts": null, 
             "job": 1, 
-            "return_log": null, 
             "schedule_dts": "2012-01-01T00:00:00Z", 
             "enqueue_dts": null
         }
@@ -50,7 +49,6 @@
             "return_success": null, 
             "return_dts": null, 
             "job": 2, 
-            "return_log": null, 
             "schedule_dts": "2012-01-01T00:00:00Z", 
             "enqueue_dts": null
         }

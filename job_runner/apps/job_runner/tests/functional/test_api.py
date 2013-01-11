@@ -14,6 +14,7 @@ from job_runner.apps.job_runner.models import (
     KillRequest,
     Project,
     Run,
+    RunLog,
     Worker,
 )
 
@@ -649,3 +650,31 @@ class KillRequestTestCase(ApiTestBase):
 
         self.assertEqual(201, response.status_code)
         self.assertEqual(1, KillRequest.objects.filter(run_id=1).count())
+
+
+class RunLogTestCase(ApiTestBase):
+    """
+    Tests for the run log interface.
+    """
+    fixtures = [
+        'test_auth',
+        'test_project',
+        'test_worker',
+        'test_job_template',
+        'test_job',
+        'test_child_job',
+    ]
+
+    def test_post_new_run_log(self):
+        """
+        Test POST ``/api/v1/run_log/``.
+        """
+        response = self.post(
+            '/api/v1/run_log/',
+            {
+                'run': '/api/v1/run/1/',
+                'content': 'foo bar',
+            }
+        )
+        self.assertEqual(201, response.status_code)
+        self.assertEqual(1, RunLog.objects.filter(run_id=1).count())
