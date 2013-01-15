@@ -186,7 +186,7 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         'job_runner.apps.job_runner.api.JobResource', 'job')
 
     run_log = fields.ToOneField(
-        'job_runner.apps.job_runner.api.RunLogResource', 'runlog',
+        'job_runner.apps.job_runner.api.RunLogResource', 'run_log',
         null=True,
         blank=True
     )
