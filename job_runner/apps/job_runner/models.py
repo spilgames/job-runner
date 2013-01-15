@@ -482,7 +482,7 @@ class RunLog(models.Model):
     """
     Contains log output for runs.
     """
-    run = models.OneToOneField(Run)
+    run = models.OneToOneField(Run, related_name='run_log')
     content = models.TextField(null=True, default=None)
 
     class Meta:
