@@ -10,6 +10,15 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.3.1
+~~~~~~
+
+* Fix run status modal JavaScript code (was not working when there is no log
+  yet).
+* Fix related name of ``run_log``, to make sure it shows up correctly in the
+  template when there is an error.
+
+
 v1.3.0
 ~~~~~~
 
