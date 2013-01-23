@@ -117,13 +117,14 @@ class WorkerAdmin(admin.ModelAdmin):
     Admin interface for workers.
     """
     list_display = (
+        'project',
         'title',
         'api_key',
-        'project',
         'enqueue_is_enabled',
         'ping_response'
     )
     list_filter = ('project', 'enqueue_is_enabled')
+    list_display_links = ('title',)
 
     def ping_response(self, obj):
         interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
@@ -173,8 +174,9 @@ class JobTemplateAdmin(admin.ModelAdmin):
     """
     Admin interface for job-templates.
     """
-    list_display = ('title', 'worker', 'enqueue_is_enabled')
+    list_display = ('worker', 'title', 'enqueue_is_enabled')
     list_filter = ('worker', 'worker__project', 'enqueue_is_enabled')
+    list_display_links = ('title',)
 
 
 class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
@@ -182,8 +184,8 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     Admin interface for jobs.
     """
     list_display = (
-        'title',
         'job_template',
+        'title',
         'enqueue_is_enabled',
         'reschedule_type',
         'parent'
@@ -196,6 +198,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         'job_template__worker',
         'job_template__worker__project'
     )
+    list_display_links = ('title',)
     inlines = [
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,

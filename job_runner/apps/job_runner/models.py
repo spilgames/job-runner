@@ -110,7 +110,7 @@ class Worker(models.Model):
         return addresses
 
     class Meta:
-        ordering = ('title', )
+        ordering = ('project__title', 'title', )
 
 
 class JobTemplate(models.Model):
@@ -171,7 +171,7 @@ class JobTemplate(models.Model):
         return addresses
 
     class Meta:
-        ordering = ('title', )
+        ordering = ('worker__project__title', 'worker__title', 'title', )
 
 
 class Job(models.Model):
@@ -233,7 +233,11 @@ class Job(models.Model):
     )
 
     class Meta:
-        ordering = ('title', )
+        ordering = (
+            'job_template__worker__project__title',
+            'job_template__worker__title',
+            'job_template__title', 'title',
+        )
         unique_together = (('title', 'job_template'),)
 
     def __unicode__(self):
