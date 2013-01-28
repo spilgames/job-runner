@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block ngapp %}jobrunner{% endblock %}
+
+{% block extrajs %}
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.new.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/app.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div ng-view></div>
+{% endblock %}

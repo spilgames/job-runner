@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="{% block ngapp %}{% endblock %}">
 <head>
     <title>{% block title %}Job-Runner{% endblock %}</title>
     {% block extrahead %}{% endblock %}
@@ -10,13 +10,26 @@
     <link rel="stylesheet/less" href="{{ STATIC_URL }}less/bootstrap/responsive.less" />
     <link rel="stylesheet/less" href="{{ STATIC_URL }}less/master.less" />
     {% block extracss %}{% endblock %}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/less.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular-resource.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-dropdown.js"></script>
+    {% block extrajs %}{% endblock %}
 </head>
 <body class="{% block bodyclass %}generic{% endblock %}" id="{% block bodyid %}generic{% endblock %}">
     <header>
-        <div class="navbar navbar-fixed-top">
+        <div class="navbar navbar-fixed-top" ng-controller="ProjectCtrl">
             <div class="navbar-inner">
                 <div class="container">
                     <a class="brand" href="/">Job-Runner</a>
+
+                    <ul class="nav">
+                        <li><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/runs/">Dashboard</a></li>
+                        <li><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/jobs/">Jobs</a></li>
+                    </ul>
+
                     <ul class="nav pull-right">
                         {% if user.is_authenticated %}
                             <li class="dropdown">
@@ -32,6 +45,18 @@
                             <li><a href="{% url login %}">Login</a></li>
                         {% endif %}
                     </ul>
+
+                    <ul class="nav pull-right">
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown">{% templatetag openvariable %} global_state.project.title {% templatetag closevariable %} <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li ng-repeat="project in projects">
+                                    <a href="/project/{% templatetag openvariable %} project.id {% templatetag closevariable %}/{% templatetag openvariable %} global_state.page {% templatetag closevariable %}/">{% templatetag openvariable %} project.title {% templatetag closevariable %}</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
                     {% block navbar %}{% endblock %}
                     <ul class="nav pull-right ws-status hidden">
                         <li><span class="label"></span></a>
@@ -45,9 +70,5 @@
         {% block content %}{% endblock %}
     </div>
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/less.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-dropdown.js"></script>
-    {% block extrajs %}{% endblock %}
 </body>
 </html>
