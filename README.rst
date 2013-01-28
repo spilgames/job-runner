@@ -10,10 +10,11 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+
 v1.3.2
 ~~~~~~
 
-* First part of removing Spil specific settings.
+* Spil specific settings removed.
 
 
 v1.3.1
