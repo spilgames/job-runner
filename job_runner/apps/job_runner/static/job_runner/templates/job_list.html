@@ -52,9 +52,15 @@
                             </div>
 
                             <h5>Re-schedule interval</h5>
-                            <div ng-switch on="job.interval && job.interval_type">
-                                <p ng-switch-when="true">Every {{ job.interval }} {{ job.interval_type }}</p>
+                            <div ng-switch on="job.reschedule_interval != '' && job.reschedule_interval_type != ''">
+                                <p ng-switch-when="true">Every {{ job.reschedule_interval }} {{ job.reschedule_interval_type |lowercase }}(s)</p>
                                 <p ng-switch-default>No interval specified.</p>
+                            </div>
+
+                            <h5>Parent</h5>
+                            <div ng-switch on="job.parent != null">
+                                <p ng-switch-when="true"><a href="../{{ job.get_parent().id }}/">{{ job.get_parent().title }}</a></p>
+                                <p ng-switch-default>This job does not have a parent.</p>
                             </div>
 
                             <h5>Command</h5>

@@ -90,5 +90,12 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', fu
         return this._job_template;
     };
 
+    Job.prototype.get_parent = function() {
+        if (!this._parent && this.parent) {
+            this._parent = Job.get({id: this.parent.split('/').splice(-2, 1)[0]});
+        }
+        return this._parent;
+    };
+
     return Job;
 });

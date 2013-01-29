@@ -17,16 +17,24 @@ angular.module('jobrunner', ['project', 'job']).config(function($routeProvider, 
 
 });
 
+
+/*
+    Controller for runs.
+*/
 var RunsCtrl = function($scope, $location, $routeParams, Project) {
     globalState.page = 'runs';
     globalState.project = Project.get({id: $routeParams['project']});
 };
 
+
+/*
+    Controller for jobs.
+*/
 var JobListCtrl = function($scope, $location, $routeParams, Project, Job) {
     globalState.page = 'jobs';
-
     $scope.global_state = globalState;
 
+    // do some caching of objects
     if (globalState.project && globalState.jobs && globalState.project.id == $routeParams.project) {
         $scope.jobs = globalState.jobs;
     } else {
@@ -36,12 +44,17 @@ var JobListCtrl = function($scope, $location, $routeParams, Project, Job) {
         });
     }
 
+    // show job details
     if ($routeParams.job) {
         $scope.job = Job.get({id: $routeParams.job});
     }
 
 };
 
+
+/*
+    Controller for selecting projects.
+*/
 var ProjectCtrl = function($scope, Project) {
     $scope.projects = Project.all();
     $scope.global_state = globalState;
