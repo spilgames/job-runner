@@ -1,0 +1,37 @@
+<section class="jobs">
+    <div class="row filters">
+        <div class="span3">
+            <h5>Template</h5>
+        </div>
+        <div class="span3">
+            <h5>Reschedule interval type</h5>
+        </div>
+        <div class="span3">
+            <h5>Worker</h5>
+        </div>
+        <div class="span3">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="span6 jobs">
+
+            <div ng-repeat="job in jobs | orderBy:title" class="span2">
+                <div class="job">
+                    <h5><a href="/project/{{ global_state.project.id }}/jobs/{{ job.id }}/" class="details">{{ job.title }}</a></h5>
+                    <ul>
+                        <li>
+                            <i class="icon-hdd"></i> {{ job.get_job_template().get_worker().title }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="span6 job-details">
+            <div class="hero-unit">
+                <p>Click on a job to see its details and run history...</p>
+            </div>
+        </div>
+    </div>
+</section>

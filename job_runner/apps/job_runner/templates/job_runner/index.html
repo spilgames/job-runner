@@ -7,6 +7,12 @@
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/app.js"></script>
 {% endblock %}
 
+{% block extracss %}
+    <link rel="stylesheet/less" href="{{ STATIC_URL }}job_runner/less/job_runner.less" />
+{% endblock %}
+
+{% block bodyid %}job_runner{% endblock %}
+
 {% block content %}
     <div ng-view></div>
 {% endblock %}

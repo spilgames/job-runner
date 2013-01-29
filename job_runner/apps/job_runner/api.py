@@ -157,6 +157,18 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
     parent = fields.ToOneField('self', 'parent', null=True)
     children = fields.ToManyField('self', 'children', null=True)
 
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(JobResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'job_template__worker__project__id': filters['project_id']
+            })
+
+        return orm_filters
+
     class Meta:
         queryset = Job.objects.all()
         resource_name = 'job'
