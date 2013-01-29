@@ -28,8 +28,44 @@
             </div>
 
         </div>
-        <div class="span6 job-details">
-            <div class="hero-unit">
+        <div class="span6 job-details" ng-switch on="job != null">
+            <div ng-switch-when="true">
+                <div class="tabbable">
+                    <ul class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#tab1" data-toggle="tab">Job details</a>
+                        </li>
+                        <li>
+                            <a href="#tab2" data-toggle="tab">Last 100 completed runs</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab1">
+                            <h5>Title</h5>
+                            <p>{{ job.title }}</p>
+
+                            <h5>Description</h5>
+                            <div ng-switch on="job.description != ''">
+                                <p ng-switch-when="true">{{ job.description }}</p>
+                                <p ng-switch-default>No description given.</p>
+                            </div>
+
+                            <h5>Re-schedule interval</h5>
+                            <div ng-switch on="job.interval && job.interval_type">
+                                <p ng-switch-when="true">Every {{ job.interval }} {{ job.interval_type }}</p>
+                                <p ng-switch-default>No interval specified.</p>
+                            </div>
+
+                            <h5>Command</h5>
+                            <p>
+                                <pre>{{ job.script_content }}</pre>
+                            </p>
+                        </div>
+                        <div class="tab-pane" id="tab2">Tab 2</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-unit" ng-switch-default>
                 <p>Click on a job to see its details and run history...</p>
             </div>
         </div>
