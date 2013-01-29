@@ -4,7 +4,8 @@ angular.module('jobrunner', ['project', 'job']).config(function($routeProvider, 
     globalState = {
         project: null,
         page: null,
-        jobs: null
+        jobs: null,
+        job_filter: {}
     };
 
     $locationProvider.html5Mode(true);
@@ -17,12 +18,13 @@ angular.module('jobrunner', ['project', 'job']).config(function($routeProvider, 
 });
 
 var RunsCtrl = function($scope, $location, $routeParams, Project) {
-    globalState.project = Project.get({id: $routeParams['project']});
     globalState.page = 'runs';
+    globalState.project = Project.get({id: $routeParams['project']});
 };
 
 var JobListCtrl = function($scope, $location, $routeParams, Project, Job) {
     globalState.page = 'jobs';
+
     $scope.global_state = globalState;
 
     if (globalState.project && globalState.jobs && globalState.project.id == $routeParams.project) {

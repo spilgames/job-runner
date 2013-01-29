@@ -11,13 +11,13 @@
         </div>
         <div class="span3">
             <h5>Search</h5>
-            <input ng-model="search.title" type="text" class="input-large" />
+            <input ng-model="global_state.job_filter.title" type="text" class="input-large" />
         </div>
     </div>
     <div class="row">
         <div class="span6 jobs">
 
-            <div ng-repeat="job in jobs | orderBy:title | filter:search" class="span2">
+            <div ng-repeat="job in jobs | orderBy:title | filter:global_state.job_filter" class="span2">
                 <div class="job">
                     <h5><a href="/project/{{ global_state.project.id }}/jobs/{{ job.id }}/" class="details">{{ job.title }}</a></h5>
                     <ul>
