@@ -25,7 +25,7 @@ var JobListCtrl = function($scope, $location, $routeParams, Project, Job) {
     globalState.page = 'jobs';
     $scope.global_state = globalState;
 
-    if (globalState.project && globalState.project.id == $routeParams.project) {
+    if (globalState.project && globalState.jobs && globalState.project.id == $routeParams.project) {
         $scope.jobs = globalState.jobs;
     } else {
         globalState.project = Project.get({id: $routeParams['project']}, function() {

@@ -10,13 +10,14 @@
             <h5>Worker</h5>
         </div>
         <div class="span3">
-
+            <h5>Search</h5>
+            <input ng-model="search.title" type="text" class="input-large" />
         </div>
     </div>
     <div class="row">
         <div class="span6 jobs">
 
-            <div ng-repeat="job in jobs | orderBy:title" class="span2">
+            <div ng-repeat="job in jobs | orderBy:title | filter:search" class="span2">
                 <div class="job">
                     <h5><a href="/project/{{ global_state.project.id }}/jobs/{{ job.id }}/" class="details">{{ job.title }}</a></h5>
                     <ul>
@@ -33,10 +34,10 @@
                 <div class="tabbable">
                     <ul class="nav nav-tabs">
                         <li class="active">
-                            <a href="#tab1" data-toggle="tab">Job details</a>
+                            <a href="#tab1" data-toggle="tab" target="_self">Job details</a>
                         </li>
                         <li>
-                            <a href="#tab2" data-toggle="tab">Last 100 completed runs</a>
+                            <a href="#tab2" data-toggle="tab" target="_self">Last 100 completed runs</a>
                         </li>
                     </ul>
                     <div class="tab-content">
