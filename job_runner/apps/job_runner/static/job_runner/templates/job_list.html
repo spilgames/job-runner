@@ -17,12 +17,12 @@
     <div class="row">
         <div class="span6 jobs">
 
-            <div ng-repeat="job in jobs | orderBy:title | filter:global_state.job_filter" class="span2">
-                <div class="job">
-                    <h5><a href="/project/{{ global_state.project.id }}/jobs/{{ job.id }}/" class="details">{{ job.title }}</a></h5>
+            <div ng-repeat="j in jobs | orderBy:title | filter:global_state.job_filter" class="span2">
+                <div ng-class="{selected: j.id == job.id, job: true}">
+                    <h5><a href="/project/{{ global_state.project.id }}/jobs/{{ j.id }}/" class="details">{{ j.title }}</a></h5>
                     <ul>
                         <li>
-                            <i class="icon-hdd"></i> {{ job.get_job_template().get_worker().title }}
+                            <i class="icon-hdd"></i> {{ j.get_job_template().get_worker().title }}
                         </li>
                     </ul>
                 </div>
