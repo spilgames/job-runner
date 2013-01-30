@@ -130,6 +130,18 @@ class JobTemplateResource(ModelResource):
         null=True
     )
 
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(JobTemplateResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'worker__project__id': filters['project_id']
+            })
+
+        return orm_filters
+
     class Meta:
         queryset = JobTemplate.objects.all()
         resource_name = 'job_template'

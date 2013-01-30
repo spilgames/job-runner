@@ -40,8 +40,14 @@ angular.module('project', ['ngResource', 'getAll']).factory('Project', function(
 /*
     Worker model.
 */
-angular.module('worker', ['ngResource', 'project']).factory('Worker', function($resource, Project) {
+angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', function($resource, getAll, Project) {
     var Worker = $resource('/api/v1/worker/:id/', {'id': '@id'});
+
+    Worker.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Worker, 0, params, success);
+        return output_list;
+    };
 
     Worker.prototype.get_project = function() {
         if (!this._project && this.project) {
@@ -57,8 +63,14 @@ angular.module('worker', ['ngResource', 'project']).factory('Worker', function($
 /*
     Job template model.
 */
-angular.module('jobTemplate', ['ngResource', 'worker']).factory('JobTemplate', function($resource, Worker) {
+angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTemplate', function($resource, getAll, Worker) {
     var JobTemplate = $resource('/api/v1/job_template/:id/', {'id': '@id'});
+
+    JobTemplate.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, JobTemplate, 0, params, success);
+        return output_list;
+    };
 
     JobTemplate.prototype.get_worker = function() {
         if (!this._worker && this.worker) {
@@ -95,6 +107,17 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', fu
             this._parent = Job.get({id: this.parent.split('/').splice(-2, 1)[0]});
         }
         return this._parent;
+    };
+
+    Job.prototype.get_children = function() {
+        if (!this._children && this.children) {
+            var children = [];
+            this._children = children;
+            angular.forEach(this.children, function(child_uri) {
+                children.push(Job.get({id: child_uri.split('/').splice(-2, 1)[0]}));
+            });
+        }
+        return this._children;
     };
 
     return Job;

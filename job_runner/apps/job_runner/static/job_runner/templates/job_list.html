@@ -2,12 +2,12 @@
     <div class="row filters">
         <div class="span3">
             <h5>Template</h5>
+            <select ng-model="global_state.job_filter.job_template" ng-options="job_template.resource_uri as job_template.title for job_template in job_templates">
+            </select>
         </div>
         <div class="span3">
             <h5>Reschedule interval type</h5>
-        </div>
-        <div class="span3">
-            <h5>Worker</h5>
+            <select ng-model="global_state.job_filter.reschedule_interval_type" ng-options="item[0] as item[1] for item in [['', ''], ['MINUTE', 'minute'], ['HOUR', 'hour'], ['DAY', 'day'], ['MONTH', 'month']]"></select>
         </div>
         <div class="span3">
             <h5>Search</h5>
@@ -61,6 +61,16 @@
                             <div ng-switch on="job.parent != null">
                                 <p ng-switch-when="true"><a href="../{{ job.get_parent().id }}/">{{ job.get_parent().title }}</a></p>
                                 <p ng-switch-default>This job does not have a parent.</p>
+                            </div>
+
+                            <h5>Children</h5>
+                            <div ng-switch on="job.children.length != 0">
+                                <p ng-switch-when="true">
+                                    <ul>
+                                        <li ng-repeat="child in job.get_children()"><a href="../{{ child.id }}/">{{ child.title }}</a></li>
+                                    </ul>
+                                </p>
+                                <p ng-switch-default>This job does not have any children.</p>
                             </div>
 
                             <h5>Command</h5>

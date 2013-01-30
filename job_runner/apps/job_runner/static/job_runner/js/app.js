@@ -1,11 +1,14 @@
 var globalState = null;
 
-angular.module('jobrunner', ['project', 'job']).config(function($routeProvider, $locationProvider) {
+angular.module('jobrunner', ['project', 'job', 'jobTemplate', 'worker']).config(function($routeProvider, $locationProvider) {
     globalState = {
         project: null,
         page: null,
         jobs: null,
-        job_filter: {}
+        job_templates: null,
+        job_filter: {
+            reschedule_interval_type: ''
+        }
     };
 
     $locationProvider.html5Mode(true);
@@ -30,17 +33,21 @@ var RunsCtrl = function($scope, $location, $routeParams, Project) {
 /*
     Controller for jobs.
 */
-var JobListCtrl = function($scope, $location, $routeParams, Project, Job) {
+var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTemplate, Worker) {
     globalState.page = 'jobs';
     $scope.global_state = globalState;
 
     // do some caching of objects
-    if (globalState.project && globalState.jobs && globalState.project.id == $routeParams.project) {
+    if (globalState.project && globalState.jobs && globalState.job_templates && globalState.project.id == $routeParams.project) {
         $scope.jobs = globalState.jobs;
+        $scope.job_templates = globalState.job_templates;
     } else {
         globalState.project = Project.get({id: $routeParams['project']}, function() {
             globalState.jobs = Job.all({project_id: globalState.project.id});
+            globalState.job_templates = JobTemplate.all({project_id: globalState.project.id});
+            globalState.workers = Worker.all({project_id: globalState.project.id});
             $scope.jobs = globalState.jobs;
+            $scope.job_templates = globalState.job_templates;
         });
     }
 
