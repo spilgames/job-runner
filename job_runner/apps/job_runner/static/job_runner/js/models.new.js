@@ -127,7 +127,7 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', fu
 /*
     Run model.
 */
-angular.module('run', ['ngResource', 'getAll', 'job']).factory('Run', function($resource, getAll, Job) {
+angular.module('run', ['ngResource', 'getAll', 'job', 'jobrunner.services']).factory('Run', function($resource, getAll, Job, dtformat) {
     var Run = $resource('/api/v1/run/:id/', {'id': '@id'});
 
     Run.all = function(params, success, error) {
@@ -142,6 +142,10 @@ angular.module('run', ['ngResource', 'getAll', 'job']).factory('Run', function($
         }
         return this._job;
     };
+
+    Run.prototype.get_duration_string = function() {
+        return dtformat.formatDuration(this.start_dts, this.return_dts);
+    }
 
     return Run;
 });

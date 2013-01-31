@@ -1,6 +1,6 @@
 var globalState = null;
 
-angular.module('jobrunner', ['project', 'job', 'jobTemplate', 'worker', 'run']).config(function($routeProvider, $locationProvider) {
+angular.module('jobrunner', ['jobrunner.filters', 'project', 'job', 'jobTemplate', 'worker', 'run']).config(function($routeProvider, $locationProvider) {
     globalState = {
         project: null,
         page: null,

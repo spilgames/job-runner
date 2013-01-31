@@ -88,10 +88,13 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="run in recent_runs">
-                                        <td>{{ run.start_dts }}</td>
-                                        <td>x</td>
-                                        <td>y</td>
+                                    <tr ng-repeat="run in recent_runs" ng-class="{error: run.return_success == false}">
+                                        <td><a href="runs/{{ run.id }}/">{{ run.start_dts | formatdts }}</a></td>
+                                        <td>{{ run.get_duration_string() }}</td>
+                                        <td ng-switch on="run.return_success == true">
+                                            <span ng-switch-when="true">OK</span>
+                                            <span ng-switch-when="false">FAIL</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
