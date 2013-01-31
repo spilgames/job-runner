@@ -37,7 +37,7 @@
                             <a href="#tab1" data-toggle="tab" target="_self">Job details</a>
                         </li>
                         <li>
-                            <a href="#tab2" data-toggle="tab" target="_self">Last 100 completed runs</a>
+                            <a href="#tab2" data-toggle="tab" target="_self" ng-click="showRecentRuns()">Last 100 completed runs</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -79,6 +79,7 @@
                             </p>
                         </div>
                         <div class="tab-pane" id="tab2">
+                            <div id="run-performance-graph" class="run-performance-graph"></div>
                             <table class="table table-striped">
                                 <thead>
                                     <tr>

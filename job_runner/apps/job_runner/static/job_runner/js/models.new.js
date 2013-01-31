@@ -147,9 +147,13 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'jobrunner.services']).fac
         return this._job;
     };
 
+    Run.prototype.get_duration_sec = function() {
+        return dtformat.getDurationInSec(this.start_dts, this.return_dts);
+    };
+
     Run.prototype.get_duration_string = function() {
         return dtformat.formatDuration(this.start_dts, this.return_dts);
-    }
+    };
 
     return Run;
 });

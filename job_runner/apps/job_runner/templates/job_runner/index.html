@@ -3,6 +3,8 @@
 {% block ngapp %}jobrunner{% endblock %}
 
 {% block extrajs %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-modal.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-transition.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-tab.js"></script>
@@ -14,6 +16,8 @@
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.new.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/services.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/filters.js"></script>
+
+    <script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});</script>
 {% endblock %}
 
 {% block extracss %}

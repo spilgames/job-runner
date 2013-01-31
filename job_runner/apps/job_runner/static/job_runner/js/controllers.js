@@ -10,7 +10,7 @@ var RunsCtrl = function($scope, $location, $routeParams, Project) {
 /*
     Controller for jobs.
 */
-var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTemplate, Worker, Run) {
+var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTemplate, Worker, Run, dtformat) {
     globalState.page = 'jobs';
     $scope.global_state = globalState;
 
@@ -31,9 +31,28 @@ var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTem
     // show job details
     if ($routeParams.job) {
         $scope.job = Job.get({id: $routeParams.job});
-        $scope.recent_runs = Run.all({job: $routeParams.job, state: 'completed', limit: 100});
-    }
 
+        $scope.showRecentRuns = function() {
+            $scope.recent_runs = Run.all({job: $routeParams.job, state: 'completed', limit: 100}, function() {
+                var chartData = [['Run', 'Duration (seconds)']];
+
+                angular.forEach($scope.recent_runs, function(run) {
+                    chartData.push([dtformat.formatDateTime(run.start_dts), run.get_duration_sec()]);
+                });
+
+                chartData = google.visualization.arrayToDataTable(chartData);
+                var chart = new google.visualization.AreaChart(document.getElementById('run-performance-graph'));
+                chart.draw(chartData, {
+                    'axisTitlesPosition': 'none',
+                    'legend': {'position': 'none'},
+                    'hAxis': {'direction': -1, 'textPosition': 'none', 'gridlines': {'count': 0}},
+                    'vAxis': {'gridlines': {'count': 3}}
+                });
+
+            });
+        };
+
+    }
 };
 
 

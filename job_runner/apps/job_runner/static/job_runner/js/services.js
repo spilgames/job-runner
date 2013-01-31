@@ -13,8 +13,8 @@ jobrunnerServices.value('dtformat', {
 
     getDurationInSec: function(startDts, endDts) {
         if (startDts !== null && endDts !== null) {
-            var start = moment(startDTS);
-            var end = moment(endDTS);
+            var start = moment(startDts);
+            var end = moment(endDts);
             var duration = moment.duration(end.diff(start));
 
             var output = duration.seconds();
@@ -24,5 +24,12 @@ jobrunnerServices.value('dtformat', {
 
             return output;
         }
+    },
+
+    formatDateTime: function(dateTimeString) {
+        if (dateTimeString !== null) {
+            return moment(dateTimeString).format('YYYY-MM-DD HH:mm:ss');
+        }
     }
+
 });
