@@ -6,15 +6,17 @@ angular.module('getAll', []).factory('getAll', function() {
     var extend = angular.extend;
 
     var getAll = function(output_list, model, offset, params, success, error) {
-        var items = model.get(extend({}, params, {offset: offset}, success, error), function() {
+        var items = model.get(extend({}, params, {offset: offset}), function() {
             forEach(items.objects, function(item) {
                 output_list.push(new model(item));
             });
 
             if (items.meta.next !== null) {
                 getAll(output_list, model, items.meta.offset + items.meta.limit, params, success, error);
+            } else {
+                success();
             }
-        });
+        }, error);
     };
 
     return getAll;
@@ -45,7 +47,7 @@ angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', 
 
     Worker.all = function(params, success, error) {
         var output_list = [];
-        getAll(output_list, Worker, 0, params, success);
+        getAll(output_list, Worker, 0, params, success, error);
         return output_list;
     };
 
@@ -68,7 +70,7 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
 
     JobTemplate.all = function(params, success, error) {
         var output_list = [];
-        getAll(output_list, JobTemplate, 0, params, success);
+        getAll(output_list, JobTemplate, 0, params, success, error);
         return output_list;
     };
 
