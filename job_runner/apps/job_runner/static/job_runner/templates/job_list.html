@@ -78,7 +78,24 @@
                                 <pre>{{ job.script_content }}</pre>
                             </p>
                         </div>
-                        <div class="tab-pane" id="tab2">Tab 2</div>
+                        <div class="tab-pane" id="tab2">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Start date</th>
+                                        <th>Duration</th>
+                                        <th>Return</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="run in recent_runs">
+                                        <td>{{ run.start_dts }}</td>
+                                        <td>x</td>
+                                        <td>y</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

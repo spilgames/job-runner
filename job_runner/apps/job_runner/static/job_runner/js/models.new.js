@@ -122,3 +122,26 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', fu
 
     return Job;
 });
+
+
+/*
+    Run model.
+*/
+angular.module('run', ['ngResource', 'getAll', 'job']).factory('Run', function($resource, getAll, Job) {
+    var Run = $resource('/api/v1/run/:id/', {'id': '@id'});
+
+    Run.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Run, 0, params, success);
+        return output_list;
+    };
+
+    Run.prototype.get_job = function() {
+        if (!this._job && this.job) {
+            this._job = Job.get({id:  this.job.split('/').splice(-2, 1)[0]});
+        }
+        return this._job;
+    };
+
+    return Run;
+});

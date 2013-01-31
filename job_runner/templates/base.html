@@ -26,8 +26,8 @@
                     <a class="brand" href="/">Job-Runner</a>
 
                     <ul class="nav">
-                        <li><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/runs/">Dashboard</a></li>
-                        <li><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/jobs/">Jobs</a></li>
+                        <li ng-class="{active: global_state.page == 'runs'}"><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/runs/">Dashboard</a></li>
+                        <li ng-class="{active: global_state.page == 'jobs'}"><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/jobs/">Jobs</a></li>
                     </ul>
 
                     <ul class="nav pull-right">
