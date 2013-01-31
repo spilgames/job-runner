@@ -14,7 +14,9 @@ angular.module('getAll', []).factory('getAll', function() {
             if (items.meta.next !== null) {
                 getAll(output_list, model, items.meta.offset + items.meta.limit, params, success, error);
             } else {
-                success();
+                if (success !== undefined) {
+                    success();
+                }
             }
         }, error);
     };
