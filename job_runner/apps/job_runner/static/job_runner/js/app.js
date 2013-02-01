@@ -12,7 +12,6 @@ angular.module('jobrunner', ['jobrunner.filters', 'project', 'job', 'jobTemplate
         }
     };
 
-    // $locationProvider.reloadOnSearch(false);
     $locationProvider.html5Mode(true);
 
     $routeProvider.
