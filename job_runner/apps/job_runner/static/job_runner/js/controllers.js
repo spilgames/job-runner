@@ -28,6 +28,7 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
         });
     }
 
+    // function for displaying job details
     $scope.showDetails = function() {
         globalState.job_tab = 'details';
     };
@@ -36,6 +37,7 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
     $scope.showRecentRuns = function() {
         globalState.job_tab = 'runs';
 
+        // get recent runs and build the chart
         $scope.recent_runs = Run.all({job: $routeParams.job, state: 'completed', limit: 100}, function() {
             var chartData = [['Run', 'Duration (seconds)']];
 
@@ -104,6 +106,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run) {
 
     };
 
+    // function for scheduling a job
     $scope.scheduleNow = function(withChildren) {
         if (confirm('Are you sure you want to schedule this job?')) {
             var newRun = new Run({
@@ -118,6 +121,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run) {
         }
     };
 
+    // function for setting enqueue_is_enabled attribute on job model
     $scope.toggleEnqueue = function(toValue) {
         if (toValue === true) {
             if (confirm('Are you sure you want to enable the enqueueing of this job?')) {
