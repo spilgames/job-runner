@@ -87,7 +87,7 @@ var ProjectCtrl = function($scope, Project) {
 /*
     Controller for job actions.
 */
-var JobActionCtrl = function($scope, $routeParams, $route, Job, Group) {
+var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run) {
     var getPermissionsForJob = function(jobId) {
         $scope.job = Job.get({id: jobId}, function() {
             var jobTemplate = $scope.job.get_job_template(function() {
@@ -105,7 +105,17 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group) {
     };
 
     $scope.scheduleNow = function(withChildren) {
-        alert(withChildren);
+        if (confirm('Are you sure you want to schedule this job?')) {
+            var newRun = new Run({
+                job: $scope.job.resource_uri,
+                is_manual: true,
+                schedule_children: withChildren,
+                schedule_dts: moment().format('YYYY-MM-DD HH:mm:ss')
+            });
+            newRun.$create(function() {
+                $scope.scheduled_run = newRun;
+            });
+        }
     };
 
     $scope.toggleEnqueue = function(toValue) {

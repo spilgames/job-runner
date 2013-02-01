@@ -181,12 +181,16 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).fact
 /*
     Run model.
 */
-angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services']).factory('Run', function($resource, getAll, Job, RunLog, dtformat) {
+angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, dtformat, $cookies, $http) {
+    // Required by Django and Django-tastypie
+    $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
+
     var Run = $resource(
         '/api/v1/run/:id/',
         {'id': '@id'},
         {
-            'get': {'method': 'GET'}
+            'get': {'method': 'GET'},
+            'create': {'method': 'POST'}
         }
     );
 

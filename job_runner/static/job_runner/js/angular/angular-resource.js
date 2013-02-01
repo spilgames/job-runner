@@ -316,7 +316,7 @@ angular.module('ngResource', ['ng']).
         });
         query.sort();
         url = url.replace(/\/*$/, '');
-        return url + (query.length ? '?' + query.join('&') : '');
+        return url + "/" + (query.length ? '?' + query.join('&') : '');
       }
     };
 
