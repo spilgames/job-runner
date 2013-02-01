@@ -48,18 +48,18 @@
                             <div class="pull-right" ng-controller="JobActionCtrl">
                                 <div ng-class="{hidden: auth_permissions != true}">
                                     <div class="btn-group">
-                                        <button class="btn"><i class="icon-play"></i> <span>Schedule now</span></button>
+                                        <button class="btn" ng-click="scheduleNow(false)"><i class="icon-play"></i> <span>Schedule now</span></button>
                                         <button ng-class="{btn: true, 'dropdown-toggle': true, hidden: job.children.length < 1}" data-toggle="dropdown">
                                             <span class="caret"></span>
                                         </button>
                                         <ul ng-class="{'dropdown-menu': true, hidden: job.children.length < 1}">
-                                            <li><a href="#">Schedule now incl. children</a></li>
+                                            <li><a href="#" ng-click="scheduleNow(true)">Schedule now incl. children</a></li>
                                         </ul>
                                     </div>
 
                                     <ng-switch on="job.enqueue_is_enabled">
-                                        <button ng-switch-when="true" class="btn btn-danger"><span>Suspend enqueue</span></button>
-                                        <button ng-switch-when="false" class="btn btn-success"><span>Enable enqueue</span></button>
+                                        <button ng-switch-when="true" class="btn btn-danger" ng-click="toggleEnqueue(false)"><span>Suspend enqueue</span></button>
+                                        <button ng-switch-when="false" class="btn btn-success" ng-click="toggleEnqueue(true)"><span>Enable enqueue</span></button>
                                     </ng-switch>
                                 </div>
                             </div>

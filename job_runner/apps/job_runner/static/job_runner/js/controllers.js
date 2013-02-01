@@ -102,6 +102,14 @@ var JobActionCtrl = function($scope, $routeParams, Job, Group) {
         });
     };
 
+    $scope.scheduleNow = function(withChildren) {
+        alert(withChildren);
+    };
+
+    $scope.toggleEnqueue = function(toValue) {
+        alert(toValue);
+    };
+
     if ($routeParams.job !== undefined) {
         getPermissionsForJob($routeParams.job);
     }

@@ -29,7 +29,13 @@ angular.module('getAll', []).factory('getAll', function() {
     Group model.
 */
 angular.module('group', ['ngResource', 'getAll']).factory('Group', function($resource, getAll) {
-    var Group = $resource('/api/v1/group/:id/', {'id': '@id'});
+    var Group = $resource(
+        '/api/v1/group/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
 
     Group.all = function(params, success, error) {
         var output_list = [];
@@ -45,7 +51,13 @@ angular.module('group', ['ngResource', 'getAll']).factory('Group', function($res
     Project model.
 */
 angular.module('project', ['ngResource', 'getAll']).factory('Project', function($resource, getAll) {
-    var Project = $resource('/api/v1/project/:id/', {'id': '@id'});
+    var Project = $resource(
+        '/api/v1/project/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
 
     Project.all = function(params, success, error) {
         var output_list = [];
@@ -61,7 +73,13 @@ angular.module('project', ['ngResource', 'getAll']).factory('Project', function(
     Worker model.
 */
 angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', function($resource, getAll, Project) {
-    var Worker = $resource('/api/v1/worker/:id/', {'id': '@id'});
+    var Worker = $resource(
+        '/api/v1/worker/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
 
     Worker.all = function(params, success, error) {
         var output_list = [];
@@ -84,7 +102,13 @@ angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', 
     Job template model.
 */
 angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTemplate', function($resource, getAll, Worker) {
-    var JobTemplate = $resource('/api/v1/job_template/:id/', {'id': '@id'});
+    var JobTemplate = $resource(
+        '/api/v1/job_template/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
 
     JobTemplate.all = function(params, success, error) {
         var output_list = [];
@@ -107,7 +131,13 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
     Job model.
 */
 angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', function($resource, getAll, JobTemplate) {
-    var Job = $resource('/api/v1/job/:id/', {'id': '@id'});
+    var Job = $resource(
+        '/api/v1/job/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
 
     Job.all = function(params, success, error) {
         var output_list = [];
@@ -148,7 +178,13 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', fu
     Run model.
 */
 angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services']).factory('Run', function($resource, getAll, Job, RunLog, dtformat) {
-    var Run = $resource('/api/v1/run/:id/', {'id': '@id'});
+    var Run = $resource(
+        '/api/v1/run/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
 
     Run.all = function(params, success, error) {
         var output_list = [];
@@ -210,6 +246,12 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
     Run-log model.
 */
 angular.module('runLog', ['ngResource', 'getAll']).factory('RunLog', function($resource, getAll) {
-    var RunLog = $resource('/api/v1/run_log/:id/', {'id': '@id'});
+    var RunLog = $resource(
+        '/api/v1/run_log/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
     return RunLog;
 });
