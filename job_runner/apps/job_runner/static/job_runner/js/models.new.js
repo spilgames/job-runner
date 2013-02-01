@@ -115,9 +115,9 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', fu
         return output_list;
     };
 
-    Job.prototype.get_job_template = function() {
+    Job.prototype.get_job_template = function(success) {
         if (!this._job_template && this.job_template) {
-            this._job_template = JobTemplate.get({'id': this.job_template.split('/').splice(-2, 1)[0]});
+            this._job_template = JobTemplate.get({'id': this.job_template.split('/').splice(-2, 1)[0]}, success);
         }
         return this._job_template;
     };

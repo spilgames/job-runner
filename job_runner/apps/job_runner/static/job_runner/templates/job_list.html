@@ -20,7 +20,7 @@
         <div class="span6 jobs">
 
             <div ng-repeat="j in jobs | orderBy:title | filter:global_state.job_filter" class="span2">
-                <div ng-class="{selected: j.id == job.id, job: true}">
+                <div ng-class="{selected: j.id == job.id, job: true, suspended: j.enqueue_is_enabled != true}">
                     <h5><a href="/project/{{ global_state.project.id }}/jobs/{{ j.id }}/" class="details">{{ j.title }}</a></h5>
                     <ul>
                         <li>
@@ -44,8 +44,33 @@
                     </ul>
                     <div class="tab-content">
                         <div ng-class="{'tab-pane': true, active: global_state.job_tab == 'details'}" id="tab1">
+
+                            <div class="pull-right" ng-controller="JobActionCtrl">
+                                <div ng-class="{hidden: auth_permissions != true}">
+                                    <div class="btn-group">
+                                        <button class="btn"><i class="icon-play"></i> <span>Schedule now</span></button>
+                                        <button ng-class="{btn: true, 'dropdown-toggle': true, hidden: job.children.length < 1}" data-toggle="dropdown">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul ng-class="{'dropdown-menu': true, hidden: job.children.length < 1}">
+                                            <li><a href="#">Schedule now incl. children</a></li>
+                                        </ul>
+                                    </div>
+
+                                    <ng-switch on="job.enqueue_is_enabled">
+                                        <button ng-switch-when="true" class="btn btn-danger"><span>Suspend enqueue</span></button>
+                                        <button ng-switch-when="false" class="btn btn-success"><span>Enable enqueue</span></button>
+                                    </ng-switch>
+                                </div>
+                            </div>
+
                             <h5>Title</h5>
-                            <p>{{ job.title }}</p>
+                            <p>
+                                {{ job.title }}
+                                <ng-switch on="job.enqueue_is_enabled">
+                                    <span ng-switch-when="false">(enqueue is suspended)</span>
+                                </ng-switch>
+                            </p>
 
                             <h5>Description</h5>
                             <div ng-switch on="job.description != ''">

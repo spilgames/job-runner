@@ -10,7 +10,7 @@ var RunsCtrl = function($scope, $location, $routeParams, Project) {
 /*
     Controller for jobs.
 */
-var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTemplate, Worker, Run, dtformat) {
+var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTemplate, Worker, Run, Group, dtformat) {
     globalState.page = 'jobs';
     $scope.global_state = globalState;
 
@@ -81,4 +81,28 @@ var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTem
 var ProjectCtrl = function($scope, Project) {
     $scope.projects = Project.all();
     $scope.global_state = globalState;
+};
+
+
+/*
+    Controller for job actions.
+*/
+var JobActionCtrl = function($scope, $routeParams, Job, Group) {
+    var getPermissionsForJob = function(jobId) {
+        var job = Job.get({id: jobId}, function() {
+            var jobTemplate = job.get_job_template(function() {
+                var groups = Group.all({}, function() {
+                    angular.forEach(groups, function(group) {
+                        if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
+                            $scope.auth_permissions = true;
+                        }
+                    });
+                });
+            });
+        });
+    };
+
+    if ($routeParams.job !== undefined) {
+        getPermissionsForJob($routeParams.job);
+    }
 };
