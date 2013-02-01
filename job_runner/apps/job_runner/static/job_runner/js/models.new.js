@@ -130,12 +130,16 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
 /*
     Job model.
 */
-angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', function($resource, getAll, JobTemplate) {
+angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).factory('Job', function($resource, getAll, JobTemplate, $cookies, $http) {
+    // Required by Django and Django-tastypie
+    $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
+
     var Job = $resource(
         '/api/v1/job/:id/',
         {'id': '@id'},
         {
-            'get': {'method': 'GET'}
+            'get': {'method': 'GET'},
+            'save': {'method': 'PUT'}
         }
     );
 

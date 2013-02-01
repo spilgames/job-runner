@@ -1,7 +1,7 @@
 /*
     Controller for runs.
 */
-var RunsCtrl = function($scope, $location, $routeParams, Project) {
+var RunsCtrl = function($scope, $routeParams, Project) {
     globalState.page = 'runs';
     globalState.project = Project.get({id: $routeParams.project});
 };
@@ -10,7 +10,7 @@ var RunsCtrl = function($scope, $location, $routeParams, Project) {
 /*
     Controller for jobs.
 */
-var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTemplate, Worker, Run, Group, dtformat) {
+var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Worker, Run, Group, dtformat) {
     globalState.page = 'jobs';
     $scope.global_state = globalState;
 
@@ -87,10 +87,10 @@ var ProjectCtrl = function($scope, Project) {
 /*
     Controller for job actions.
 */
-var JobActionCtrl = function($scope, $routeParams, Job, Group) {
+var JobActionCtrl = function($scope, $routeParams, $route, Job, Group) {
     var getPermissionsForJob = function(jobId) {
-        var job = Job.get({id: jobId}, function() {
-            var jobTemplate = job.get_job_template(function() {
+        $scope.job = Job.get({id: jobId}, function() {
+            var jobTemplate = $scope.job.get_job_template(function() {
                 var groups = Group.all({}, function() {
                     angular.forEach(groups, function(group) {
                         if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
@@ -100,6 +100,8 @@ var JobActionCtrl = function($scope, $routeParams, Job, Group) {
                 });
             });
         });
+
+
     };
 
     $scope.scheduleNow = function(withChildren) {
@@ -107,7 +109,23 @@ var JobActionCtrl = function($scope, $routeParams, Job, Group) {
     };
 
     $scope.toggleEnqueue = function(toValue) {
-        alert(toValue);
+        if (toValue === true) {
+            if (confirm('Are you sure you want to enable the enqueueing of this job?')) {
+                $scope.job.enqueue_is_enabled = toValue;
+                $scope.job.$save(function(){
+                    globalState.jobs = null;
+                    $route.reload();
+                });
+            }
+        } else if (toValue === false) {
+            if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
+                $scope.job.enqueue_is_enabled = toValue;
+                $scope.job.$save(function() {
+                    globalState.jobs = null;
+                    $route.reload();
+                });
+            }
+        }
     };
 
     if ($routeParams.job !== undefined) {
