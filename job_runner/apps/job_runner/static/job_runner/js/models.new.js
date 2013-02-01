@@ -26,6 +26,22 @@ angular.module('getAll', []).factory('getAll', function() {
 
 
 /*
+    Group model.
+*/
+angular.module('group', ['ngResource', 'getAll']).factory('Group', function($resource, getAll) {
+    var Group = $resource('/api/v1/group/:id/', {'id': '@id'});
+
+    Group.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Group, 0, params, success, error);
+        return output_list;
+    };
+
+    return Group;
+});
+
+
+/*
     Project model.
 */
 angular.module('project', ['ngResource', 'getAll']).factory('Project', function($resource, getAll) {
