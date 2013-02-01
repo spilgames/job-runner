@@ -131,7 +131,7 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate']).factory('Job', fu
 /*
     Run model.
 */
-angular.module('run', ['ngResource', 'getAll', 'job', 'jobrunner.services']).factory('Run', function($resource, getAll, Job, dtformat) {
+angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services']).factory('Run', function($resource, getAll, Job, RunLog, dtformat) {
     var Run = $resource('/api/v1/run/:id/', {'id': '@id'});
 
     Run.all = function(params, success, error) {
@@ -155,5 +155,45 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'jobrunner.services']).fac
         return dtformat.formatDuration(this.start_dts, this.return_dts);
     };
 
+    Run.prototype.get_state = function() {
+        if (this.enqueue_dts === null) {
+            return 'scheduled';
+        } else if (this.enqueue_dts !== null && this.start_dts === null) {
+            return 'in_queue';
+        } else if (this.start_dts !== null && this.return_dts === null) {
+            return 'started';
+        } else if (this.return_dts !== null && this.return_success === true) {
+            return 'completed';
+        } else if (this.return_dts !== null && this.return_success === false) {
+            return 'completed_with_error';
+        }
+    };
+
+    Run.prototype.get_state_string = function() {
+        return {
+            'scheduled': 'Scheduled',
+            'in_queue': 'In queue',
+            'started': 'Started',
+            'completed': 'Completed',
+            'completed_with_error': 'Completed with error'
+        }[this.get_state()];
+    };
+
+    Run.prototype.get_run_log = function() {
+        if (!this._run_log && this.run_log) {
+            this._run_log = RunLog.get({id: this.run_log.split('/').splice(-2, 1)[0]});
+        }
+        return this._run_log;
+    };
+
     return Run;
+});
+
+
+/*
+    Run-log model.
+*/
+angular.module('runLog', ['ngResource', 'getAll']).factory('RunLog', function($resource, getAll) {
+    var RunLog = $resource('/api/v1/run_log/:id/', {'id': '@id'});
+    return RunLog;
 });

@@ -1,3 +1,5 @@
+<ng-include src="'/static/job_runner/templates/run_modal.html'"></ng-include>
+
 <section class="jobs">
     <div class="row filters">
         <div class="span3">
@@ -33,15 +35,15 @@
             <div ng-switch-when="true">
                 <div class="tabbable">
                     <ul class="nav nav-tabs">
-                        <li class="active">
-                            <a href="#tab1" data-toggle="tab" target="_self">Job details</a>
+                        <li ng-class="{active: global_state.job_tab == 'details'}">
+                            <a href="#tab1" data-toggle="tab" target="_self" ng-click="showDetails()">Job details</a>
                         </li>
-                        <li>
+                        <li ng-class="{active: global_state.job_tab == 'runs'}">
                             <a href="#tab2" data-toggle="tab" target="_self" ng-click="showRecentRuns()">Last 100 completed runs</a>
                         </li>
                     </ul>
                     <div class="tab-content">
-                        <div class="tab-pane active" id="tab1">
+                        <div ng-class="{'tab-pane': true, active: global_state.job_tab == 'details'}" id="tab1">
                             <h5>Title</h5>
                             <p>{{ job.title }}</p>
 
@@ -78,7 +80,7 @@
                                 <pre>{{ job.script_content }}</pre>
                             </p>
                         </div>
-                        <div class="tab-pane" id="tab2">
+                        <div ng-class="{'tab-pane': true, active: global_state.job_tab == 'runs'}" id="tab2">
                             <div id="run-performance-graph" class="run-performance-graph"></div>
                             <table class="table table-striped">
                                 <thead>

@@ -1,0 +1,63 @@
+<div class="modal hide fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="run_modal_title">Run: <a href="/project/{{ global_state.project.id }}/jobs/{{ run.get_job().id }}/">{{ run.get_job().title }}</a></h3>
+    </div>
+    <div class="modal-body" id="status-modal">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>Status</th>
+                    <td>{{ run.get_state_string() }}</td>
+                </tr>
+                <tr>
+                    <th>Scheduled</th>
+                    <td>{{ run.schedule_dts | formatdts }}</td>
+                </tr>
+                <tr>
+                    <th>In queue</th>
+                    <td>{{ run.enqueue_dts | formatdts }}</td>
+                </tr>
+                <tr>
+                    <th>Started</th>
+                    <td>{{ run.start_dts | formatdts }}</td>
+                </tr>
+                <tr>
+                    <th>Returned</th>
+                    <td>{{ run.return_dts | formatdts }}</td>
+                </tr>
+                <tr>
+                    <th>Run duration</th>
+                    <td>{{ run.get_duration_string() }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div ng-switch on="run.get_job().description != null">
+            <p ng-switch-when="true">{{ run.get_job().description }}</p>
+        </div>
+
+        <div class="tabbable">
+            <ul class="nav nav-tabs" ng-switch on="run.get_run_log() != null">
+                <li ng-switch-when="true" class="active">
+                    <a href="#log" data-toggle="tab" target="_self">Log output</a>
+                </li>
+                <li ng-class="{active: run.get_run_log() == null}">
+                    <a href="#command" data-toggle="tab" target="_self">Script</a>
+                </li>
+            </ul>
+            <div class="tab-content" ng-switch on="run.get_run_log() != null">
+                <div id="log" ng-switch-when="true" class="tab-pane active">
+                    <p><pre>{{ run.get_run_log().content }}</pre></p>
+                </div>
+                <div id="command" ng-class="{'tab-pane': true, active: run.get_run_log() == null}">
+                    <p><pre>{{ run.get_job().script_content }}</pre></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+</div>

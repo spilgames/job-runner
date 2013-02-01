@@ -28,31 +28,50 @@ var JobListCtrl = function($scope, $location, $routeParams, Project, Job, JobTem
         });
     }
 
+    $scope.showDetails = function() {
+        globalState.job_tab = 'details';
+    };
+
+    // function for displaying recent runs of a job
+    $scope.showRecentRuns = function() {
+        globalState.job_tab = 'runs';
+
+        $scope.recent_runs = Run.all({job: $routeParams.job, state: 'completed', limit: 100}, function() {
+            var chartData = [['Run', 'Duration (seconds)']];
+
+            angular.forEach($scope.recent_runs, function(run) {
+                chartData.push([dtformat.formatDateTime(run.start_dts), run.get_duration_sec()]);
+            });
+
+            chartData = google.visualization.arrayToDataTable(chartData);
+            var chart = new google.visualization.AreaChart(document.getElementById('run-performance-graph'));
+            chart.draw(chartData, {
+                'axisTitlesPosition': 'none',
+                'legend': {'position': 'none'},
+                'hAxis': {'direction': -1, 'textPosition': 'none', 'gridlines': {'count': 0}},
+                'vAxis': {'gridlines': {'count': 3}}
+            });
+
+        });
+    };
+
     // show job details
     if ($routeParams.job) {
         $scope.job = Job.get({id: $routeParams.job});
-
-        $scope.showRecentRuns = function() {
-            $scope.recent_runs = Run.all({job: $routeParams.job, state: 'completed', limit: 100}, function() {
-                var chartData = [['Run', 'Duration (seconds)']];
-
-                angular.forEach($scope.recent_runs, function(run) {
-                    chartData.push([dtformat.formatDateTime(run.start_dts), run.get_duration_sec()]);
-                });
-
-                chartData = google.visualization.arrayToDataTable(chartData);
-                var chart = new google.visualization.AreaChart(document.getElementById('run-performance-graph'));
-                chart.draw(chartData, {
-                    'axisTitlesPosition': 'none',
-                    'legend': {'position': 'none'},
-                    'hAxis': {'direction': -1, 'textPosition': 'none', 'gridlines': {'count': 0}},
-                    'vAxis': {'gridlines': {'count': 3}}
-                });
-
-            });
-        };
-
+        if (globalState.job_tab == 'runs') {
+            // make sure that we update the recent runs
+            $scope.showRecentRuns();
+        }
     }
+
+    // show run details
+    if ($routeParams.run) {
+        $scope.run = Run.get({id: $routeParams.run}, function() {
+            // is there a better way?
+            $('#modal').modal().on('hide', function() { history.go(-1); });
+        });
+    }
+
 };
 
 
