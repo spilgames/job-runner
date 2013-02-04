@@ -1,7 +1,7 @@
 <div class="modal hide fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="run_modal_title">Run: <a href="/project/{{ global_state.project.id }}/jobs/{{ run.get_job().id }}/">{{ run.get_job().title }}</a></h3>
+        <h3 id="run_modal_title">Run: <a href="/project/{{ global_state.project.id }}/jobs/{{ run.get_job().id }}/" target="_self">{{ run.get_job().title }}</a></h3>
     </div>
     <div class="modal-body" id="status-modal">
         <table class="table table-bordered">
