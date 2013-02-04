@@ -282,6 +282,11 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         if 'state' in filters and filters['state'] in state_filters:
             orm_filters.update(state_filters[filters['state']])
 
+        if 'project_id' in filters:
+            orm_filters.update({
+                'job__job_template__worker__project__id': filters['project_id']
+            })
+
         return orm_filters
 
     def obj_update(self, bundle, request=None, *args, **kwargs):

@@ -1,9 +1,41 @@
 /*
     Controller for runs.
 */
-var RunsCtrl = function($scope, $routeParams, Project) {
+var RunsCtrl = function($scope, $routeParams, Project, Run) {
     globalState.page = 'runs';
     globalState.project = Project.get({id: $routeParams.project});
+    $scope.runFilter = function(state) {
+        return function(run) {
+            return (run.get_state() == state);
+        };
+    };
+
+    var initialFetch = function() {
+        $scope.runs = [];
+
+        var scheduled = Run.all({state: 'scheduled', project_id: $routeParams.project}, function() {
+            angular.forEach(scheduled, function(run) {
+                $scope.runs.push(run);
+            });
+        });
+
+        var inQueue = Run.all({state: 'in_queue', project_id: $routeParams.project}, function() {
+            angular.forEach(inQueue, function(run) {
+                $scope.runs.push(run);
+            });
+        });
+
+        var started = Run.all({state: 'started', project_id: $routeParams.project}, function() {
+            angular.forEach(started, function(run) {
+                $scope.runs.push(run);
+            });
+        });
+
+
+    };
+
+    initialFetch();
+
 };
 
 
@@ -90,6 +122,8 @@ var ProjectCtrl = function($scope, Project) {
     Controller for job actions.
 */
 var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run) {
+    // set $scope.auth_permissions to true if the user has auth permissions
+    // for the given jobId.
     var getPermissionsForJob = function(jobId) {
         $scope.job = Job.get({id: jobId}, function() {
             var jobTemplate = $scope.job.get_job_template(function() {
