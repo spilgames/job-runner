@@ -110,6 +110,18 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
 
 
 /*
+    Controller which redirects to the first project.
+*/
+var RedirectToFirstProjectCtrl = function($location, Project) {
+    var projects = Project.all({}, function() {
+        if (projects.length > 0) {
+            $location.path('/project/'+ projects[0].id +'/runs/');
+        }
+    });
+};
+
+
+/*
     Controller for selecting projects.
 */
 var ProjectCtrl = function($scope, Project) {
