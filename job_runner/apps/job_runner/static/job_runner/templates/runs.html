@@ -17,7 +17,7 @@
         <div class="span2">
             <h4>In queue</h4>
             <div id="enqueued-runs">
-                <div ng-repeat="run in runs | filter:runFilter('in_queue') | orderBy:enqueue_dts" class="job-run job-in_queue">
+                <div ng-repeat="run in runs | filter:runFilter('in_queue') | orderBy:enqueue_dts" class="job-run job-in-queue">
                     <h5>
                         <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
                     </h5>
@@ -59,7 +59,7 @@
         <div class="span2">
             <h4>Completed (error)</h4>
             <div id="completed-with-error-runs">
-                <div ng-repeat="run in runs | filter:runFilter('completed_with_error') | orderBy:return_dts" class="job-run job-completed_with_error">
+                <div ng-repeat="run in runs | filter:runFilter('completed_with_error') | orderBy:return_dts" class="job-run job-completed-with-error">
                     <h5>
                         <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
                     </h5>

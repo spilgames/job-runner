@@ -211,6 +211,18 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
         return output_list;
     };
 
+    Run.query = function(params, success, error) {
+        var output_list = [];
+        var items = Run.get(params, function() {
+            angular.forEach(items.objects, function(item) {
+                output_list.push(new Run(item));
+            });
+            success();
+        }, error);
+
+        return output_list;
+    };
+
     // Return the related job
     Run.prototype.get_job = function() {
         if (!this._job && this.job) {

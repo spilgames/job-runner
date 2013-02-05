@@ -1,7 +1,7 @@
 /*
     Controller for runs.
 */
-var RunsCtrl = function($scope, $routeParams, Project, Run) {
+var RunsCtrl = function($scope, $routeParams, Project, Run, Job) {
     globalState.page = 'runs';
     globalState.project = Project.get({id: $routeParams.project});
     $scope.runFilter = function(state) {
@@ -28,6 +28,16 @@ var RunsCtrl = function($scope, $routeParams, Project, Run) {
         var started = Run.all({state: 'started', project_id: $routeParams.project}, function() {
             angular.forEach(started, function(run) {
                 $scope.runs.push(run);
+            });
+        });
+
+        var jobs = Job.all({}, function() {
+            angular.forEach(jobs, function(job) {
+                var runs = Run.query({job: job.id, limit: 1, state: 'completed'}, function() {
+                    angular.forEach(runs, function(run) {
+                        $scope.runs.push(run);
+                    });
+                });
             });
         });
 
