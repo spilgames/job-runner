@@ -106,6 +106,7 @@ class WorkerResource(ModelResource):
         ]
         filtering = {
             'project': ALL_WITH_RELATIONS,
+            'api_key': ALL,
         }
 
         authentication = MultiAuthentication(
