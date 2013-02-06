@@ -1,12 +1,13 @@
 import json
 import logging
 import time
+from datetime import datetime, timedelta
 
 import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
-from job_runner.apps.job_runner.models import KillRequest, Run
+from job_runner.apps.job_runner.models import KillRequest, Run, Worker
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,14 @@ class Command(NoArgsCommand):
         # give the subscribers some time to (re-)connect.
         time.sleep(2)
 
+        ping_delta = timedelta(
+            seconds=settings.JOB_RUNNER_WORKER_PING_INTERVAL)
+        next_ping_request = datetime.utcnow()
+
         while True:
+            if next_ping_request <= datetime.utcnow():
+                self._broadcast_worker_ping(publisher)
+                next_ping_request = datetime.utcnow() + ping_delta
             self._broadcast_runs(publisher)
             self._broadcast_kill_requests(publisher)
             time.sleep(5)
@@ -81,6 +89,26 @@ class Command(NoArgsCommand):
                 json.dumps({
                     'kill_request_id': kill_request.id,
                     'action': 'kill',
+                })
+            ]
+            logger.debug('Sending: {0}'.format(message))
+            publisher.send_multipart(message)
+
+    def _broadcast_worker_ping(self, publisher):
+        """
+        Broadcast ping-request to all the workers.
+
+        :param publisher:
+            A ``zmq`` publisher.
+
+        """
+        workers = Worker.objects.all()
+
+        for worker in workers:
+            message = [
+                'master.broadcast.{0}'.format(worker.api_key),
+                json.dumps({
+                    'action': 'ping',
                 })
             ]
             logger.debug('Sending: {0}'.format(message))

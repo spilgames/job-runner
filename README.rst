@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.3.3
+~~~~~~
+
+* The ``broadcast_queue`` is now sending ping requests to the workers every
+  5 minutes (default setting).
+
 
 v1.3.2
 ~~~~~~

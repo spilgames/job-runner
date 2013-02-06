@@ -191,6 +191,12 @@ Unless there is a specific need, you can keep the default.
 """
 
 
+JOB_RUNNER_WORKER_PING_INTERVAL = 60 * 5
+"""
+The interval in seconds for sending ping-requests to the workers.
+"""
+
+
 HOSTNAME = ''
 """
 The hostname of the server.

@@ -161,3 +161,23 @@ class CommandTestCase(TestCase):
                 '{"action": "enqueue", "run_id": 2}'
             ]),
         ], publisher.send_multipart.call_args_list)
+
+    def test__broadcast_worker_ping(self):
+        """
+        Test :meth:`.Command._broadcast_worker_ping`.
+        """
+        command = Command()
+        publisher = Mock()
+
+        command._broadcast_worker_ping(publisher)
+
+        self.assertEqual([
+            call([
+                'master.broadcast.worker1',
+                '{"action": "ping"}'
+            ]),
+            call([
+                'master.broadcast.worker2',
+                '{"action": "ping"}'
+            ]),
+        ], publisher.send_multipart.call_args_list)
