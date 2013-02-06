@@ -1,50 +1,18 @@
 /*
     Controller for runs.
 */
-var RunsCtrl = function($scope, $routeParams, Project, Run, Job) {
-    globalState.page = 'runs';
-    globalState.project = Project.get({id: $routeParams.project});
+var RunsCtrl = function($scope, $routeParams, Project, Run, Job, globalState) {
+    $scope.global_state = globalState;
+    globalState.data.page = 'runs';
+    globalState.setProjectId($routeParams.project);
+    
     $scope.runFilter = function(state) {
         return function(run) {
             return (run.get_state() == state);
         };
     };
 
-    var initialFetch = function() {
-        $scope.runs = [];
-
-        var scheduled = Run.all({state: 'scheduled', project_id: $routeParams.project}, function() {
-            angular.forEach(scheduled, function(run) {
-                $scope.runs.push(run);
-            });
-        });
-
-        var inQueue = Run.all({state: 'in_queue', project_id: $routeParams.project}, function() {
-            angular.forEach(inQueue, function(run) {
-                $scope.runs.push(run);
-            });
-        });
-
-        var started = Run.all({state: 'started', project_id: $routeParams.project}, function() {
-            angular.forEach(started, function(run) {
-                $scope.runs.push(run);
-            });
-        });
-
-        var jobs = Job.all({}, function() {
-            angular.forEach(jobs, function(job) {
-                var runs = Run.query({job: job.id, limit: 1, state: 'completed'}, function() {
-                    angular.forEach(runs, function(run) {
-                        $scope.runs.push(run);
-                    });
-                });
-            });
-        });
-
-
-    };
-
-    initialFetch();
+    $scope.runs = globalState.getRuns();
 
 };
 
@@ -52,32 +20,21 @@ var RunsCtrl = function($scope, $routeParams, Project, Run, Job) {
 /*
     Controller for jobs.
 */
-var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Worker, Run, Group, dtformat) {
-    globalState.page = 'jobs';
+var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Worker, Run, Group, globalState, dtformat) {
+    globalState.data.page = 'jobs';
+    globalState.setProjectId($routeParams.project);
     $scope.global_state = globalState;
-
-    // do some caching of objects
-    if (globalState.project && globalState.jobs && globalState.job_templates && globalState.project.id == $routeParams.project) {
-        $scope.jobs = globalState.jobs;
-        $scope.job_templates = globalState.job_templates;
-    } else {
-        globalState.project = Project.get({id: $routeParams.project}, function() {
-            globalState.jobs = Job.all({project_id: globalState.project.id});
-            globalState.job_templates = JobTemplate.all({project_id: globalState.project.id});
-            globalState.workers = Worker.all({project_id: globalState.project.id});
-            $scope.jobs = globalState.jobs;
-            $scope.job_templates = globalState.job_templates;
-        });
-    }
+    $scope.jobs = globalState.getAllJobs();
+    $scope.job_templates = globalState.getAllJobTemplates();
 
     // function for displaying job details
     $scope.showDetails = function() {
-        globalState.job_tab = 'details';
+        globalState.data.jobTab = 'details';
     };
 
     // function for displaying recent runs of a job
     $scope.showRecentRuns = function() {
-        globalState.job_tab = 'runs';
+        globalState.data.jobTab = 'runs';
 
         // get recent runs and build the chart
         $scope.recent_runs = Run.all({job: $routeParams.job, state: 'completed', limit: 100}, function() {
@@ -102,7 +59,7 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
     // show job details
     if ($routeParams.job) {
         $scope.job = Job.get({id: $routeParams.job});
-        if (globalState.job_tab == 'runs') {
+        if (globalState.data.jobTab == 'runs') {
             // make sure that we update the recent runs
             $scope.showRecentRuns();
         }
@@ -134,7 +91,8 @@ var RedirectToFirstProjectCtrl = function($location, Project) {
 /*
     Controller for selecting projects.
 */
-var ProjectCtrl = function($scope, Project) {
+var ProjectCtrl = function($scope, $routeParams, Project, globalState) {
+    $scope.project = Project.get({id: $routeParams.project});
     $scope.projects = Project.all();
     $scope.global_state = globalState;
 };

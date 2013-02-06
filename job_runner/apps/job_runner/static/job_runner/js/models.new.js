@@ -114,6 +114,10 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
         }
     );
 
+    var relatedCache = {
+        workers: {}
+    };
+
     // Return all job-templates
     JobTemplate.all = function(params, success, error) {
         var output_list = [];
@@ -123,10 +127,10 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
 
     // Return the related worker object
     JobTemplate.prototype.get_worker = function() {
-        if (!this._worker && this.worker) {
-            this._worker = Worker.get({'id': this.worker.split('/').splice(-2, 1)[0]});
+        if (relatedCache.workers[this.worker] === undefined && this.worker) {
+            relatedCache.workers[this.worker] = Worker.get({'id': this.worker.split('/').splice(-2, 1)[0]});
         }
-        return this._worker;
+        return relatedCache.workers[this.worker];
     };
 
     return JobTemplate;
@@ -139,6 +143,10 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
 angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).factory('Job', function($resource, getAll, JobTemplate, $cookies, $http) {
     // Required by Django and Django-tastypie
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
+
+    var relatedCache = {
+        jobTemplates: {}
+    };
 
     var Job = $resource(
         '/api/v1/job/:id/',
@@ -158,10 +166,10 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).fact
 
     // Return the related job-template
     Job.prototype.get_job_template = function(success) {
-        if (!this._job_template && this.job_template) {
-            this._job_template = JobTemplate.get({'id': this.job_template.split('/').splice(-2, 1)[0]}, success);
+        if (relatedCache.jobTemplates[this.job_template] === undefined && this.job_template) {
+            relatedCache.jobTemplates[this.job_template] = JobTemplate.get({'id': this.job_template.split('/').splice(-2, 1)[0]}, success);
         }
-        return this._job_template;
+        return relatedCache.jobTemplates[this.job_template];
     };
 
     // Return the parent of this job (if any)
@@ -195,6 +203,11 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
     // Required by Django and Django-tastypie
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
 
+    var relatedCache = {
+        jobs: {},
+        runLogs: {}
+    };
+
     var Run = $resource(
         '/api/v1/run/:id/',
         {'id': '@id'},
@@ -225,10 +238,10 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
 
     // Return the related job
     Run.prototype.get_job = function() {
-        if (!this._job && this.job) {
-            this._job = Job.get({id:  this.job.split('/').splice(-2, 1)[0]});
+        if (relatedCache.jobs[this.job] === undefined && this.job) {
+            relatedCache.jobs[this.job] = Job.get({id:  this.job.split('/').splice(-2, 1)[0]});
         }
-        return this._job;
+        return relatedCache.jobs[this.job];
     };
 
     // Get run duration in seconds
@@ -269,10 +282,10 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
 
     // Return the related run-log object (if any)
     Run.prototype.get_run_log = function() {
-        if (!this._run_log && this.run_log) {
-            this._run_log = RunLog.get({id: this.run_log.split('/').splice(-2, 1)[0]});
+        if (relatedCache.runLogs[this.run_log] === undefined && this.run_log) {
+            relatedCache.runLogs[this.run_log] = RunLog.get({id: this.run_log.split('/').splice(-2, 1)[0]});
         }
-        return this._run_log;
+        return relatedCache.runLogs[this.run_log];
     };
 
     return Run;

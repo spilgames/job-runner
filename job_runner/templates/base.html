@@ -27,8 +27,8 @@
                     <a class="brand" href="/">Job-Runner</a>
 
                     <ul class="nav">
-                        <li ng-class="{active: global_state.page == 'runs'}"><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/runs/">Dashboard</a></li>
-                        <li ng-class="{active: global_state.page == 'jobs'}"><a href="/project/{% templatetag openvariable %} global_state.project.id {% templatetag closevariable %}/jobs/">Jobs</a></li>
+                        <li ng-class="{active: global_state.data.page == 'runs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/runs/">Dashboard</a></li>
+                        <li ng-class="{active: global_state.data.page == 'jobs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/jobs/">Jobs</a></li>
                     </ul>
 
                     <ul class="nav pull-right">
@@ -49,10 +49,10 @@
 
                     <ul class="nav pull-right">
                         <li class="dropdown">
-                            <a class="dropdown-toggle" data-toggle="dropdown">{% templatetag openvariable %} global_state.project.title {% templatetag closevariable %} <b class="caret"></b></a>
+                            <a class="dropdown-toggle" data-toggle="dropdown">{% templatetag openvariable %} global_state.getProject().title {% templatetag closevariable %} <b class="caret"></b></a>
                             <ul class="dropdown-menu">
                                 <li ng-repeat="project in projects">
-                                    <a href="/project/{% templatetag openvariable %} project.id {% templatetag closevariable %}/{% templatetag openvariable %} global_state.page {% templatetag closevariable %}/">{% templatetag openvariable %} project.title {% templatetag closevariable %}</a>
+                                    <a href="/project/{% templatetag openvariable %} project.id {% templatetag closevariable %}/{% templatetag openvariable %} global_state.data.page {% templatetag closevariable %}/">{% templatetag openvariable %} project.title {% templatetag closevariable %}</a>
                                 </li>
                             </ul>
                         </li>
