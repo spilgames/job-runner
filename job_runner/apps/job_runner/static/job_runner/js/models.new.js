@@ -168,6 +168,8 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).fact
     Job.prototype.get_job_template = function(success) {
         if (relatedCache.jobTemplates[this.job_template] === undefined && this.job_template) {
             relatedCache.jobTemplates[this.job_template] = JobTemplate.get({'id': this.job_template.split('/').splice(-2, 1)[0]}, success);
+        } else if (success) {
+            success();
         }
         return relatedCache.jobTemplates[this.job_template];
     };

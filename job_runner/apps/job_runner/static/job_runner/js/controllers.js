@@ -105,6 +105,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run) {
     // set $scope.auth_permissions to true if the user has auth permissions
     // for the given jobId.
     var getPermissionsForJob = function(jobId) {
+        $scope.auth_permissions = false;
         $scope.job = Job.get({id: jobId}, function() {
             var jobTemplate = $scope.job.get_job_template(function() {
                 var groups = Group.all({}, function() {
