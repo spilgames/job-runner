@@ -139,15 +139,31 @@ class WorkerAdmin(admin.ModelAdmin):
 
         if (obj.ping_response_dts <
                 timezone.now() - timedelta(seconds=2 * interval + margin)):
-            return '<span style="color: red;">{0}</span>'.format(
-                date_formatted)
+            return (
+                '<img src="{0}admin/img/icon_error.gif" /> '
+                '<span style="color: red;">{1}</span>'.format(
+                    settings.STATIC_URL,
+                    date_formatted
+                )
+            )
 
         if (obj.ping_response_dts <
                 timezone.now() - timedelta(seconds=interval + margin)):
-            return '<span style="color: orange;">{0}</span>'.format(
-                date_formatted)
+            return (
+                '<img src="{0}admin/img/icon_alert.gif" /> '
+                '<span style="color: orange;">{1}</span>'.format(
+                    settings.STATIC_URL,
+                    date_formatted
+                )
+            )
 
-        return str(obj.ping_response_dts)
+        return (
+            '<img src="{0}admin/img/icon_success.gif" /> '
+            '<span style="color: green;">{1}</span>'.format(
+                settings.STATIC_URL,
+                date_formatted
+            )
+        )
 
     ping_response.allow_tags = True
     ping_response.short_description = 'Last ping response'
