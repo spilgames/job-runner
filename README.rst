@@ -13,8 +13,9 @@ Changes
 v1.3.3
 ~~~~~~
 
-* The ``broadcast_queue`` is now sending ping requests to the workers every
-  5 minutes (default setting).
+* Broadcast ping requests to the worker (default: every 5 minutes) and show
+  last ping response in admin. This will make it more easy to discover problems
+  with workers.
 
 
 v1.3.2
