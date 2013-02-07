@@ -191,6 +191,17 @@ Unless there is a specific need, you can keep the default.
 """
 
 
+JOB_RUNNER_WORKER_PING_INTERVAL = 60 * 5
+"""
+The interval in seconds for sending ping-requests to the workers.
+"""
+
+JOB_RUNNER_WORKER_PING_MARGIN = 15
+"""
+The time to add to the interval before considering a worker is not responding.
+"""
+
+
 HOSTNAME = ''
 """
 The hostname of the server.

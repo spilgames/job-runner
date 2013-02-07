@@ -94,6 +94,8 @@ class Worker(models.Model):
             'the worker queue. This will not affect already running jobs.'
         )
     )
+    ping_response_dts = models.DateTimeField(
+        blank=True, null=True, editable=False)
 
     def __unicode__(self):
         return u'{0} > {1}'.format(self.project, self.title)

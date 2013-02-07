@@ -1,5 +1,10 @@
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib import admin
 from django.db.models import Q
+from django.utils import timezone
+from django.utils.dateformat import DateFormat
 
 from job_runner.apps.job_runner.models import (
     Job,
@@ -111,8 +116,57 @@ class WorkerAdmin(admin.ModelAdmin):
     """
     Admin interface for workers.
     """
-    list_display = ('title', 'api_key', 'project', 'enqueue_is_enabled')
+    list_display = (
+        'title',
+        'api_key',
+        'project',
+        'enqueue_is_enabled',
+        'ping_response'
+    )
     list_filter = ('project', 'enqueue_is_enabled')
+
+    def ping_response(self, obj):
+        interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
+        margin = settings.JOB_RUNNER_WORKER_PING_MARGIN
+
+        if not obj.ping_response_dts:
+            return '<span style="color: red;">(none)</span>'
+
+        date_local = obj.ping_response_dts.astimezone(
+            timezone.get_current_timezone())
+        date_formatted = DateFormat(date_local)
+        date_formatted = date_formatted.format(settings.DATETIME_FORMAT)
+
+        if (obj.ping_response_dts <
+                timezone.now() - timedelta(seconds=2 * interval + margin)):
+            return (
+                '<img src="{0}admin/img/icon_error.gif" /> '
+                '<span style="color: red;">{1}</span>'.format(
+                    settings.STATIC_URL,
+                    date_formatted
+                )
+            )
+
+        if (obj.ping_response_dts <
+                timezone.now() - timedelta(seconds=interval + margin)):
+            return (
+                '<img src="{0}admin/img/icon_alert.gif" /> '
+                '<span style="color: orange;">{1}</span>'.format(
+                    settings.STATIC_URL,
+                    date_formatted
+                )
+            )
+
+        return (
+            '<img src="{0}admin/img/icon_success.gif" /> '
+            '<span style="color: green;">{1}</span>'.format(
+                settings.STATIC_URL,
+                date_formatted
+            )
+        )
+
+    ping_response.allow_tags = True
+    ping_response.short_description = 'Last ping response'
 
 
 class JobTemplateAdmin(admin.ModelAdmin):

@@ -94,11 +94,19 @@ class WorkerResource(ModelResource):
     class Meta:
         queryset = Worker.objects.all()
         resource_name = 'worker'
-        allowed_methods = ['get']
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'patch']
         fields = [
-            'id', 'title', 'api_key', 'description', 'enqueue_is_enabled']
+            'id',
+            'title',
+            'api_key',
+            'description',
+            'enqueue_is_enabled',
+            'ping_response_dts'
+        ]
         filtering = {
             'project': ALL_WITH_RELATIONS,
+            'api_key': ALL,
         }
 
         authentication = MultiAuthentication(

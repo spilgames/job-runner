@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.3.3
+~~~~~~
+
+* Broadcast ping requests to the worker (default: every 5 minutes) and show
+  last ping response in admin. This will make it more easy to discover problems
+  with workers.
+
 
 v1.3.2
 ~~~~~~

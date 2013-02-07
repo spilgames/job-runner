@@ -120,7 +120,8 @@ class WorkerTestCase(ApiTestBase):
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
-        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(
+            ['get', 'patch'], json_data['allowed_detail_http_methods'])
         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
     def test_worker_count(self):
@@ -152,6 +153,20 @@ class WorkerTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test worker 1', json_data['objects'][0]['title'])
+
+    def test_patch_ping_response_dts(self):
+        """
+        Test PATCH the ping_response_dts field.
+        """
+        dts = timezone.now()
+        response = self.patch(
+            '/api/v1/worker/1/',
+            {'ping_response_dts': dts.isoformat(' ')}
+        )
+        self.assertEqual(202, response.status_code)
+
+        worker = Worker.objects.get(pk=1)
+        self.assertEqual(dts, worker.ping_response_dts)
 
 
 class JobTemplateTestCase(ApiTestBase):
