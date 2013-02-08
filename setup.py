@@ -8,7 +8,7 @@ setup(
     version=job_runner.__version__,
     url='http://github.com/spilgames/jobrunner',
     author='Orne Brocaar',
-    author_email='orne.brocaar@spilgames.com',
+    author_email='datawarehouse@spilgames.com',
     description='Tool for scheduling jobs and realtime monitoring',
     long_description=open('README.rst').read(),
     packages=find_packages(),
