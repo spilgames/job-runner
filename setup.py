@@ -18,7 +18,6 @@ setup(
         'django==1.4.2',
         'django-grappelli',
         'south',
-        'MySQL-python',
         'pytz',
         'pyzmq',
         'django-tastypie==0.9.12-alpha',

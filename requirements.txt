@@ -4,7 +4,6 @@ south
 sphinx
 pytz
 pyzmq
-MySQL-python
 
 # can be switched back to package version when 0.9.12 final has been released.
 -e git://github.com/toastdriven/django-tastypie.git@27d17b7db7afd6c81da24f64f5b4562b59134582#egg=django-tastypie
