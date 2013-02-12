@@ -6,6 +6,7 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
     $routeProvider.
         when('/', {controller: RedirectToFirstProjectCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/project/:project/runs/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
+        when('/project/:project/runs/:run/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/project/:project/jobs/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/job_list.html'}).
         when('/project/:project/jobs/:job/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/job_list.html'}).
         when('/project/:project/jobs/:job/runs/:run/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/job_list.html'});

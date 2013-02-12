@@ -58,6 +58,29 @@
     </div>
 
     <div class="modal-footer">
+        <div ng-controller="JobActionCtrl">
+            <div ng-class="{hidden: auth_permissions != true, 'pull-left': true}">
+                <ng-switch on="scheduled_run == null">
+                    <div ng-switch-when="true" class="btn-group">
+                        <button class="btn" ng-click="scheduleNow(false)"><i class="icon-play"></i> <span>Schedule job now</span></button>
+                        <button ng-class="{btn: true, 'dropdown-toggle': true, hidden: job.children.length < 1}" data-toggle="dropdown">
+                            <span class="caret"></span>
+                        </button>
+                        <ul ng-class="{'dropdown-menu': true, hidden: job.children.length < 1}">
+                            <li><a href="#" ng-click="scheduleNow(true)">Schedule now incl. children</a></li>
+                        </ul>
+                    </div>
+                    <div ng-switch-when="false" class="btn-group">
+                        <button class="btn" disabled="disabled"><i class="icon-ok"></i> Job scheduled</button>
+                    </div>
+                </ng-switch>
+
+                <ng-switch on="job.enqueue_is_enabled">
+                    <button ng-switch-when="true" class="btn btn-danger" ng-click="toggleEnqueue(false)"><span>Suspend enqueue for job</span></button>
+                    <button ng-switch-when="false" class="btn btn-success" ng-click="toggleEnqueue(true)"><span>Enable enqueue for job</span></button>
+                </ng-switch>
+            </div>
+        </div>
         <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
 </div>
