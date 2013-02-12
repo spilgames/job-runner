@@ -7,9 +7,9 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
         when('/', {controller: RedirectToFirstProjectCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/project/:project/runs/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/project/:project/runs/:run/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
-        when('/project/:project/jobs/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/job_list.html'}).
-        when('/project/:project/jobs/:job/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/job_list.html'}).
-        when('/project/:project/jobs/:job/runs/:run/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/job_list.html'});
+        when('/project/:project/jobs/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/jobs.html'}).
+        when('/project/:project/jobs/:job/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/jobs.html'}).
+        when('/project/:project/jobs/:job/runs/:run/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/jobs.html'});
 }).run(function(globalState, Run) {
     // handle incoming events from the WebSocket server
     var handleEvent = function(data) {
