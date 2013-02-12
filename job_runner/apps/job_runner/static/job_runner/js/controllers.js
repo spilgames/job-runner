@@ -141,17 +141,19 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobT
 
     // function for scheduling a job
     $scope.scheduleNow = function(withChildren) {
-        if (confirm('Are you sure you want to schedule this job?')) {
-            var newRun = new Run({
-                job: $scope.job.resource_uri,
-                is_manual: true,
-                schedule_children: withChildren,
-                schedule_dts: moment().format('YYYY-MM-DD HH:mm:ss')
-            });
-            newRun.$create(function() {
-                $scope.scheduled_run = newRun;
-            });
+        if (!confirm('Are you sure you want to schedule this job?')) {
+            return false;
         }
+
+        var newRun = new Run({
+            job: $scope.job.resource_uri,
+            is_manual: true,
+            schedule_children: withChildren,
+            schedule_dts: moment().format('YYYY-MM-DD HH:mm:ss')
+        });
+        newRun.$create(function() {
+            $scope.scheduled_run = newRun;
+        });
     };
 
     // function for setting enqueue_is_enabled attribute on job model
