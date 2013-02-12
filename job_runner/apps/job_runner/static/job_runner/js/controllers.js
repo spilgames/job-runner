@@ -95,6 +95,16 @@ var ProjectCtrl = function($scope, $routeParams, Project, globalState) {
     $scope.project = Project.get({id: $routeParams.project});
     $scope.projects = Project.all();
     $scope.global_state = globalState;
+
+    // it seems that if we have multiple controllers (called from the template
+    // with ng-controller and from the routeProvider), only one $scope is
+    // watched?
+    var digest = function() {
+        $scope.$digest();
+        setTimeout(digest, 1000);
+    };
+
+    setTimeout(digest, 1000);
 };
 
 
