@@ -2,6 +2,12 @@
 
 {% block ngapp %}jobrunner{% endblock %}
 
+{% block extrahead %}
+    <script type="text/javascript">
+        var ws_server = '{{ ws_server }}';
+    </script>
+{% endblock %}
+
 {% block extrajs %}
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 

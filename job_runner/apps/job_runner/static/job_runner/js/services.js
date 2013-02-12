@@ -44,7 +44,8 @@ jobrunnerServices.factory('globalState', ['Project', 'Job', 'JobTemplate', 'Run'
             jobTab: 'details',
             jobTemplates: null,
             jobFilter: {},
-            runs: null
+            runs: null,
+            wsConnected: false
         },
 
         setProjectId: function(projectId) {
