@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.4.0
+~~~~~~
+
+* Complete refactor of front-end code. The front-end is now based on AngularJS.
+
+
 v1.3.3
 ~~~~~~
 
