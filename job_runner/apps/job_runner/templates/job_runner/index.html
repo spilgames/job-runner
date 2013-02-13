@@ -1,203 +1,29 @@
 {% extends "base.html" %}
 
+{% block ngapp %}jobrunner{% endblock %}
+
 {% block extrahead %}
     <script type="text/javascript">
         var ws_server = '{{ ws_server }}';
     </script>
-
-    <script type="text/html" id="run-template">
-        <div style='display: none;' class='job-run job-<%= state %><% if(suspended) { %> suspended<% } %>' id='run-<%= id %>' data-id='<%= id %>' data-job_id='<%= job_id %>' data-timestamp='<%= timestamp %>'>
-            <h5>
-                <a href='<%= baseURL %>runs/<%= id %>/' class='details js-link'><%= title %></a>
-            </h5>
-            <ul>
-                <li><i class='icon-hdd'></i> <%= server %></li>
-                <li><i class='<% if(suspended) { %>icon-ban-circle<% } else { %>icon-time<% } %>'></i> <%= timestamp %></li>
-            </ul>
-        </div>
-    </script>
-
-    <script type="text/html" id="job-template">
-        <div class="span2" id="job-<%= id %>" data-job_template_url="<%= job_template_url %>" data-reschedule_interval_type="<%= reschedule_interval_type %>" data-worker_url="<%= worker_url %>">
-            <div class="job<% if(!enqueue_is_enabled) { %> suspended<% } %>" data-id="<%= id %>">
-                <h5><a href="<%= baseURL %>jobs/<%= id %>/" class="details js-link"><%= title %></a></h5>
-                <ul>
-                    <li>
-                        <i class="icon-hdd"></i> <%= hostname %>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </script>
-
-    <script type="text/html" id="run-modal-template">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="run_modal_title">Run: <a href="<%= baseURL %>jobs/<%= job_id %>/"><%= title %></a></h3>
-        </div>
-        <div class="modal-body" id="status-modal">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th>Status</th>
-                        <td><%= state %><% if(suspended) { %> (suspended)<% } %></td>
-                    </tr>
-                    <tr>
-                        <th>Scheduled</th>
-                        <td><%= schedule_dts %></td>
-                    </tr>
-                    <% if(enqueue_dts) { %>
-                        <tr>
-                            <th>In queue</th>
-                            <td><%= enqueue_dts %></td>
-                        </tr>
-                    <% } %>
-                    <% if(start_dts) { %>
-                        <tr>
-                            <th>Started</th>
-                            <td><%= start_dts %></td>
-                        </tr>
-                    <% } %>
-                    <% if (return_dts) { %>
-                        <tr>
-                            <th>Returned</th>
-                            <td><%= return_dts %></td>
-                        </tr>
-                    <% } %>
-                    <% if(run_duration) { %>
-                        <tr>
-                            <th>Run duration</th>
-                            <td><%= run_duration %></td>
-                        </tr>
-                    <% } %>
-                </tbody>
-            </table>
-
-            <% if(job_description) { %>
-                <p>
-                    <%= job_description %>
-                </p>
-            <% } %>
-
-            <h3>Command</h3>
-            <p><pre class="script_content"><%= script_content %></pre></p>
-            <% if(return_log) { %>
-                <h3>Log output</h3>
-                <p><pre class="return_log"><%= return_log %></pre></p>
-            <% } %>
-        </div>
-        <div class="modal-footer">
-            <% if(start_dts && !return_dts) { %>
-                <button class="btn btn-danger kill-run hide" data-run_url="<%= url %>"><i class="icon-remove icon-white"></i> <span>Kill this run</span></button>
-            <% } %>
-            <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
-        </div>
-    </script>
-
-    <script type="text/html" id="job-details-run-row-template">
-        <tr class="<% if(!return_success) { %>error<% } %>">
-            <td><a href="<%= baseURL %>jobs/<%= job_id %>/runs/<%= id %>/" class="js-link"><%= start_dts %></a></td>
-            <td><%= duration %></td>
-            <td><% if(return_success) { %>OK<% } else { %>FAIL<% } %></td>
-        </tr>
-    </script>
-
-    <script type="text/html" id="job-details-template">
-        <div class="tabbable">
-            <ul class="nav nav-tabs">
-                <li class="active">
-                    <a href="#tab1" data-toggle="tab">Job details</a>
-                </li>
-                <li>
-                    <a href="#tab2" data-toggle="tab" class="show-runs" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-fetched="false">Last 100 completed runs</a>
-                </li>
-            </ul>
-            <div class="tab-content">
-                <div class="tab-pane active" id="tab1">
-                    <div class="pull-right">
-                        <div class="btn-group schedule-job-group">
-                            <button class="btn schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="false"><i class="icon-play"></i> <span>Schedule now</span></button>
-                            <% if (children.length) { %>
-                                <button class="btn dropdown-toggle" data-toggle="dropdown">
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#" class="schedule-job" data-job_url="<%= job_url %>" data-job_id="<%= id %>" data-schedule_children="true">Schedule now incl. children</a></li>
-                                </ul>
-                            <% } %>
-                        </div>
-                        <button class="btn toggle-enable-job" data-job_id="<%= id %>"><span></span></button>
-                    </div>
-                    <h5>Title:</h5>
-                    <p><%= title %><% if(!enqueue_is_enabled) { %> (enqueue suspended)<% } %></p>
-
-                    <% if (description) { %>
-                        <h5>Description</h5>
-                        <p><%= description %>
-                    <% } %>
-
-                    <h5>Re-schedule interval:</h5>
-                    <% if (interval && interval_type) { %>
-                        <p>Every <%= interval %> <%= interval_type %><% if (!(interval == 1)) { %>s<% } %></p>
-                    <% } else { %>
-                        <p>No interval specified</p>
-                    <% } %>
-
-                    <% if (parent) { %>
-                        <h5>Parent</h5>
-                        <p>
-                            <a href="<%= baseURL %>jobs/<%= parent.id %>/" class="js-link"><%= parent.attributes.title %></a>
-                        </p>
-                    <% } %>
-
-                    <% if (children.length) { %>
-                        <h5>Children</h5>
-                        <ul>
-                            <% _.each(children, function(child) { %>
-                                <li><a href="<%= baseURL %>jobs/<%= child.id %>/" class="js-link"><%= child.attributes.title %></a></li>
-                            <% }); %>
-                        </ul>
-                    <% } %>
-
-                    <h5>Command:</h5>
-                    <p>
-                        <pre><%= script_content %></pre>
-                    </p>
-                </div>
-                <div class="tab-pane" id="tab2">
-                    <div id="run-performance-graph" class="run-performance-graph"></div>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Start date</th>
-                                <th>Duration</th>
-                                <th>Return</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </script>
-
 {% endblock %}
 
-{% block navbar %}
-<ul class="nav">
-    <li class="active dashboard"><a href="runs/" class="js-patch-link">Dashboard</a></li>
-    <li class="jobs"><a href="jobs/" class="js-patch-link">Jobs</a></li>
-</ul>
+{% block extrajs %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 
-<ul class="nav pull-right" id="project-list">
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span></span> <b class="caret"></b></a>
-        <ul class="dropdown-menu">
-        </ul>
-    </li>
-</ul>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-modal.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-transition.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-tab.js"></script>
 
+    <script type="text/javascript" src="{{ STATIC_URL }}js/moment.min.js"></script>
+
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/app.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/controllers.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/services.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/filters.js"></script>
+
+    <script type="text/javascript">google.load("visualization", "1", {packages:["corechart"]});</script>
 {% endblock %}
 
 {% block extracss %}
@@ -207,86 +33,5 @@
 {% block bodyid %}job_runner{% endblock %}
 
 {% block content %}
-    <div class="modal hide fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
-    </div>
-
-    <section class="hide" id="dashboard">
-        <div class="row">
-            <div class="span2">
-                <h4>Scheduled</h4>
-                <div id="scheduled-runs"></div>
-            </div>
-            <div class="span2">
-                <h4>In queue</h4>
-                <div id="enqueued-runs"></div>
-            </div>
-            <div class="span2">
-                <h4>Started</h4>
-                <div id="started-runs"></div>
-            </div>
-            <div class="span2">
-                <h4>Completed</h4>
-                <div id="completed-runs"></div>
-            </div>
-            <div class="span2">
-                <h4>Completed (error)</h4>
-                <div id="completed-with-error-runs"></div>
-            </div>
-        </div>
-    </section>
-
-    <section class="hide" id="jobs">
-        <div class="row filters">
-            <div class="span3">
-                <h5>Template</h5>
-                <select id="job-template-select" class="job-filter" data-attr_name="job_template_url">
-                    <option></option>
-                </select>
-            </div>
-            <div class="span3">
-                <h5>Reschedule interval type</h5>
-                <select id="reschedule-interval-type-select" class="job-filter" data-attr_name="reschedule_interval_type">
-                    <option></option>
-                </select>
-            </div>
-            <div class="span3">
-                <h5>Worker</h5>
-                <select id="worker-select" class="job-filter" data-attr_name="worker_url">
-                    <option></option>
-                </select>
-            </div>
-        </div>
-        <div class="row">
-            <div class="span6 jobs"></div>
-            <div class="span6 job-details" id="job-details" data-job_id="null">
-                <div class="hero-unit">
-                    <p>Click on a job to see its details and run history...</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-{% endblock %}
-
-{% block extrajs %}
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-modal.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-transition.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-tab.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/json2.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.csrf.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/moment.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/underscore.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/backbone.min.js"></script>
-
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/helpers.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/models.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/collections.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/projects.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/runs.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/jobs.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/views/modals.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/router.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}job_runner/js/boot.js"></script>
+    <div ng-view></div>
 {% endblock %}

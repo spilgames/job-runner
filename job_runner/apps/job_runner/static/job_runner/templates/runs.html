@@ -1,0 +1,76 @@
+<ng-include src="'/static/job_runner/templates/run_modal.html'"></ng-include>
+
+<section id="dashboard">
+    <div class="row">
+        <div class="span2">
+            <h4>Scheduled</h4>
+            <div id="scheduled-runs">
+                <div ng-repeat="run in runs | filter:runFilter('scheduled') | orderBy:schedule_dts:reverse" ng-class="{'job-run': true, 'job-scheduled': true, suspended: run.get_job().enqueue_is_enabled == false}">
+                    <h5>
+                        <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
+                    </h5>
+                    <ul>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i ng-class="{'icon-time': run.get_job().enqueue_is_enabled == true, 'icon-ban-circle': run.get_job().enqueue_is_enabled == false}"></i> {{ run.schedule_dts | formatdts }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="span2">
+            <h4>In queue</h4>
+            <div id="enqueued-runs">
+                <div ng-repeat="run in runs | filter:runFilter('in_queue') | orderBy:'enqueue_dts'" class="job-run job-in-queue">
+                    <h5>
+                        <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
+                    </h5>
+                    <ul>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-time"></i> {{ run.enqueue_dts | formatdts }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="span2">
+            <h4>Started</h4>
+            <div id="started-runs">
+                <div ng-repeat="run in runs | filter:runFilter('started') | orderBy:'-start_dts'" class="job-run job-started">
+                    <h5>
+                        <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
+                    </h5>
+                    <ul>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-time"></i> {{ run.start_dts | formatdts }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="span2">
+            <h4>Completed</h4>
+            <div id="completed-runs">
+                <div ng-repeat="run in runs | filter:runFilter('completed') | orderBy:'-return_dts'" class="job-run job-completed">
+                    <h5>
+                        <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
+                    </h5>
+                    <ul>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-time"></i> {{ run.return_dts | formatdts }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="span2">
+            <h4>Completed (error)</h4>
+            <div id="completed-with-error-runs">
+                <div ng-repeat="run in runs | filter:runFilter('completed_with_error') | orderBy:'-return_dts'" class="job-run job-completed-with-error">
+                    <h5>
+                        <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
+                    </h5>
+                    <ul>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-time"></i> {{ run.return_dts | formatdts }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

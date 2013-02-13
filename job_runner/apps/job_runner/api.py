@@ -130,6 +130,18 @@ class JobTemplateResource(ModelResource):
         null=True
     )
 
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(JobTemplateResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'worker__project__id': filters['project_id']
+            })
+
+        return orm_filters
+
     class Meta:
         queryset = JobTemplate.objects.all()
         resource_name = 'job_template'
@@ -156,6 +168,18 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
         'job_runner.apps.job_runner.api.JobTemplateResource', 'job_template')
     parent = fields.ToOneField('self', 'parent', null=True)
     children = fields.ToManyField('self', 'children', null=True)
+
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(JobResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'job_template__worker__project__id': filters['project_id']
+            })
+
+        return orm_filters
 
     class Meta:
         queryset = Job.objects.all()
@@ -257,6 +281,11 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
 
         if 'state' in filters and filters['state'] in state_filters:
             orm_filters.update(state_filters[filters['state']])
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'job__job_template__worker__project__id': filters['project_id']
+            })
 
         return orm_filters
 

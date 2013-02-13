@@ -1,99 +1,294 @@
 /*
-    Tastypie classes
+    Get all objects from a paginated resource.
 */
-var TastypieModel = Backbone.Model.extend({
-    base_url: function() {
-        var temp_url = Backbone.Model.prototype.url.call(this);
-        return (temp_url.charAt(temp_url.length - 1) == '/' ? temp_url : temp_url + '/');
-    },
+angular.module('getAll', []).factory('getAll', function() {
+    var forEach = angular.forEach;
+    var extend = angular.extend;
 
-    url: function() {
-        if (this.attributes.resource_uri !== undefined) {
-            return this.attributes.resource_uri;
-        } else {
-            return this.base_url();
-        }
-    }
-});
+    var getAll = function(output_list, model, offset, params, success, error) {
+        var items = model.get(extend({}, params, {offset: offset}), function() {
+            forEach(items.objects, function(item) {
+                output_list.push(new model(item));
+            });
 
-var TastypieCollection = Backbone.Collection.extend({
-    parse: function(response) {
-        this.recent_meta = response.meta || {};
-        return response.objects || response;
-    },
-
-    fetch_all: function(options) {
-        var self = this;
-
-        if (options === undefined) {
-            this.reset();
-            options = {'add': true};
-        } else {
-            options.add = true;
-        }
-
-        var success_callback = null;
-
-        if (options.success !== undefined) {
-            success_callback = options.success;
-        } else {
-            success_callback = function() {};
-        }
-
-        options.success = function() {
-            if (self.recent_meta.next !== null) {
-                if (options.data === undefined) {
-                    options.data = {};
-                }
-
-                options.data.offset = self.recent_meta.offset + self.recent_meta.limit;
-                self.fetch_all(options);
+            if (items.meta.next !== null) {
+                getAll(output_list, model, items.meta.offset + items.meta.limit, params, success, error);
             } else {
-                success_callback();
+                if (success !== undefined) {
+                    success();
+                }
             }
-        };
+        }, error);
+    };
 
-        self.fetch(options);
-    }
+    return getAll;
 });
-
 
 
 /*
-    Models
+    Group model.
 */
-var Run = TastypieModel.extend({
-    // return the state of the run
-    state: function() {
-        if (this.attributes.enqueue_dts === null) {
+angular.module('group', ['ngResource', 'getAll']).factory('Group', function($resource, getAll) {
+    var Group = $resource(
+        '/api/v1/group/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
+
+    // Return all group objects
+    Group.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Group, 0, params, success, error);
+        return output_list;
+    };
+
+    return Group;
+});
+
+
+/*
+    Project model.
+*/
+angular.module('project', ['ngResource', 'getAll']).factory('Project', function($resource, getAll) {
+    var Project = $resource(
+        '/api/v1/project/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
+
+    // Return all projects
+    Project.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Project, 0, params, success, error);
+        return output_list;
+    };
+
+    return Project;
+});
+
+
+/*
+    Worker model.
+*/
+angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', function($resource, getAll, Project) {
+    var Worker = $resource(
+        '/api/v1/worker/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
+
+    // Return all workers
+    Worker.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Worker, 0, params, success, error);
+        return output_list;
+    };
+
+    // Return the related project
+    Worker.prototype.get_project = function() {
+        if (!this._project && this.project) {
+            this._project = Project.get({'id': this.project.split('/').splice(-2, 1)[0]});
+        }
+        return this._project;
+    };
+
+    return Worker;
+});
+
+
+/*
+    Job template model.
+*/
+angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTemplate', function($resource, getAll, Worker) {
+    var JobTemplate = $resource(
+        '/api/v1/job_template/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
+
+    // Return all job-templates
+    JobTemplate.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, JobTemplate, 0, params, success, error);
+        return output_list;
+    };
+
+    // Return the related worker object
+    JobTemplate.prototype.get_worker = function() {
+        if (!this._worker && this.worker) {
+            this._worker = Worker.get({'id': this.worker.split('/').splice(-2, 1)[0]});
+        }
+        return this._worker;
+    };
+
+    return JobTemplate;
+});
+
+
+/*
+    Job model.
+*/
+angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).factory('Job', function($resource, getAll, JobTemplate, $cookies, $http) {
+    // Required by Django and Django-tastypie
+    $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
+
+    var Job = $resource(
+        '/api/v1/job/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'},
+            'save': {'method': 'PUT'}
+        }
+    );
+
+    // Return all jobs
+    Job.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Job, 0, params, success);
+        return output_list;
+    };
+
+    // Return the related job-template
+    Job.prototype.get_job_template = function() {
+        if (!this._job_template && this.job_template) {
+            this._job_template = JobTemplate.get({'id': this.job_template.split('/').splice(-2, 1)[0]});
+        }
+        return this._job_template;
+    };
+
+    // Return the parent of this job (if any)
+    Job.prototype.get_parent = function() {
+        if (!this._parent && this.parent) {
+            this._parent = Job.get({id: this.parent.split('/').splice(-2, 1)[0]});
+        }
+        return this._parent;
+    };
+
+    // Return the children of this job (if any)
+    Job.prototype.get_children = function() {
+        if (!this._children && this.children) {
+            var children = [];
+            this._children = children;
+            angular.forEach(this.children, function(child_uri) {
+                children.push(Job.get({id: child_uri.split('/').splice(-2, 1)[0]}));
+            });
+        }
+        return this._children;
+    };
+
+    return Job;
+});
+
+
+/*
+    Run model.
+*/
+angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, dtformat, $cookies, $http) {
+    // Required by Django and Django-tastypie
+    $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
+
+    var Run = $resource(
+        '/api/v1/run/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'},
+            'create': {'method': 'POST'}
+        }
+    );
+
+    // Return all runs
+    Run.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, Run, 0, params, success);
+        return output_list;
+    };
+
+    Run.query = function(params, success, error) {
+        var output_list = [];
+        var items = Run.get(params, function() {
+            angular.forEach(items.objects, function(item) {
+                output_list.push(new Run(item));
+            });
+            success();
+        }, error);
+
+        return output_list;
+    };
+
+    // Return the related job
+    Run.prototype.get_job = function() {
+        if (!this._job && this.job) {
+            this._job = Job.get({id:  this.job.split('/').splice(-2, 1)[0]});
+        }
+        return this._job;
+    };
+
+    // Get run duration in seconds
+    Run.prototype.get_duration_sec = function() {
+        return dtformat.getDurationInSec(this.start_dts, this.return_dts);
+    };
+
+    // Get run duration as a formatted string
+    Run.prototype.get_duration_string = function() {
+        return dtformat.formatDuration(this.start_dts, this.return_dts);
+    };
+
+    // Return the state of the run
+    Run.prototype.get_state = function() {
+        if (this.enqueue_dts === null) {
             return 'scheduled';
-        } else if (this.attributes.enqueue_dts !== null && this.attributes.start_dts === null) {
+        } else if (this.enqueue_dts !== null && this.start_dts === null) {
             return 'in_queue';
-        } else if (this.attributes.start_dts !== null && this.attributes.return_dts === null) {
+        } else if (this.start_dts !== null && this.return_dts === null) {
             return 'started';
-        } else if (this.attributes.return_dts !== null && this.attributes.return_success === true) {
+        } else if (this.return_dts !== null && this.return_success === true) {
             return 'completed';
-        } else if (this.attributes.return_dts !== null && this.attributes.return_success === false) {
+        } else if (this.return_dts !== null && this.return_success === false) {
             return 'completed_with_error';
         }
-    },
+    };
 
-    // return the human readable state
-    humanReadableState: function() {
+    // Return the state of the run as a human-readable string
+    Run.prototype.get_state_string = function() {
         return {
             'scheduled': 'Scheduled',
             'in_queue': 'In queue',
             'started': 'Started',
             'completed': 'Completed',
             'completed_with_error': 'Completed with error'
-        }[this.state()];
-    }
+        }[this.get_state()];
+    };
+
+    // Return the related run-log object (if any)
+    Run.prototype.get_run_log = function() {
+        if (!this._run_log && this.run_log) {
+            this._run_log = RunLog.get({id: this.run_log.split('/').splice(-2, 1)[0]});
+        }
+        return this._run_log;
+    };
+
+    return Run;
 });
 
-var RunLog = TastypieModel.extend();
-var Group = TastypieModel.extend();
-var Project = TastypieModel.extend();
-var Worker = TastypieModel.extend();
-var Job = TastypieModel.extend();
-var JobTemplate = TastypieModel.extend();
-var KillRequest = TastypieModel.extend();
+
+/*
+    Run-log model.
+*/
+angular.module('runLog', ['ngResource', 'getAll']).factory('RunLog', function($resource, getAll) {
+    var RunLog = $resource(
+        '/api/v1/run_log/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
+    return RunLog;
+});

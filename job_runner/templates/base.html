@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="{% block ngapp %}{% endblock %}">
 <head>
     <title>{% block title %}Job-Runner{% endblock %}</title>
     {% block extrahead %}{% endblock %}
@@ -10,13 +10,29 @@
     <link rel="stylesheet/less" href="{{ STATIC_URL }}less/bootstrap/responsive.less" />
     <link rel="stylesheet/less" href="{{ STATIC_URL }}less/master.less" />
     {% block extracss %}{% endblock %}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/less.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular-resource.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular-cookies.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-dropdown.js"></script>
+    {% block extrajs %}{% endblock %}
 </head>
 <body class="{% block bodyclass %}generic{% endblock %}" id="{% block bodyid %}generic{% endblock %}">
     <header>
-        <div class="navbar navbar-fixed-top">
+        <div class="navbar navbar-fixed-top" {% if user.is_authenticated %}ng-controller="ProjectCtrl"{% endif %}>
             <div class="navbar-inner">
                 <div class="container">
                     <a class="brand" href="/">Job-Runner</a>
+
+                    {% if user.is_authenticated %}
+                        <ul class="nav">
+                            <li ng-class="{active: global_state.data.page == 'runs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/runs/">Dashboard</a></li>
+                            <li ng-class="{active: global_state.data.page == 'jobs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/jobs/">Jobs</a></li>
+                        </ul>
+                    {% endif %}
+
                     <ul class="nav pull-right">
                         {% if user.is_authenticated %}
                             <li class="dropdown">
@@ -32,9 +48,30 @@
                             <li><a href="{% url login %}">Login</a></li>
                         {% endif %}
                     </ul>
+
+                    {% if user.is_authenticated %}
+                        <ul class="nav pull-right">
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown">{% templatetag openvariable %} global_state.getProject().title {% templatetag closevariable %} <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li ng-repeat="project in projects">
+                                        <a href="/project/{% templatetag openvariable %} project.id {% templatetag closevariable %}/{% templatetag openvariable %} global_state.data.page {% templatetag closevariable %}/">{% templatetag openvariable %} project.title {% templatetag closevariable %}</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    {% endif %}
+
                     {% block navbar %}{% endblock %}
-                    <ul class="nav pull-right ws-status hidden">
-                        <li><span class="label"></span></a>
+                    <ul class="nav pull-right">
+                        <li>
+                            <span ng-class="{label: true, 'label-important': global_state.data.wsConnected == false, 'label-success': global_state.data.wsConnected}">
+                                <ng-switch on="global_state.data.wsConnected">
+                                    <span ng-switch-when="false">dashboard is not live</span>
+                                    <span ng-switch-when="true">live</span>
+                                </ng-switch>
+                            </span>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -45,9 +82,5 @@
         {% block content %}{% endblock %}
     </div>
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/less.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-dropdown.js"></script>
-    {% block extrajs %}{% endblock %}
 </body>
 </html>
