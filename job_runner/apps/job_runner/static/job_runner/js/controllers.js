@@ -45,7 +45,11 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
         globalState.data.jobTab = 'runs';
 
         // get recent runs and build the chart
-        $scope.recent_runs = Run.all({job: $routeParams.job, state: 'completed', limit: 100}, function() {
+        var recentRuns = Run.get({job: $routeParams.job, state: 'completed', limit: 100}, function() {
+            $scope.recent_runs = [];
+            angular.forEach(recentRuns.objects, function(run) {
+                $scope.recent_runs.push(new Run(run));
+            });
             var chartData = [['Run', 'Duration (seconds)']];
 
             angular.forEach($scope.recent_runs, function(run) {
