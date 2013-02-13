@@ -17,6 +17,7 @@ setup(
     install_requires=[
         'django==1.4.2',
         'django-grappelli',
+        'django_compressor',
         'south',
         'pytz',
         'pyzmq',

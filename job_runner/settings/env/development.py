@@ -4,7 +4,7 @@ from job_runner.settings.base import *
 
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
 
 
 DATABASES = {
