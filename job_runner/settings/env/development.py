@@ -3,6 +3,10 @@ import os
 from job_runner.settings.base import *
 
 
+DEBUG = True
+TEMPLATE_DEBUG = True
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

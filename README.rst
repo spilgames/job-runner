@@ -14,6 +14,9 @@ v1.4.0
 ~~~~~~
 
 * Complete refactor of front-end code. The front-end is now based on AngularJS.
+* Misc admin interface improvements (sorting, labels, etc...).
+* Add if the run was manual and / or killed to the error e-mail template.
+* Add compressor for JavaScript code.
 
 
 v1.3.3

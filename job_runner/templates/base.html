@@ -1,22 +1,23 @@
-<!DOCTYPE html>
+<!DOCTYPE html>{% load compress %}
 <html ng-app="{% block ngapp %}{% endblock %}">
 <head>
     <title>{% block title %}Job-Runner{% endblock %}</title>
     {% block extrahead %}{% endblock %}
 
     <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}img/favicon.png" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/boot.css" />
     <link rel="stylesheet/less" href="{{ STATIC_URL }}less/bootstrap/bootstrap.less" />
     <link rel="stylesheet/less" href="{{ STATIC_URL }}less/bootstrap/responsive.less" />
     <link rel="stylesheet/less" href="{{ STATIC_URL }}less/master.less" />
     {% block extracss %}{% endblock %}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/less.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular-resource.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular-cookies.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-dropdown.js"></script>
+    {% compress js %}
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/less.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular-resource.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/angular/angular-cookies.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap/bootstrap-dropdown.js"></script>
+    {% endcompress %}
     {% block extrajs %}{% endblock %}
 </head>
 <body class="{% block bodyclass %}generic{% endblock %}" id="{% block bodyid %}generic{% endblock %}">
@@ -41,7 +42,7 @@
                                     {% if user.is_staff %}
                                         <li><a href="{% url admin:index %}" target="_blank">Admin interface</a></li>
                                     {% endif %}
-                                    <li><a href="{% url logout %}">Logout</a></li>
+                                    <li><a href="{% url logout %}" target="_self">Logout</a></li>
                                 </ul>
                             </li>
                         {% else %}

@@ -1,8 +1,14 @@
-Worker:
-{{ run.job.job_template.worker.title }}
-
 Job title:
 {{ run.job.title }}
+
+Was manual:
+{% if run.is_manual %}yes{% else %}no{% endif %}
+
+Was killed:
+{% if run.killrequest_set.all|length > 0 %}yes{% else %}no{% endif %}
+
+Worker:
+{{ run.job.job_template.worker.title }}
 
 Links:
  * Dashboard - http://{{ hostname }}{{ run.get_absolute_url }}
