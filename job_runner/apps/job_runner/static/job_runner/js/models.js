@@ -292,3 +292,19 @@ angular.module('runLog', ['ngResource', 'getAll']).factory('RunLog', function($r
     );
     return RunLog;
 });
+
+
+/*
+    Kill-request model.
+*/
+angular.module('killRequest', ['ngResource']).factory('KillRequest', function($resource) {
+    var KillRequest = $resource(
+        '/api/v1/kill_request/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'},
+            'create': {'method': 'POST'}
+        }
+    );
+    return KillRequest;
+});

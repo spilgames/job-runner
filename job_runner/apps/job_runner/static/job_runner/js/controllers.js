@@ -121,6 +121,47 @@ var ProjectCtrl = function($scope, $routeParams, Project, globalState) {
 
 
 /*
+    Controller for run actions.
+*/
+var RunActionCtrl = function($scope, $routeParams, Run, Job, JobTemplate, Group, KillRequest) {
+    var getPermissionsForJob = function(jobId) {
+        $scope.auth_permissions = false;
+        $scope.job = Job.get({id: jobId}, function() {
+            var jobTemplate = JobTemplate.get({id: $scope.job.job_template.split('/').splice(-2, 1)[0]}, function() {
+                var groups = Group.all({}, function() {
+                    angular.forEach(groups, function(group) {
+                        if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
+                            $scope.auth_permissions = true;
+                        }
+                    });
+                });
+            });
+        });
+    };
+
+    $scope.killRun = function() {
+        if(!confirm('Are you sure you want to kill this run?')) {
+            return false;
+        }
+
+        var killRequest = new KillRequest({
+            run: $scope.run.resource_uri
+        });
+        killRequest.$create(function() {
+            $scope.kill_request = killRequest;
+        });
+    };
+
+    if ($routeParams.run !== undefined) {
+        var run = Run.get({id: $routeParams.run}, function() {
+            getPermissionsForJob(run.job.split('/').splice(-2, 1)[0]);
+        });
+    }
+
+};
+
+
+/*
     Controller for job actions.
 */
 var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobTemplate, globalState) {
@@ -139,8 +180,6 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobT
                 });
             });
         });
-
-
     };
 
     // function for scheduling a job

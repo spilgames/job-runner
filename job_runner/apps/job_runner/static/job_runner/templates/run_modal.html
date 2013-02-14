@@ -85,6 +85,17 @@
                 </ng-switch>
             </div>
         </div>
+
+        <div class="inline" ng-controller="RunActionCtrl">
+            <ng-switch on="auth_permissions == true && run.get_state() == 'started'">
+                <div ng-switch-when="true" class="inline">
+                    <ng-switch on="kill_request == null">
+                        <button class="btn btn-danger" disabled="disabled" ng-switch-when="false">Kill-request has been sent</button>
+                        <button class="btn btn-danger" ng-switch-when="true" ng-click="killRun()">Kill this run</button>
+                    </ng-switch>
+                </div>
+            </ng-switch>
+        </div>
         <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Close</button>
     </div>
 </div>
