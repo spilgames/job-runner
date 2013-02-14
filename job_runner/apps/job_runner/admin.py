@@ -110,6 +110,7 @@ class ProjectAdmin(admin.ModelAdmin):
     """
     list_display = ('title', 'enqueue_is_enabled')
     list_filter = ('enqueue_is_enabled',)
+    list_editable = ('enqueue_is_enabled',)
 
 
 class WorkerAdmin(admin.ModelAdmin):
@@ -125,6 +126,7 @@ class WorkerAdmin(admin.ModelAdmin):
     )
     list_filter = ('project', 'enqueue_is_enabled')
     list_display_links = ('title',)
+    list_editable = ('enqueue_is_enabled',)
 
     def ping_response(self, obj):
         interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
@@ -177,6 +179,7 @@ class JobTemplateAdmin(admin.ModelAdmin):
     list_display = ('worker', 'title', 'enqueue_is_enabled')
     list_filter = ('worker', 'worker__project', 'enqueue_is_enabled')
     list_display_links = ('title',)
+    list_editable = ('enqueue_is_enabled',)
 
 
 class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
@@ -199,6 +202,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         'job_template__worker__project'
     )
     list_display_links = ('title',)
+    list_editable = ('enqueue_is_enabled',)
     inlines = [
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,
