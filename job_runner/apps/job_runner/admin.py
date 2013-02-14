@@ -203,6 +203,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     )
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
+    search_fields = ('title',)
     inlines = [
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,
