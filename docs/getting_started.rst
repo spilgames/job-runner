@@ -145,8 +145,8 @@ Job-Runner Worker
 
 Congratulations! You now have all components up and running. If you point your
 browser to http://localhost:8000/, you will see an empty dashboard, with
-top-right a label **live**, meaning that the dashboard is connected to the
-WebSocket server. If this is red with a warning, please make sure the
+top-right a label **Dashboard is live**, meaning that the dashboard is connected
+to the WebSocket server. If this is red with a warning, please make sure the
 ``job_runner_ws_server`` process is still running!
 
 
