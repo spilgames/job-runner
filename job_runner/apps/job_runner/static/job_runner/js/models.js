@@ -282,7 +282,7 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
 /*
     Run-log model.
 */
-angular.module('runLog', ['ngResource', 'getAll']).factory('RunLog', function($resource, getAll) {
+angular.module('runLog', ['ngResource']).factory('RunLog', function($resource) {
     var RunLog = $resource(
         '/api/v1/run_log/:id/',
         {'id': '@id'},

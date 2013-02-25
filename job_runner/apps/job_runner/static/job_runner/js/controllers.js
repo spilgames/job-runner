@@ -45,7 +45,7 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
         globalState.data.jobTab = 'runs';
 
         // get recent runs and build the chart
-        var recentRuns = Run.get({job: $routeParams.job, state: 'completed', limit: 100}, function() {
+        Run.get({job: $routeParams.job, state: 'completed', limit: 100}, function(recentRuns) {
             $scope.recent_runs = [];
             angular.forEach(recentRuns.objects, function(run) {
                 $scope.recent_runs.push(new Run(run));
@@ -92,7 +92,7 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
     Controller which redirects to the first project.
 */
 var RedirectToFirstProjectCtrl = function($location, Project) {
-    var projects = Project.all({}, function() {
+    Project.all({}, function(projects) {
         if (projects.length > 0) {
             $location.path('/project/'+ projects[0].id +'/runs/');
         }
@@ -127,8 +127,8 @@ var RunActionCtrl = function($scope, $routeParams, Run, Job, JobTemplate, Group,
     var getPermissionsForJob = function(jobId) {
         $scope.auth_permissions = false;
         $scope.job = Job.get({id: jobId}, function() {
-            var jobTemplate = JobTemplate.get({id: $scope.job.job_template.split('/').splice(-2, 1)[0]}, function() {
-                var groups = Group.all({}, function() {
+            JobTemplate.get({id: $scope.job.job_template.split('/').splice(-2, 1)[0]}, function(jobTemplate) {
+                Group.all({}, function(groups) {
                     angular.forEach(groups, function(group) {
                         if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
                             $scope.auth_permissions = true;
@@ -229,7 +229,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobT
     if ($routeParams.job !== undefined) {
         getPermissionsForJob($routeParams.job);
     } else if ($routeParams.run !== undefined) {
-        var run = Run.get({id: $routeParams.run}, function() {
+        Run.get({id: $routeParams.run}, function(run) {
             getPermissionsForJob(run.job.split('/').splice(-2, 1)[0]);
         });
     }

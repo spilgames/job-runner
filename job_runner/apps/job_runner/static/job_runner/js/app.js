@@ -24,7 +24,7 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
             return;
         }
 
-        var run = Run.get({id: data.run_id}, function() {
+        Run.get({id: data.run_id}, function(run) {
             var pushRun = true;
             var toPop = [];
 
@@ -36,7 +36,7 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
                     }
                 });
 
-                var scheduled = Run.all({state: 'scheduled', project_id: globalState.data.projectId}, function() {
+                Run.all({state: 'scheduled', project_id: globalState.data.projectId}, function(scheduled) {
                     angular.forEach(scheduled, function(run) {
                         globalState.data.runs.push(run);
                     });
