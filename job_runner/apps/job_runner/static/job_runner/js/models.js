@@ -6,7 +6,7 @@ angular.module('getAll', []).factory('getAll', function() {
     var extend = angular.extend;
 
     var getAll = function(output_list, model, offset, params, success, error) {
-        var items = model.get(extend({}, params, {offset: offset}), function() {
+        model.get(extend({}, params, {offset: offset}), function(items) {
             forEach(items.objects, function(item) {
                 output_list.push(new model(item));
             });
@@ -15,13 +15,42 @@ angular.module('getAll', []).factory('getAll', function() {
                 getAll(output_list, model, items.meta.offset + items.meta.limit, params, success, error);
             } else {
                 if (success !== undefined) {
-                    success();
+                    success(output_list);
                 }
             }
         }, error);
     };
 
     return getAll;
+});
+
+
+/*
+    Decorator to cache get requests.
+*/
+angular.module('modelCache', []).factory('cachedGet', function() {
+    var cachedGet = function(fn, cache, cacheKey) {
+        return function(params, success, error) {
+            var output = null;
+
+            if (params.id) {
+                output = cache.get(cacheKey + '.' + params.id);
+            }
+            if (!output) {
+                output = fn(params, function(obj) {
+                    if (params.id) {
+                        cache.put(cacheKey + '.' + params.id, obj);
+                    }
+                    if(success) {
+                        success(obj);
+                    }
+                }, error);
+            }
+            return output;
+        };
+    };
+
+    return cachedGet;
 });
 
 
@@ -51,7 +80,7 @@ angular.module('group', ['ngResource', 'getAll']).factory('Group', function($res
 /*
     Project model.
 */
-angular.module('project', ['ngResource', 'getAll']).factory('Project', function($resource, getAll) {
+angular.module('project', ['ngResource', 'getAll', 'modelCache']).factory('Project', function($resource, getAll, globalCache, cachedGet) {
     var Project = $resource(
         '/api/v1/project/:id/',
         {'id': '@id'},
@@ -59,6 +88,9 @@ angular.module('project', ['ngResource', 'getAll']).factory('Project', function(
             'get': {'method': 'GET'}
         }
     );
+
+    // Decorate get method to add caching.
+    Project.get = cachedGet(Project.get, globalCache, 'project');
 
     // Return all projects
     Project.all = function(params, success, error) {
@@ -74,7 +106,7 @@ angular.module('project', ['ngResource', 'getAll']).factory('Project', function(
 /*
     Worker model.
 */
-angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', function($resource, getAll, Project) {
+angular.module('worker', ['ngResource', 'getAll', 'project', 'modelCache']).factory('Worker', function($resource, getAll, Project, globalCache, cachedGet) {
     var Worker = $resource(
         '/api/v1/worker/:id/',
         {'id': '@id'},
@@ -82,6 +114,9 @@ angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', 
             'get': {'method': 'GET'}
         }
     );
+
+    // Decorate get method to add caching.
+    Worker.get = cachedGet(Worker.get, globalCache, 'worker');
 
     // Return all workers
     Worker.all = function(params, success, error) {
@@ -92,10 +127,9 @@ angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', 
 
     // Return the related project
     Worker.prototype.get_project = function() {
-        if (!this._project && this.project) {
-            this._project = Project.get({'id': this.project.split('/').splice(-2, 1)[0]});
+        if (this.project) {
+            return Project.get({'id': this.project.split('/').splice(-2, 1)[0]});
         }
-        return this._project;
     };
 
     return Worker;
@@ -105,7 +139,7 @@ angular.module('worker', ['ngResource', 'getAll', 'project']).factory('Worker', 
 /*
     Job template model.
 */
-angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTemplate', function($resource, getAll, Worker) {
+angular.module('jobTemplate', ['ngResource', 'getAll', 'worker', 'modelCache']).factory('JobTemplate', function($resource, getAll, Worker, globalCache, cachedGet) {
     var JobTemplate = $resource(
         '/api/v1/job_template/:id/',
         {'id': '@id'},
@@ -113,6 +147,9 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
             'get': {'method': 'GET'}
         }
     );
+
+    // Decorate get method to add caching.
+    JobTemplate.get = cachedGet(JobTemplate.get, globalCache, 'jobTemplate');
 
     // Return all job-templates
     JobTemplate.all = function(params, success, error) {
@@ -123,10 +160,10 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
 
     // Return the related worker object
     JobTemplate.prototype.get_worker = function() {
-        if (!this._worker && this.worker) {
-            this._worker = Worker.get({'id': this.worker.split('/').splice(-2, 1)[0]});
+        if (this.worker) {
+            var workerId = this.worker.split('/').splice(-2, 1)[0];
+            return Worker.get({'id': workerId});
         }
-        return this._worker;
     };
 
     return JobTemplate;
@@ -136,7 +173,7 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker']).factory('JobTe
 /*
     Job model.
 */
-angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).factory('Job', function($resource, getAll, JobTemplate, $cookies, $http) {
+angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'modelCache', 'ngCookies']).factory('Job', function($resource, getAll, JobTemplate, $cookies, $http, globalCache, cachedGet) {
     // Required by Django and Django-tastypie
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
 
@@ -149,6 +186,9 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).fact
         }
     );
 
+    // Decorate get method to add caching.
+    Job.get = cachedGet(Job.get, globalCache, 'job');
+
     // Return all jobs
     Job.all = function(params, success, error) {
         var output_list = [];
@@ -158,18 +198,18 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).fact
 
     // Return the related job-template
     Job.prototype.get_job_template = function() {
-        if (!this._job_template && this.job_template) {
-            this._job_template = JobTemplate.get({'id': this.job_template.split('/').splice(-2, 1)[0]});
+        if (this.job_template) {
+            var templateId = this.job_template.split('/').splice(-2, 1)[0];
+            return JobTemplate.get({'id': templateId});
         }
-        return this._job_template;
     };
 
     // Return the parent of this job (if any)
     Job.prototype.get_parent = function() {
-        if (!this._parent && this.parent) {
-            this._parent = Job.get({id: this.parent.split('/').splice(-2, 1)[0]});
+        if (this.parent) {
+            var parentId = this.parent.split('/').splice(-2, 1)[0];
+            return Job.get({id: parentId});
         }
-        return this._parent;
     };
 
     // Return the children of this job (if any)
@@ -178,7 +218,8 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).fact
             var children = [];
             this._children = children;
             angular.forEach(this.children, function(child_uri) {
-                children.push(Job.get({id: child_uri.split('/').splice(-2, 1)[0]}));
+                var childId = child_uri.split('/').splice(-2, 1)[0];
+                children.push(Job.get({id: childId}));
             });
         }
         return this._children;
@@ -191,7 +232,7 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'ngCookies']).fact
 /*
     Run model.
 */
-angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, dtformat, $cookies, $http) {
+angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, dtformat, globalCache, $cookies, $http) {
     // Required by Django and Django-tastypie
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
 
@@ -225,10 +266,8 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
 
     // Return the related job
     Run.prototype.get_job = function() {
-        if (!this._job && this.job) {
-            this._job = Job.get({id:  this.job.split('/').splice(-2, 1)[0]});
-        }
-        return this._job;
+        var jobId = this.job.split('/').splice(-2, 1)[0];
+        return Job.get({id: jobId});
     };
 
     // Get run duration in seconds

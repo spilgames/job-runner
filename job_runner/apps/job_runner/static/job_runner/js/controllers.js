@@ -4,24 +4,25 @@
 var RunsCtrl = function($scope, $routeParams, Project, Run, Job, globalState) {
     $scope.global_state = globalState;
     globalState.data.page = 'runs';
-    globalState.setProjectId($routeParams.project);
-    
-    $scope.runFilter = function(state) {
-        return function(run) {
-            return (run.get_state() == state);
+    globalState.initialize($routeParams.project, function() {
+
+        $scope.runFilter = function(state) {
+            return function(run) {
+                return (run.get_state() == state);
+            };
         };
-    };
 
-    $scope.runs = globalState.getRuns();
+        $scope.runs = globalState.getRuns();
 
-    // show run details
-    if ($routeParams.run) {
-        $scope.run = Run.get({id: $routeParams.run}, function() {
-            // is there a better way?
-            $('#modal').modal().on('hide', function() { history.go(-1); });
-        });
-    }
+        // show run details
+        if ($routeParams.run) {
+            $scope.run = Run.get({id: $routeParams.run}, function() {
+                // is there a better way?
+                $('#modal').modal().on('hide', function() { history.go(-1); });
+            });
+        }
 
+    });
 };
 
 
