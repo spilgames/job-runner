@@ -123,7 +123,12 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
         // get all jobs.
         getAllJobs: function(success) {
             var jobs = globalCache.get('job.all');
-            if (success) {
+            if (!jobs) {
+                jobs = Job.all({project_id: this.data.projectId}, function(jobs) {
+                    globalCache.put('job.all', jobs);
+                    success(jobs);
+                });
+            } else if (success) {
                 success(jobs);
             }
             return jobs;
