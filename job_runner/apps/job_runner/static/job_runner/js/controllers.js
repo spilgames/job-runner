@@ -31,61 +31,61 @@ var RunsCtrl = function($scope, $routeParams, Project, Run, Job, globalState) {
 */
 var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Worker, Run, Group, globalState, dtformat) {
     globalState.data.page = 'jobs';
-    globalState.setProjectId($routeParams.project);
-    $scope.global_state = globalState;
-    $scope.jobs = globalState.getAllJobs();
-    $scope.job_templates = globalState.getAllJobTemplates();
+    globalState.initialize($routeParams.project, function() {
+        $scope.global_state = globalState;
+        $scope.jobs = globalState.getAllJobs();
+        $scope.job_templates = globalState.getAllJobTemplates();
 
-    // function for displaying job details
-    $scope.showDetails = function() {
-        globalState.data.jobTab = 'details';
-    };
+        // function for displaying job details
+        $scope.showDetails = function() {
+            globalState.data.jobTab = 'details';
+        };
 
-    // function for displaying recent runs of a job
-    $scope.showRecentRuns = function() {
-        globalState.data.jobTab = 'runs';
+        // function for displaying recent runs of a job
+        $scope.showRecentRuns = function() {
+            globalState.data.jobTab = 'runs';
 
-        // get recent runs and build the chart
-        Run.get({job: $routeParams.job, state: 'completed', limit: 100}, function(recentRuns) {
-            $scope.recent_runs = [];
-            angular.forEach(recentRuns.objects, function(run) {
-                $scope.recent_runs.push(new Run(run));
+            // get recent runs and build the chart
+            Run.get({job: $routeParams.job, state: 'completed', limit: 100}, function(recentRuns) {
+                $scope.recent_runs = [];
+                angular.forEach(recentRuns.objects, function(run) {
+                    $scope.recent_runs.push(new Run(run));
+                });
+                var chartData = [['Run', 'Duration (seconds)']];
+
+                angular.forEach($scope.recent_runs, function(run) {
+                    chartData.push([dtformat.formatDateTime(run.start_dts), run.get_duration_sec()]);
+                });
+
+                chartData = google.visualization.arrayToDataTable(chartData);
+                var chart = new google.visualization.AreaChart(document.getElementById('run-performance-graph'));
+                chart.draw(chartData, {
+                    'axisTitlesPosition': 'none',
+                    'legend': {'position': 'none'},
+                    'hAxis': {'direction': -1, 'textPosition': 'none', 'gridlines': {'count': 0}},
+                    'vAxis': {'gridlines': {'count': 3}}
+                });
+
             });
-            var chartData = [['Run', 'Duration (seconds)']];
+        };
 
-            angular.forEach($scope.recent_runs, function(run) {
-                chartData.push([dtformat.formatDateTime(run.start_dts), run.get_duration_sec()]);
-            });
-
-            chartData = google.visualization.arrayToDataTable(chartData);
-            var chart = new google.visualization.AreaChart(document.getElementById('run-performance-graph'));
-            chart.draw(chartData, {
-                'axisTitlesPosition': 'none',
-                'legend': {'position': 'none'},
-                'hAxis': {'direction': -1, 'textPosition': 'none', 'gridlines': {'count': 0}},
-                'vAxis': {'gridlines': {'count': 3}}
-            });
-
-        });
-    };
-
-    // show job details
-    if ($routeParams.job) {
-        $scope.job = Job.get({id: $routeParams.job});
-        if (globalState.data.jobTab == 'runs') {
-            // make sure that we update the recent runs
-            $scope.showRecentRuns();
+        // show job details
+        if ($routeParams.job) {
+            $scope.job = Job.get({id: $routeParams.job});
+            if (globalState.data.jobTab == 'runs') {
+                // make sure that we update the recent runs
+                $scope.showRecentRuns();
+            }
         }
-    }
 
-    // show run details
-    if ($routeParams.run) {
-        $scope.run = Run.get({id: $routeParams.run}, function() {
-            // is there a better way?
-            $('#modal').modal().on('hide', function() { history.go(-1); });
-        });
-    }
-
+        // show run details
+        if ($routeParams.run) {
+            $scope.run = Run.get({id: $routeParams.run}, function() {
+                // is there a better way?
+                $('#modal').modal().on('hide', function() { history.go(-1); });
+            });
+        }
+    });
 };
 
 
@@ -127,8 +127,8 @@ var ProjectCtrl = function($scope, $routeParams, Project, globalState) {
 var RunActionCtrl = function($scope, $routeParams, Run, Job, JobTemplate, Group, KillRequest) {
     var getPermissionsForJob = function(jobId) {
         $scope.auth_permissions = false;
-        $scope.job = Job.get({id: jobId}, function() {
-            JobTemplate.get({id: $scope.job.job_template.split('/').splice(-2, 1)[0]}, function(jobTemplate) {
+        $scope.job = Job.get({id: jobId}, function(job) {
+            JobTemplate.get({id: job.job_template.split('/').splice(-2, 1)[0]}, function(jobTemplate) {
                 Group.all({}, function(groups) {
                     angular.forEach(groups, function(group) {
                         if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
@@ -154,7 +154,7 @@ var RunActionCtrl = function($scope, $routeParams, Run, Job, JobTemplate, Group,
     };
 
     if ($routeParams.run !== undefined) {
-        var run = Run.get({id: $routeParams.run}, function() {
+        Run.get({id: $routeParams.run}, function(run) {
             getPermissionsForJob(run.job.split('/').splice(-2, 1)[0]);
         });
     }
@@ -165,14 +165,14 @@ var RunActionCtrl = function($scope, $routeParams, Run, Job, JobTemplate, Group,
 /*
     Controller for job actions.
 */
-var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobTemplate, globalState) {
+var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobTemplate, globalState, globalCache) {
     // set $scope.auth_permissions to true if the user has auth permissions
     // for the given jobId.
     var getPermissionsForJob = function(jobId) {
         $scope.auth_permissions = false;
-        $scope.job = Job.get({id: jobId}, function() {
-            var jobTemplate = JobTemplate.get({id: $scope.job.job_template.split('/').splice(-2, 1)[0]}, function() {
-                var groups = Group.all({}, function() {
+        $scope.job = Job.get({id: jobId}, function(job) {
+            JobTemplate.get({id: job.job_template.split('/').splice(-2, 1)[0]}, function(jobTemplate) {
+                Group.all({}, function(groups) {
                     angular.forEach(groups, function(group) {
                         if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
                             $scope.auth_permissions = true;
@@ -204,10 +204,10 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobT
     $scope.toggleEnqueue = function(toValue) {
         if (toValue === true) {
             if (confirm('Are you sure you want to enable the enqueueing of this job?')) {
+                // invalidate the cache
+                globalCache.remove('job.' + $scope.job.id);
                 $scope.job.enqueue_is_enabled = toValue;
                 $scope.job.$save(function(){
-                    globalState.data.jobs = null;
-                    globalState.data.runs = null;
                     if ($routeParams.job) {
                         $route.reload();
                     }
@@ -215,10 +215,10 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobT
             }
         } else if (toValue === false) {
             if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
+                // invalidate the cache
+                globalCache.remove('job.' + $scope.job.id);
                 $scope.job.enqueue_is_enabled = toValue;
                 $scope.job.$save(function() {
-                    globalState.data.jobs = null;
-                    globalState.data.runs = null;
                     if ($routeParams.job) {
                         $route.reload();
                     }
