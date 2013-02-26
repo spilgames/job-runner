@@ -256,11 +256,13 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
 
     Run.query = function(params, success, error) {
         var output_list = [];
-        var items = Run.get(params, function() {
+        Run.get(params, function(items) {
             angular.forEach(items.objects, function(item) {
                 output_list.push(new Run(item));
             });
-            success();
+            if (success) {
+                success(items);
+            }
         }, error);
 
         return output_list;
