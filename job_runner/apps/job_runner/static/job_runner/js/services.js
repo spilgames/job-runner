@@ -1,6 +1,10 @@
 var jobrunnerServices = angular.module('jobrunner.services', ['project', 'job', 'jobTemplate', 'run']);
 
+/*
+    Formatters for date/time objects.
+*/
 jobrunnerServices.value('dtformat', {
+    // format the delta between two datetime-stamps.
     formatDuration: function(startDts, endDts) {
         if (startDts !== null && endDts !== null) {
             var start = moment(startDts);
@@ -11,6 +15,7 @@ jobrunnerServices.value('dtformat', {
         }
     },
 
+    // get the duration in seconds between two datetime-stamps.
     getDurationInSec: function(startDts, endDts) {
         if (startDts !== null && endDts !== null) {
             var start = moment(startDts);
@@ -26,6 +31,7 @@ jobrunnerServices.value('dtformat', {
         }
     },
 
+    // format datetime-stamp.
     formatDateTime: function(dateTimeString) {
         if (dateTimeString !== null) {
             return moment(dateTimeString).format('YYYY-MM-DD HH:mm:ss');
@@ -34,12 +40,18 @@ jobrunnerServices.value('dtformat', {
 
 });
 
+/*
+    Global cache object.
+*/
 jobrunnerServices.factory('globalCache', function($cacheFactory) {
     var globalCache = $cacheFactory('globalCache');
     return globalCache;
 });
 
 
+/*
+    Global state.
+*/
 jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, globalCache) {
     return {
         data : {
@@ -51,19 +63,8 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
             wsConnected: false
         },
 
-        setProjectId: function(projectId) {
-            if (!this.data.projectId || this.data.projectId != projectId) {
-                this.data.projectId = projectId;
-
-                // reset all data
-                globalCache.removeAll();
-                this.data.project = null;
-                this.data.jobs = null;
-                this.data.jobTemplates = null;
-                this.data.runs = null;
-            }
-        },
-
+        // initialize the globalState for the given project, after initializing
+        // the given callback will be executed.
         initialize: function(projectId, callback) {
             var self = this;
 
@@ -107,6 +108,7 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
             }
         },
 
+        // get the current project object.
         getProject: function() {
             var self = this;
             var project = globalCache.get('project.' + self.data.projectId);
@@ -118,16 +120,21 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
             return project;
         },
 
+        // get all jobs.
         getAllJobs: function(success) {
             var jobs = globalCache.get('job.all');
-            success(jobs);
+            if (success) {
+                success(jobs);
+            }
             return jobs;
         },
 
+        // get all job-templates.
         getAllJobTemplates: function() {
-            return globalCache('jobTemplate.all');
+            return globalCache.get('jobTemplate.all');
         },
 
+        // get all runs to display at the dashboard.
         getRuns: function() {
             if (this.data.runs) {
                 return this.data.runs;
@@ -135,24 +142,30 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
                 this.data.runs = [];
                 var self = this;
 
+                // get all scheduled
                 Run.all({state: 'scheduled', project_id: this.data.projectId}, function(scheduled) {
                     angular.forEach(scheduled, function(run) {
                         self.data.runs.push(run);
                     });
                 });
 
+                // get all enqueued
                 Run.all({state: 'in_queue', project_id: this.data.projectId}, function(inQueue) {
                     angular.forEach(inQueue, function(run) {
                         self.data.runs.push(run);
                     });
                 });
 
+                // get all started
                 Run.all({state: 'started', project_id: this.data.projectId}, function(started) {
                     angular.forEach(started, function(run) {
                         self.data.runs.push(run);
                     });
                 });
 
+                // get for each job the last complated run
+                // TODO: make it possible to retrieve this in one call from the
+                //       API.
                 Job.all({project_id: this.data.projectId}, function(jobs) {
                     angular.forEach(jobs, function(job) {
                         var runs = Run.query({job: job.id, limit: 1, state: 'completed'}, function() {

@@ -45,6 +45,8 @@ angular.module('modelCache', []).factory('cachedGet', function() {
                         success(obj);
                     }
                 }, error);
+            } else if (success) {
+                success(output);
             }
             return output;
         };
@@ -266,8 +268,10 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
 
     // Return the related job
     Run.prototype.get_job = function() {
-        var jobId = this.job.split('/').splice(-2, 1)[0];
-        return Job.get({id: jobId});
+        if (this.job) {
+            var jobId = this.job.split('/').splice(-2, 1)[0];
+            return Job.get({id: jobId});
+        }
     };
 
     // Get run duration in seconds
