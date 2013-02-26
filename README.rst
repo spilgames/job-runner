@@ -10,6 +10,12 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.4.1
+~~~~~~
+
+* Add caching of objects to improve the performance (frontend).
+
+
 v1.4.0
 ~~~~~~
 
