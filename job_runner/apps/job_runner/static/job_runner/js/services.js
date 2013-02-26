@@ -43,12 +43,9 @@ jobrunnerServices.factory('globalCache', function($cacheFactory) {
 jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, globalCache) {
     return {
         data : {
-            project: null,
             projectId: null,
             page: null,
-            jobs: null,
             jobTab: 'details',
-            jobTemplates: null,
             jobFilter: {},
             runs: null,
             wsConnected: false
@@ -111,30 +108,24 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
         },
 
         getProject: function() {
-            if (this.data.project) {
-                return this.data.project;
-            } else {
-                this.data.project = Project.get({id: this.data.projectId});
-                return this.data.project;
+            var self = this;
+            var project = globalCache.get('project.' + self.data.projectId);
+            if (!project) {
+                project = Project.get({id: self.data.projectId}, function(project) {
+                    globalCache.put('project.' + self.data.projectId);
+                });
             }
+            return project;
         },
 
         getAllJobs: function(success) {
-            if (this.data.jobs) {
-                return this.data.jobs;
-            } else {
-                this.data.jobs = Job.all({project_id: this.data.projectId}, success);
-                return this.data.jobs;
-            }
+            var jobs = globalCache.get('job.all');
+            success(jobs);
+            return jobs;
         },
 
         getAllJobTemplates: function() {
-            if (this.data.jobTemplates) {
-                return this.data.jobTemplates;
-            } else {
-                this.data.jobTemplates = JobTemplate.all({project_id: this.data.projectId});
-                return this.data.jobTemplates;
-            }
+            return globalCache('jobTemplate.all');
         },
 
         getRuns: function() {
