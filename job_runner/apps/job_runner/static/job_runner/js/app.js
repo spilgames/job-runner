@@ -30,15 +30,17 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
 
             // update scheduled runs, if our run completed
             if (data.event == 'returned') {
-                angular.forEach(globalState.data.runs, function(value) {
-                    if (value.get_state() == 'scheduled') {
-                        toPop.push(value);
-                    }
-                });
-
                 Run.all({state: 'scheduled', project_id: globalState.data.projectId}, function(scheduled) {
                     angular.forEach(scheduled, function(run) {
-                        globalState.data.runs.push(run);
+                        var inList = false;
+                        angular.forEach(globalState.data.runs, function(r) {
+                            if (r.resource_uri == run.resource_uri) {
+                                inList = true;
+                            }
+                        });
+                        if (inList === false) {
+                            globalState.data.runs.push(run);
+                        }
                     });
                 });
             }
