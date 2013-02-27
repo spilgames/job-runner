@@ -10,6 +10,13 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.4.2
+~~~~~~
+
+* Fix the issue where runs from other projects than the selected one, were
+  rendered on the dashboard.
+
+
 v1.4.1
 ~~~~~~
 
