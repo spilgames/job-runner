@@ -11,6 +11,53 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
         when('/project/:project/jobs/:job/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/jobs.html'}).
         when('/project/:project/jobs/:job/runs/:run/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/jobs.html'});
 }).run(function(globalState, Run) {
+    // handle run update
+    var handleRunUpdate = function(run, data) {
+        var pushRun = true;
+        var toPop = [];
+
+        // update scheduled runs, if our run completed
+        if (data.event == 'returned') {
+            Run.all({state: 'scheduled', project_id: globalState.data.projectId}, function(scheduled) {
+                angular.forEach(scheduled, function(run) {
+                    var inList = false;
+                    angular.forEach(globalState.data.runs, function(r) {
+                        if (r.resource_uri == run.resource_uri) {
+                            inList = true;
+                        }
+                    });
+                    if (inList === false) {
+                        globalState.data.runs.push(run);
+                    }
+                });
+            });
+        }
+
+        // update the run, if we already have it in cache
+        angular.forEach(globalState.data.runs, function(value, index) {
+            if (value.id == run.id) {
+                pushRun = false;
+                globalState.data.runs[index] = run;
+            }
+
+            // remove old completed runs
+            if (value.id != run.id && value.job == run.job && (run.get_state() == 'completed' || run.get_state() == 'completed_with_error') && (value.get_state() == 'completed' || value.get_state() == 'completed_with_error')) {
+                toPop.push(value);
+            }
+        });
+
+        // cleanup old items
+        angular.forEach(toPop, function(value) {
+            var index = globalState.data.runs.indexOf(value);
+            globalState.data.runs.splice(index, 1);
+        });
+
+        if (pushRun) {
+            globalState.data.runs.push(run);
+        }
+    };
+
+
     // handle incoming events from the WebSocket server
     var handleEvent = function(data) {
         // if we don't have a list of runs, it means the user is currently
@@ -24,48 +71,17 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
             return;
         }
 
+        // get an instance of the run and make sure it belongs to one of the
+        // jobs we are aware of (so we can assume it is within the selected
+        // project).
         Run.get({id: data.run_id}, function(run) {
-            var pushRun = true;
-            var toPop = [];
-
-            // update scheduled runs, if our run completed
-            if (data.event == 'returned') {
-                angular.forEach(globalState.data.runs, function(value) {
-                    if (value.get_state() == 'scheduled') {
-                        toPop.push(value);
+            globalState.getAllJobs(function(jobs) {
+                angular.forEach(jobs, function(job) {
+                    if (job.resource_uri == run.job) {
+                        handleRunUpdate(run, data);
                     }
                 });
-
-                Run.all({state: 'scheduled', project_id: globalState.data.projectId}, function(scheduled) {
-                    angular.forEach(scheduled, function(run) {
-                        globalState.data.runs.push(run);
-                    });
-                });
-            }
-
-            // update the run, if we already have it in cache
-            angular.forEach(globalState.data.runs, function(value, index) {
-                if (value.id == run.id) {
-                    pushRun = false;
-                    globalState.data.runs[index] = run;
-                }
-
-                // remove old completed runs
-                if (value.id != run.id && value.job == run.job && (run.get_state() == 'completed' || run.get_state() == 'completed_with_error') && (value.get_state() == 'completed' || value.get_state() == 'completed_with_error')) {
-                    toPop.push(value);
-                }
             });
-
-            // cleanup old items
-            angular.forEach(toPop, function(value) {
-                var index = globalState.data.runs.indexOf(value);
-                globalState.data.runs.splice(index, 1);
-            });
-
-            if (pushRun) {
-                globalState.data.runs.push(run);
-            }
-
         });
     };
 
