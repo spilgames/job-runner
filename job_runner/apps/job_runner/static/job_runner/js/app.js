@@ -71,19 +71,17 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
             return;
         }
 
+        // get an instance of the run and make sure it belongs to one of the
+        // jobs we are aware of (so we can assume it is within the selected
+        // project).
         Run.get({id: data.run_id}, function(run) {
-            run.get_job(function(job) {
-                job.get_job_template(function(template) {
-                    template.get_worker(function(worker) {
-                        worker.get_project(function(project) {
-                            if (project.id == globalState.data.projectId) {
-                                handleRunUpdate(run, data);
-                            }
-                        });
-                    });
+            globalState.getAllJobs(function(jobs) {
+                angular.forEach(jobs, function(job) {
+                    if (job.resource_uri == run.job) {
+                        handleRunUpdate(run, data);
+                    }
                 });
             });
-
         });
     };
 
