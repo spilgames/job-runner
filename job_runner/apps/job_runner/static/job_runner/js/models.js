@@ -128,9 +128,9 @@ angular.module('worker', ['ngResource', 'getAll', 'project', 'modelCache']).fact
     };
 
     // Return the related project
-    Worker.prototype.get_project = function() {
+    Worker.prototype.get_project = function(success) {
         if (this.project) {
-            return Project.get({'id': this.project.split('/').splice(-2, 1)[0]});
+            return Project.get({'id': this.project.split('/').splice(-2, 1)[0]}, success);
         }
     };
 
@@ -161,10 +161,10 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker', 'modelCache']).
     };
 
     // Return the related worker object
-    JobTemplate.prototype.get_worker = function() {
+    JobTemplate.prototype.get_worker = function(success) {
         if (this.worker) {
             var workerId = this.worker.split('/').splice(-2, 1)[0];
-            return Worker.get({'id': workerId});
+            return Worker.get({'id': workerId}, success);
         }
     };
 
@@ -199,10 +199,10 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'modelCache', 'ngC
     };
 
     // Return the related job-template
-    Job.prototype.get_job_template = function() {
+    Job.prototype.get_job_template = function(success) {
         if (this.job_template) {
             var templateId = this.job_template.split('/').splice(-2, 1)[0];
-            return JobTemplate.get({'id': templateId});
+            return JobTemplate.get({'id': templateId}, success);
         }
     };
 
@@ -269,10 +269,10 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
     };
 
     // Return the related job
-    Run.prototype.get_job = function() {
+    Run.prototype.get_job = function(success) {
         if (this.job) {
             var jobId = this.job.split('/').splice(-2, 1)[0];
-            return Job.get({id: jobId});
+            return Job.get({id: jobId}, success);
         }
     };
 
