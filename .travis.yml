@@ -7,3 +7,4 @@ before_install:
  - sudo apt-get install -qq libevent-dev
 install: pip install -r test-requirements.txt -r requirements.txt --use-mirrors
 script: make test
+
