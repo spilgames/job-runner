@@ -1,10 +1,14 @@
 Job-Runner
 ==========
 
+.. image:: https://api.travis-ci.org/spilgames/job-runner.png?branch=master
+    :alt: Build Status
+    :target: https://travis-ci.org/spilgames/job-runner
+
 This project contains the Job-Runner dashboard and admin interface to
 manage and view the current status of scheduled jobs.
 
-For the full documentation see ``docs/``.
+For the full documentation see https://job-runner.readthedocs.org/.
 
 
 Changes
