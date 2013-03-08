@@ -9,6 +9,7 @@ components (and repositories):
   admin interface and (live) dashboard. As well this contains a long-running
   command (``manage.py broadcast_queue``) to broadcast commands (like enqueue,
   kill requests, ...) to the workers.
+  See: https://github.com/spilgames/job-runner
 
 * **Job-Runner WebSocket Server**: provides a WebSocket gateway to Worker
   events. This is used for real-time communication between workers and the
@@ -23,4 +24,4 @@ components (and repositories):
 
 
 .. image:: images/overview.*
-    :width: 100%
+    :width: 75%
