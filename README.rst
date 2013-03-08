@@ -10,6 +10,14 @@ For the full documentation see ``docs/``.
 Changes
 -------
 
+v1.4.3
+~~~~~~
+
+* Fix duplicated enqueues when the worker is down or the enqueue is disabled
+  for the job. This happened for example when a parent-job tried to schedule
+  a child job which was disabled.
+
+
 v1.4.2
 ~~~~~~
 

@@ -300,11 +300,24 @@ class Job(models.Model):
     def schedule_now(self):
         """
         Schedule the job to run now.
+
+        When the job is already scheduled to run now, but the run has not yet
+        been picked up by the worker (the worker could be dead or the job
+        enqueue is disabled), it will not schedule a new run.
+
         """
-        Run.objects.create(
+        # don't schedule a new run when it is already scheduled to run now
+        runs = Run.objects.filter(
             job=self,
-            schedule_dts=timezone.now(),
+            schedule_dts__lte=timezone.now(),
+            enqueue_dts__isnull=True,
+            is_manual=False,
         )
+        if not runs.count():
+            Run.objects.create(
+                job=self,
+                schedule_dts=timezone.now(),
+            )
 
     def save(self, *args, **kwargs):
         t = Template(self.job_template.body)

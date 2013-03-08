@@ -263,3 +263,12 @@ class RunTestCase(TestCase):
         self.assertEqual(0, job.run_set.count())
         job.schedule_now()
         self.assertEqual(1, job.run_set.count())
+
+    def test_schedule_now_already_scheduled(self):
+        """
+        Test direct schedule when there is already a scheduled run available.
+        """
+        job = Job.objects.get(pk=1)
+        self.assertEqual(1, job.run_set.count())
+        job.schedule_now()
+        self.assertEqual(1, job.run_set.count())
