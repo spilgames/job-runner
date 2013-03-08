@@ -13,11 +13,13 @@ components (and repositories):
 * **Job-Runner WebSocket Server**: provides a WebSocket gateway to Worker
   events. This is used for real-time communication between workers and the
   **Job-Runner** dashboard (eg: to make the dashboard status live).
+  See: https://github.com/spilgames/job-runner-ws-server
 
 * **Job-Runner Worker**: the component that executes the job. It is possible
   to have multiple workers. For example when you have multiple servers on
   which jobs should run and / or when you want to execute jobs under different
   user-accounts.
+  See: https://github.com/spilgames/job-runner-worker
 
 
 .. image:: images/overview.*
