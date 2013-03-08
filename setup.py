@@ -6,7 +6,8 @@ import job_runner
 setup(
     name='job-runner',
     version=job_runner.__version__,
-    url='http://github.com/spilgames/jobrunner',
+    url='http://github.com/spilgames/job-runner',
+    license='BSD',
     author='Orne Brocaar',
     author_email='datawarehouse@spilgames.com',
     description='Tool for scheduling jobs and realtime monitoring',
