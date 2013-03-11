@@ -8,7 +8,7 @@ class RunManagerTestCase(TestCase):
     """
     Tests for the job run manager.
     """
-    fixtures = ['test_job']
+    fixtures = ['test_jobs']
 
     def test_scheduled(self):
         """
@@ -29,7 +29,7 @@ class KillRequestManagerTestCase(TestCase):
     """
     Tests for the kill-request manager.
     """
-    fixtures = ['test_job']
+    fixtures = ['test_jobs']
 
     def test_killable(self):
         """
