@@ -113,6 +113,30 @@ class Worker(models.Model):
         ordering = ('project__title', 'title', )
 
 
+class WorkerPool(models.Model):
+    """
+    Worker-pool.
+    """
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    notification_addresses = models.TextField(
+        help_text='Separate e-mail addresses by a newline',
+        blank=True,
+    )
+    enqueue_is_enabled = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text=(
+            'If unchecked, nothing for this worker-pool will be added to '
+            'the worker queue. This will not affect already running jobs.'
+        )
+    )
+    workers = models.ManyToManyField(Worker)
+
+    def __unicode__(self):
+        return self.title
+
+
 class JobTemplate(models.Model):
     """
     Job templates

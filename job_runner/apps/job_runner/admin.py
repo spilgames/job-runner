@@ -13,6 +13,7 @@ from job_runner.apps.job_runner.models import (
     RescheduleExclude,
     Run,
     Worker,
+    WorkerPool,
 )
 
 
@@ -172,6 +173,14 @@ class WorkerAdmin(admin.ModelAdmin):
     ping_response.short_description = 'Last ping response'
 
 
+class WorkerPoolAdmin(admin.ModelAdmin):
+    """
+    Admin interface for worker-pools.
+    """
+    list_display = ('title', 'enqueue_is_enabled',)
+    list_editable = ('enqueue_is_enabled',)
+
+
 class JobTemplateAdmin(admin.ModelAdmin):
     """
     Admin interface for job-templates.
@@ -246,3 +255,4 @@ admin.site.register(Job, JobAdmin)
 admin.site.register(JobTemplate, JobTemplateAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Worker, WorkerAdmin)
+admin.site.register(WorkerPool, WorkerPoolAdmin)
