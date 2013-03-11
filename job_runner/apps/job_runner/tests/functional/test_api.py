@@ -16,6 +16,7 @@ from job_runner.apps.job_runner.models import (
     Run,
     RunLog,
     Worker,
+    WorkerPool,
 )
 
 
@@ -111,6 +112,61 @@ class ProjectTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test project 1', json_data['objects'][0]['title'])
+
+
+class WorkerPoolTestCase(ApiTestBase):
+    """
+    Tests for the worker-pool interface.
+    """
+    fixtures = [
+        'test_auth',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
+    ]
+
+    def test_worker_pool_methods(self):
+        """
+        Test allowed methods.
+        """
+        response = self.get('/api/v1/worker_pool/schema/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+
+    def test_worker_pool_count(self):
+        """
+        Test worker-pool count in the DB.
+        """
+        self.assertEqual(2, WorkerPool.objects.count())
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/worker_pool/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Pool 1', json_data['objects'][0]['title'])
+
+    def test_user_authorization(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/worker_pool/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Pool 1', json_data['objects'][0]['title'])
 
 
 class WorkerTestCase(ApiTestBase):

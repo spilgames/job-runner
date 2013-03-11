@@ -14,6 +14,7 @@ from job_runner.apps.job_runner.models import (
     Run,
     RunLog,
     Worker,
+    WorkerPool,
 )
 
 
@@ -81,6 +82,32 @@ class ProjectResource(ModelResource):
         authorization = ModelAuthorization(
             api_key_path='worker_pools__workers__api_key',
             user_groups_path='groups',
+        )
+
+
+class WorkerPoolResource(ModelResource):
+    """
+    RESTful resource for worker-pools.
+    """
+    class Meta:
+        queryset = WorkerPool.objects.all()
+        resource_name = 'worker_pool'
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get']
+        fields = [
+            'id',
+            'title',
+            'description',
+            'enqueue_is_enabled',
+            'workers',
+        ]
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='workers__api_key',
+            user_groups_path='project__groups',
         )
 
 
