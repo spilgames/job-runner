@@ -119,13 +119,12 @@ class WorkerAdmin(admin.ModelAdmin):
     Admin interface for workers.
     """
     list_display = (
-        'project',
         'title',
         'api_key',
         'enqueue_is_enabled',
         'ping_response'
     )
-    list_filter = ('project', 'enqueue_is_enabled')
+    list_filter = ('enqueue_is_enabled',)
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
 
@@ -185,19 +184,22 @@ class JobTemplateAdmin(admin.ModelAdmin):
     """
     Admin interface for job-templates.
     """
-    list_display = ('worker', 'title', 'enqueue_is_enabled')
-    list_filter = ('worker', 'worker__project', 'enqueue_is_enabled')
+    list_display = (
+        'project', 'title', 'enqueue_is_enabled')
+    list_filter = (
+        'project', 'enqueue_is_enabled',)
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
 
 
-class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
+class JobAdmin(admin.ModelAdmin):
     """
     Admin interface for jobs.
     """
     list_display = (
         'job_template',
         'title',
+        'worker_pool',
         'enqueue_is_enabled',
         'reschedule_type',
         'parent'
@@ -207,12 +209,13 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         'reschedule_interval_type',
         'reschedule_type',
         'job_template',
-        'job_template__worker',
-        'job_template__worker__project'
+        'job_template__project',
+        'worker_pool'
     )
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
     search_fields = ('title',)
+    save_as = True
     inlines = [
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,

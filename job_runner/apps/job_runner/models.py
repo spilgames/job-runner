@@ -124,7 +124,7 @@ class Worker(models.Model):
         return addresses
 
     class Meta:
-        ordering = ('project__title', 'title', )
+        ordering = ('title', )
 
 
 class WorkerPool(models.Model):
@@ -196,11 +196,11 @@ class JobTemplate(models.Model):
         """
         addresses = self.notification_addresses.strip().split('\n')
         addresses = [x.strip() for x in addresses if x.strip() != '']
-        addresses.extend(self.worker.get_notification_addresses())
+        addresses.extend(self.worker_pool.get_notification_addresses())
         return addresses
 
     class Meta:
-        ordering = ('worker__project__title', 'worker__title', 'title', )
+        ordering = ('project__title', 'title', )
 
 
 class Job(models.Model):
@@ -271,9 +271,9 @@ class Job(models.Model):
 
     class Meta:
         ordering = (
-            'job_template__worker__project__title',
-            'job_template__worker__title',
-            'job_template__title', 'title',
+            'job_template__project__title',
+            'job_template__title',
+            'title',
         )
         unique_together = (('title', 'job_template'),)
 
