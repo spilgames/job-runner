@@ -62,7 +62,14 @@ class ProjectTestCase(ApiTestBase):
     """
     Tests for the project interface.
     """
-    fixtures = ['test_auth', 'test_project', 'test_worker']
+    fixtures = [
+        'test_auth',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
+    ]
 
     def test_project_methods(self):
         """
@@ -110,7 +117,14 @@ class WorkerTestCase(ApiTestBase):
     """
     Tests for the worker interface.
     """
-    fixtures = ['test_auth', 'test_project', 'test_worker']
+    fixtures = [
+        'test_auth',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
+    ]
 
     def test_worker_methods(self):
         """
@@ -174,7 +188,13 @@ class JobTemplateTestCase(ApiTestBase):
     Tests for the job-template interface.
     """
     fixtures = [
-        'test_auth', 'test_project', 'test_worker', 'test_job_template']
+        'test_auth',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
+    ]
 
     def test_job_template_methods(self):
         """
@@ -224,10 +244,11 @@ class JobTestCase(ApiTestBase):
     """
     fixtures = [
         'test_auth',
-        'test_project',
-        'test_worker',
-        'test_job_template',
-        'test_job',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
     ]
 
     def test_job_methods(self):
@@ -279,10 +300,11 @@ class RunTestCase(ApiTestBase):
     """
     fixtures = [
         'test_auth',
-        'test_project',
-        'test_worker',
-        'test_job_template',
-        'test_job',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
     ]
 
     def test_run_methods(self):
@@ -566,9 +588,9 @@ class RunTestCase(ApiTestBase):
         """
         Test create a new run by performing a ``POST`` with invalid group.
         """
-        template = JobTemplate.objects.get(pk=1)
-        template.auth_groups = [Group.objects.get(pk=2)]
-        template.save()
+        project = Project.objects.get(pk=1)
+        project.auth_groups = [Group.objects.get(pk=2)]
+        project.save()
 
         self.client.login(username='admin', password='admin')
 
@@ -591,10 +613,11 @@ class ChainedRunTestCase(ApiTestBase):
     """
     fixtures = [
         'test_auth',
-        'test_project',
-        'test_worker',
-        'test_job_template',
-        'test_job',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
         'test_child_job',
     ]
 
@@ -645,11 +668,11 @@ class KillRequestTestCase(ApiTestBase):
     """
     fixtures = [
         'test_auth',
-        'test_project',
-        'test_worker',
-        'test_job_template',
-        'test_job',
-        'test_child_job',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
     ]
 
     def test_post_new_kill_request(self):
@@ -673,11 +696,11 @@ class RunLogTestCase(ApiTestBase):
     """
     fixtures = [
         'test_auth',
-        'test_project',
-        'test_worker',
-        'test_job_template',
-        'test_job',
-        'test_child_job',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
     ]
 
     def test_post_new_run_log(self):

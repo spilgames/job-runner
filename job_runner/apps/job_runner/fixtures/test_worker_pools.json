@@ -6,8 +6,7 @@
             "title": "Pool 1",
             "notification_addresses": "pool1@example.com",
             "workers": [
-                1,
-                2
+                1
             ]
         }
     },
@@ -18,7 +17,7 @@
             "title": "Pool 2",
             "notification_addresses": "pool2@example.com ",
             "workers": [
-                1
+                2
             ]
         }
     }

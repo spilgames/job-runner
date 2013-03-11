@@ -489,7 +489,7 @@ class Run(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('job_runner:job_run', (), {
-            'project_id': self.job.job_template.worker.project.pk,
+            'project_id': self.job.job_template.project.pk,
             'job_id': self.job.pk,
             'run_id': self.pk,
         })
