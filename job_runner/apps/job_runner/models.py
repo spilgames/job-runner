@@ -9,6 +9,7 @@ from django.db import models
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.utils import timezone
+from smart_selects.db_fields import ChainedForeignKey
 
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
 
@@ -42,8 +43,16 @@ class Project(models.Model):
         Group,
         help_text=(
             'These are the groups that can see the project in the dashboard. '
-            'The admin permissions are set on template level. '
-
+        )
+    )
+    auth_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        related_name='auth_groups_set',
+        help_text=(
+            'These are the groups that are authorized to see this project '
+            'and its jobs in the admin and are able to re-schedule the jobs '
+            'of this project in the dashboard.'
         )
     )
     worker_pools = models.ManyToManyField(
@@ -154,6 +163,7 @@ class JobTemplate(models.Model):
         'Use {{ content|safe }} at the place where you want to render the '
         'script content of the job'
     ))
+    project = models.ForeignKey(Project)
     worker = models.ForeignKey(Worker)
     auth_groups = models.ManyToManyField(
         Group,
@@ -212,6 +222,14 @@ class Job(models.Model):
     parent = models.ForeignKey(
         'self', blank=True, null=True, related_name='children')
     job_template = models.ForeignKey(JobTemplate)
+    worker_pool = ChainedForeignKey(
+        WorkerPool,
+        chained_field='job_template',
+        chained_model_field='project__jobtemplate',
+        show_all=False,
+        auto_choose=False,
+        help_text='Select a job-template first to see the available pools.',
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     script_content_partial = models.TextField('script content')

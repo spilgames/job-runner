@@ -231,7 +231,13 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'job_template', 'parent', 'description',)
+            'fields': (
+                'title',
+                'job_template',
+                'worker_pool',
+                'parent',
+                'description',
+            )
         }),
         ('Script', {
             'fields': ('script_content_partial',)

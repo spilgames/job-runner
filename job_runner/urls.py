@@ -7,6 +7,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     '',
     (r'^grappelli/', include('grappelli.urls')),
+    url(r'^chaining/', include('smart_selects.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
     (r'^api/', include('job_runner.apps.job_runner.api_urls')),

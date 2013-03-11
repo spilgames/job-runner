@@ -26,6 +26,19 @@ class Migration(SchemaMigration):
         ))
         db.create_unique('job_runner_workerpool_workers', ['workerpool_id', 'worker_id'])
 
+        # Adding field 'Job.worker_pool'
+        db.add_column('job_runner_job', 'worker_pool',
+                      self.gf('smart_selects.db_fields.ChainedForeignKey')(default=1, to=orm['job_runner.WorkerPool']),
+                      keep_default=False)
+
+        # Adding M2M table for field auth_groups on 'Project'
+        db.create_table('job_runner_project_auth_groups', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('project', models.ForeignKey(orm['job_runner.project'], null=False)),
+            ('group', models.ForeignKey(orm['auth.group'], null=False))
+        ))
+        db.create_unique('job_runner_project_auth_groups', ['project_id', 'group_id'])
+
         # Adding M2M table for field worker_pools on 'Project'
         db.create_table('job_runner_project_worker_pools', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
@@ -33,6 +46,11 @@ class Migration(SchemaMigration):
             ('workerpool', models.ForeignKey(orm['job_runner.workerpool'], null=False))
         ))
         db.create_unique('job_runner_project_worker_pools', ['project_id', 'workerpool_id'])
+
+        # Adding field 'JobTemplate.project'
+        db.add_column('job_runner_jobtemplate', 'project',
+                      self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['job_runner.Project']),
+                      keep_default=False)
 
 
     def backwards(self, orm):
@@ -42,8 +60,17 @@ class Migration(SchemaMigration):
         # Removing M2M table for field workers on 'WorkerPool'
         db.delete_table('job_runner_workerpool_workers')
 
+        # Deleting field 'Job.worker_pool'
+        db.delete_column('job_runner_job', 'worker_pool_id')
+
+        # Removing M2M table for field auth_groups on 'Project'
+        db.delete_table('job_runner_project_auth_groups')
+
         # Removing M2M table for field worker_pools on 'Project'
         db.delete_table('job_runner_project_worker_pools')
+
+        # Deleting field 'JobTemplate.project'
+        db.delete_column('job_runner_jobtemplate', 'project_id')
 
 
     models = {
@@ -82,7 +109,8 @@ class Migration(SchemaMigration):
             'reschedule_type': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '18', 'blank': 'True'}),
             'script_content': ('django.db.models.fields.TextField', [], {}),
             'script_content_partial': ('django.db.models.fields.TextField', [], {}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'worker_pool': ('smart_selects.db_fields.ChainedForeignKey', [], {'to': "orm['job_runner.WorkerPool']"})
         },
         'job_runner.jobtemplate': {
             'Meta': {'ordering': "('worker__project__title', 'worker__title', 'title')", 'object_name': 'JobTemplate'},
@@ -92,6 +120,7 @@ class Migration(SchemaMigration):
             'enqueue_is_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'project': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Project']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'worker': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Worker']"})
         },
@@ -105,6 +134,7 @@ class Migration(SchemaMigration):
         },
         'job_runner.project': {
             'Meta': {'ordering': "('title',)", 'object_name': 'Project'},
+            'auth_groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'auth_groups_set'", 'blank': 'True', 'to': "orm['auth.Group']"}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'enqueue_is_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False'}),

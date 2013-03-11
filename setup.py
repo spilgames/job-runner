@@ -19,6 +19,7 @@ setup(
         'django==1.4.2',
         'django-grappelli',
         'django_compressor',
+        'django-smart-selects',
         'south',
         'pytz',
         'pyzmq',
