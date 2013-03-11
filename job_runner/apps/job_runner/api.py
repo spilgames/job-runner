@@ -67,6 +67,12 @@ class ProjectResource(ModelResource):
     """
     RESTful resource for projects.
     """
+    worker_pools = fields.ToManyField(
+        'job_runner.apps.job_runner.api.WorkerPoolResource', 'worker_pools')
+
+    auth_groups = fields.ToManyField(
+        'job_runner.apps.job_runner.api.GroupResource', 'auth_groups')
+
     class Meta:
         queryset = Project.objects.all()
         resource_name = 'project'
@@ -89,6 +95,21 @@ class WorkerPoolResource(ModelResource):
     """
     RESTful resource for worker-pools.
     """
+    workers = fields.ToManyField(
+        'job_runner.apps.job_runner.api.WorkerResource', 'workers')
+
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(WorkerPoolResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'project__id': filters['project_id']
+            })
+
+        return orm_filters
+
     class Meta:
         queryset = WorkerPool.objects.all()
         resource_name = 'worker_pool'
@@ -99,7 +120,6 @@ class WorkerPoolResource(ModelResource):
             'title',
             'description',
             'enqueue_is_enabled',
-            'workers',
         ]
 
         authentication = MultiAuthentication(
@@ -115,6 +135,18 @@ class WorkerResource(ModelResource):
     """
     RESTful resource for workers.
     """
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(WorkerResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'workerpool__project__id': filters['project_id']
+            })
+
+        return orm_filters
+
     class Meta:
         queryset = Worker.objects.all()
         resource_name = 'worker'
@@ -145,6 +177,9 @@ class JobTemplateResource(ModelResource):
     """
     RESTful resource for job-templates.
     """
+    project = fields.ToOneField(
+        'job_runner.apps.job_runner.api.ProjectResource', 'project')
+
     def build_filters(self, filters=None):
         if filters is None:
             filters = {}
@@ -181,6 +216,9 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
     """
     job_template = fields.ToOneField(
         'job_runner.apps.job_runner.api.JobTemplateResource', 'job_template')
+    worker_pool = fields.ToOneField(
+        'job_runner.apps.job_runner.api.WorkerPoolResource', 'worker_pool')
+
     parent = fields.ToOneField('self', 'parent', null=True)
     children = fields.ToManyField('self', 'children', null=True)
 
