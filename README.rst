@@ -263,8 +263,7 @@ v0.6.1
 ~~~~~~
 
 * Add MySQL package as a requirement + update requirements in docs.
-* Make it possible to override production settings by creating
-  ``/bigdisk/docs/DATA/job_runner/settings_production.py``.
+* Make it possible to override production settings.
 
 
 v0.6.0
