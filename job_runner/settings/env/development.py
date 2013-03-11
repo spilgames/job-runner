@@ -42,6 +42,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'south': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         '': {
             'handlers': ['console'],
             'level': 'DEBUG',

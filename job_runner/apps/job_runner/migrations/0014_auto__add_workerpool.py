@@ -26,6 +26,14 @@ class Migration(SchemaMigration):
         ))
         db.create_unique('job_runner_workerpool_workers', ['workerpool_id', 'worker_id'])
 
+        # Adding M2M table for field worker_pools on 'Project'
+        db.create_table('job_runner_project_worker_pools', (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('project', models.ForeignKey(orm['job_runner.project'], null=False)),
+            ('workerpool', models.ForeignKey(orm['job_runner.workerpool'], null=False))
+        ))
+        db.create_unique('job_runner_project_worker_pools', ['project_id', 'workerpool_id'])
+
 
     def backwards(self, orm):
         # Deleting model 'WorkerPool'
@@ -33,6 +41,9 @@ class Migration(SchemaMigration):
 
         # Removing M2M table for field workers on 'WorkerPool'
         db.delete_table('job_runner_workerpool_workers')
+
+        # Removing M2M table for field worker_pools on 'Project'
+        db.delete_table('job_runner_project_worker_pools')
 
 
     models = {
@@ -99,7 +110,8 @@ class Migration(SchemaMigration):
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'worker_pools': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['job_runner.WorkerPool']", 'symmetrical': 'False'})
         },
         'job_runner.rescheduleexclude': {
             'Meta': {'object_name': 'RescheduleExclude'},

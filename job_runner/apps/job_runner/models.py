@@ -46,6 +46,13 @@ class Project(models.Model):
 
         )
     )
+    worker_pools = models.ManyToManyField(
+        'job_runner.WorkerPool',
+        help_text=(
+            'These are the worker-pools that will be available for this '
+            'project.'
+        )
+    )
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
