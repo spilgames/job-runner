@@ -97,10 +97,6 @@ class Worker(models.Model):
     description = models.TextField(blank=True)
     api_key = models.CharField(max_length=255, db_index=True, unique=True)
     secret = models.CharField(max_length=255, db_index=True)
-    notification_addresses = models.TextField(
-        help_text='Separate e-mail addresses by a newline',
-        blank=True,
-    )
     enqueue_is_enabled = models.BooleanField(
         default=True,
         db_index=True,
@@ -114,14 +110,6 @@ class Worker(models.Model):
 
     def __unicode__(self):
         return self.title
-
-    def get_notification_addresses(self):
-        """
-        Return a ``list`` of notification addresses.
-        """
-        addresses = self.notification_addresses.strip().split('\n')
-        addresses = [x.strip() for x in addresses if x.strip() != '']
-        return addresses
 
     class Meta:
         ordering = ('title', )
@@ -149,6 +137,13 @@ class WorkerPool(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def get_notification_addresses(self):
+        """
+        Return a ``list`` notification addresses.
+        """
+        addresses = self.notification_addresses.strip().split('\n')
+        return [x.strip() for x in addresses if x.strip() != '']
 
 
 class JobTemplate(models.Model):
@@ -196,7 +191,7 @@ class JobTemplate(models.Model):
         """
         addresses = self.notification_addresses.strip().split('\n')
         addresses = [x.strip() for x in addresses if x.strip() != '']
-        addresses.extend(self.worker_pool.get_notification_addresses())
+        addresses.extend(self.project.get_notification_addresses())
         return addresses
 
     class Meta:
@@ -369,6 +364,7 @@ class Job(models.Model):
         addresses = self.notification_addresses.strip().split('\n')
         addresses = [x.strip() for x in addresses if x.strip() != '']
         addresses.extend(self.job_template.get_notification_addresses())
+        addresses.extend(self.worker_pool.get_notification_addresses())
         return addresses
 
     def _get_reschedule_incremented_dts(self, increment_date):

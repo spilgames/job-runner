@@ -16,6 +16,7 @@ class Migration(DataMigration):
             worker_pool = orm['job_runner.WorkerPool'].objects.create(
                 title=worker.title,
                 enqueue_is_enabled=worker.enqueue_is_enabled,
+                notification_addresses=worker.notification_addresses,
             )
             # add the worker to the pool
             worker_pool.workers.add(worker)

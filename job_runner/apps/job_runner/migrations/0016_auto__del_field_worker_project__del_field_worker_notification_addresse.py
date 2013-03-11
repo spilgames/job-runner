@@ -11,6 +11,9 @@ class Migration(SchemaMigration):
         # Deleting field 'Worker.project'
         db.delete_column('job_runner_worker', 'project_id')
 
+        # Deleting field 'Worker.notification_addresses'
+        db.delete_column('job_runner_worker', 'notification_addresses')
+
         # Deleting field 'JobTemplate.worker'
         db.delete_column('job_runner_jobtemplate', 'worker_id')
 
@@ -22,6 +25,11 @@ class Migration(SchemaMigration):
 
         # User chose to not deal with backwards NULL issues for 'Worker.project'
         raise RuntimeError("Cannot reverse this migration. 'Worker.project' and its values cannot be restored.")
+        # Adding field 'Worker.notification_addresses'
+        db.add_column('job_runner_worker', 'notification_addresses',
+                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
+                      keep_default=False)
+
 
         # User chose to not deal with backwards NULL issues for 'JobTemplate.worker'
         raise RuntimeError("Cannot reverse this migration. 'JobTemplate.worker' and its values cannot be restored.")
@@ -56,7 +64,7 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         'job_runner.job': {
-            'Meta': {'ordering': "('job_template__worker__project__title', 'job_template__worker__title', 'job_template__title', 'title')", 'unique_together': "(('title', 'job_template'),)", 'object_name': 'Job'},
+            'Meta': {'ordering': "('job_template__project__title', 'job_template__title', 'title')", 'unique_together': "(('title', 'job_template'),)", 'object_name': 'Job'},
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'disable_enqueue_after_fails': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'enqueue_is_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
@@ -74,7 +82,7 @@ class Migration(SchemaMigration):
             'worker_pool': ('smart_selects.db_fields.ChainedForeignKey', [], {'to': "orm['job_runner.WorkerPool']"})
         },
         'job_runner.jobtemplate': {
-            'Meta': {'ordering': "('worker__project__title', 'worker__title', 'title')", 'object_name': 'JobTemplate'},
+            'Meta': {'ordering': "('project__title', 'title')", 'object_name': 'JobTemplate'},
             'body': ('django.db.models.fields.TextField', [], {}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'enqueue_is_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
@@ -130,12 +138,11 @@ class Migration(SchemaMigration):
             'run': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'run_log'", 'unique': 'True', 'to': "orm['job_runner.Run']"})
         },
         'job_runner.worker': {
-            'Meta': {'ordering': "('project__title', 'title')", 'object_name': 'Worker'},
+            'Meta': {'ordering': "('title',)", 'object_name': 'Worker'},
             'api_key': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255', 'db_index': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'enqueue_is_enabled': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'ping_response_dts': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'secret': ('django.db.models.fields.CharField', [], {'max_length': '255', 'db_index': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '255'})
