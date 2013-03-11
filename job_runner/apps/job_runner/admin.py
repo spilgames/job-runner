@@ -28,7 +28,7 @@ class PermissionAdminMixin(object):
 
     Example::
 
-        'job_template__auth_groups'
+        'job_template__project__auth_groups'
 
     """
 
@@ -41,7 +41,7 @@ class PermissionAdminMixin(object):
 
         {
             'job_template': {
-                'path': 'auth_groups',
+                'path': 'project__auth_groups',
                 'model': JobTemplate,
             }
         }
@@ -77,9 +77,9 @@ class PermissionAdminMixin(object):
         return self._filter_groups(request, qs, self.groups_path)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name in self.fK_groups_path:
-            qs = self.fK_groups_path[db_field.name]['model'].objects.all()
-            group_path = self.fK_groups_path[db_field.name]['path']
+        if db_field.name in self.fk_groups_path:
+            qs = self.fk_groups_path[db_field.name]['model'].objects.all()
+            group_path = self.fk_groups_path[db_field.name]['path']
             kwargs['queryset'] = self._filter_groups(request, qs, group_path)
 
         return super(PermissionAdminMixin, self).formfield_for_foreignkey(
@@ -180,7 +180,7 @@ class WorkerPoolAdmin(admin.ModelAdmin):
     list_editable = ('enqueue_is_enabled',)
 
 
-class JobTemplateAdmin(admin.ModelAdmin):
+class JobTemplateAdmin(PermissionAdminMixin, admin.ModelAdmin):
     """
     Admin interface for job-templates.
     """
@@ -190,9 +190,16 @@ class JobTemplateAdmin(admin.ModelAdmin):
         'project', 'enqueue_is_enabled',)
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
+    groups_path = 'project__auth_groups'
+    fk_groups_path = {
+        'project': {
+            'model': Project,
+            'path': 'auth_groups',
+        }
+    }
 
 
-class JobAdmin(admin.ModelAdmin):
+class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     """
     Admin interface for jobs.
     """
@@ -220,15 +227,15 @@ class JobAdmin(admin.ModelAdmin):
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,
     ]
-    groups_path = 'job_template__auth_groups'
-    fK_groups_path = {
+    groups_path = 'job_template__project__auth_groups'
+    fk_groups_path = {
         'job_template': {
             'model': JobTemplate,
-            'path': 'auth_groups',
+            'path': 'project__auth_groups',
         },
         'parent': {
             'model': Job,
-            'path': 'job_template__auth_groups',
+            'path': 'job_template__project__auth_groups',
         }
     }
 
