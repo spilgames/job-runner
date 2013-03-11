@@ -97,7 +97,6 @@ class Worker(models.Model):
     description = models.TextField(blank=True)
     api_key = models.CharField(max_length=255, db_index=True, unique=True)
     secret = models.CharField(max_length=255, db_index=True)
-    project = models.ForeignKey(Project)
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
@@ -114,7 +113,7 @@ class Worker(models.Model):
         blank=True, null=True, editable=False)
 
     def __unicode__(self):
-        return u'{0} > {1}'.format(self.project, self.title)
+        return self.title
 
     def get_notification_addresses(self):
         """
@@ -122,7 +121,6 @@ class Worker(models.Model):
         """
         addresses = self.notification_addresses.strip().split('\n')
         addresses = [x.strip() for x in addresses if x.strip() != '']
-        addresses.extend(self.project.get_notification_addresses())
         return addresses
 
     class Meta:
@@ -164,16 +162,6 @@ class JobTemplate(models.Model):
         'script content of the job'
     ))
     project = models.ForeignKey(Project)
-    worker = models.ForeignKey(Worker)
-    auth_groups = models.ManyToManyField(
-        Group,
-        blank=True,
-        help_text=(
-            'These are the groups that are authorized to see this template '
-            'and its jobs in the admin and are able to re-schedule the jobs '
-            'using this template in the dashboard.'
-        )
-    )
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
@@ -188,7 +176,7 @@ class JobTemplate(models.Model):
     )
 
     def __unicode__(self):
-        return u'{0} > {1}'.format(self.worker, self.title)
+        return u'{0} > {1}'.format(self.project, self.title)
 
     def save(self, *args, **kwargs):
         """
