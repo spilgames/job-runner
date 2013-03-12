@@ -339,7 +339,7 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
 
         if 'project_id' in filters:
             orm_filters.update({
-                'job__job_template__worker__project__id': filters['project_id']
+                'job__job_template__project__id': filters['project_id']
             })
 
         return orm_filters
