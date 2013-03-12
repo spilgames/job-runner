@@ -24,7 +24,7 @@
                     <h5><a href="/project/{{ global_state.data.projectId }}/jobs/{{ j.id }}/" class="details">{{ j.title }}</a></h5>
                     <ul>
                         <li>
-                            <i class="icon-hdd"></i> {{ j.get_job_template().get_worker().title }}
+                            <i class="icon-hdd"></i> {{ j.get_worker_pool().title }}
                         </li>
                     </ul>
                 </div>
