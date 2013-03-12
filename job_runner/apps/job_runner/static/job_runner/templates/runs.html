@@ -10,7 +10,7 @@
                         <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
                     </h5>
                     <ul>
-                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_worker_pool().title }}</li>
                         <li><i ng-class="{'icon-time': run.get_job().enqueue_is_enabled == true, 'icon-ban-circle': run.get_job().enqueue_is_enabled == false}"></i> {{ run.schedule_dts | formatdts }}</li>
                     </ul>
                 </div>
@@ -24,7 +24,7 @@
                         <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
                     </h5>
                     <ul>
-                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_worker_pool().title }}</li>
                         <li><i class="icon-time"></i> {{ run.enqueue_dts | formatdts }}</li>
                     </ul>
                 </div>
@@ -38,7 +38,7 @@
                         <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
                     </h5>
                     <ul>
-                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_worker_pool().title }}</li>
                         <li><i class="icon-time"></i> {{ run.start_dts | formatdts }}</li>
                     </ul>
                 </div>
@@ -52,7 +52,7 @@
                         <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
                     </h5>
                     <ul>
-                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_worker_pool().title }}</li>
                         <li><i class="icon-time"></i> {{ run.return_dts | formatdts }}</li>
                     </ul>
                 </div>
@@ -66,7 +66,7 @@
                         <a href="{{ run.id }}/" class="details">{{ run.get_job().title }}</a>
                     </h5>
                     <ul>
-                        <li><i class="icon-hdd"></i> {{ run.get_job().get_job_template().get_worker().title }}</li>
+                        <li><i class="icon-hdd"></i> {{ run.get_job().get_worker_pool().title }}</li>
                         <li><i class="icon-time"></i> {{ run.return_dts | formatdts }}</li>
                     </ul>
                 </div>
