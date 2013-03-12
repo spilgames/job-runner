@@ -238,6 +238,17 @@ class WorkerTestCase(ApiTestBase):
         worker = Worker.objects.get(pk=1)
         self.assertEqual(dts, worker.ping_response_dts)
 
+    def test_patch_ping_response_no_permissions(self):
+        """
+        Test PATCH the ping_response_dts without having permission.
+        """
+        dts = timezone.now()
+        response = self.patch(
+            '/api/v1/worker/2/',
+            {'ping_response_dts': dts.isoformat(' ')}
+        )
+        self.assertEqual(401, response.status_code)
+
 
 class JobTemplateTestCase(ApiTestBase):
     """
@@ -660,7 +671,7 @@ class RunTestCase(ApiTestBase):
             ACCEPT='application/json',
         )
 
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(401, response.status_code)
 
 
 class ChainedRunTestCase(ApiTestBase):

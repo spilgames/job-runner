@@ -20,18 +20,11 @@ setup(
         'django-grappelli',
         'django_compressor',
         'django-smart-selects',
+        'django-tastypie==0.9.12',
         'south',
         'pytz',
         'pyzmq',
-        'django-tastypie==0.9.12-alpha',
         'mimeparse==0.1.3',
         'python-dateutil==1.5',
     ],
-    dependency_links=[
-        (
-            'https://github.com/toastdriven/django-tastypie/archive/'
-            '27d17b7db7afd6c81da24f64f5b4562b59134582.tar.gz'
-            '#egg=django-tastypie-0.9.12-alpha'
-        ),
-    ]
 )

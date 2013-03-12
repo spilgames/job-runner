@@ -31,20 +31,28 @@ class RunManager(models.Manager):
             schedule_dts__lte=timezone.now(),
         ).exclude(
             # exclude auto scheduled jobs when enqueue is disabled
+
+            # when job enqueue is disabled
             Q(
                 job__enqueue_is_enabled=False,
                 is_manual=False
             ) |
+
+            # when job-template enqueue is disabled
             Q(
                 job__job_template__enqueue_is_enabled=False,
                 is_manual=False
             ) |
+
+            # when project enqueue is disabled
             Q(
-                job__job_template__worker__enqueue_is_enabled=False,
+                job__job_template__project__enqueue_is_enabled=False,
                 is_manual=False
             ) |
+
+            # when worker-pool enqueue is disabled
             Q(
-                job__job_template__worker__project__enqueue_is_enabled=False,
+                job__worker_pool__enqueue_is_enabled=False,
                 is_manual=False
             ) |
 
@@ -79,4 +87,7 @@ class KillRequestManager(models.Manager):
 
             # make sure the run hasn't returned already
             run__return_dts__isnull=True,
+
+            # make sure the run is assigned to a worker
+            run__worker__isnull=False,
         )

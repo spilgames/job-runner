@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 
-from job_runner.apps.job_runner.models import KillRequest, Run
+from job_runner.apps.job_runner.models import KillRequest, Run, Worker
 
 
 class RunManagerTestCase(TestCase):
@@ -29,15 +29,17 @@ class KillRequestManagerTestCase(TestCase):
     """
     Tests for the kill-request manager.
     """
-    fixtures = ['test_jobs']
+    fixtures = ['test_jobs', 'test_workers']
 
     def test_killable(self):
         """
         Test with one killable run.
         """
+        worker = Worker.objects.get(pk=1)
         run = Run.objects.get(pk=1)
         run.start_dts = timezone.now()
         run.pid = 1234
+        run.worker = worker
         run.save()
 
         KillRequest.objects.create(
