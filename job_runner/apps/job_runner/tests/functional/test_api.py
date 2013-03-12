@@ -59,6 +59,69 @@ class ApiTestBase(TestCase):
         return self.post(path, data, method_override='PATCH')
 
 
+class GroupTestCase(ApiTestBase):
+    """
+    Tests for the group interface.
+    """
+    fixtures = [
+        'test_auth',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
+    ]
+
+    def test_project_methods(self):
+        """
+        Test allowed methods.
+        """
+        response = self.get('/api/v1/group/schema/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+
+    def test_api_authorization(self):
+        """
+        Test API authorization (API-key has access to one object).
+        """
+        response = self.get('/api/v1/group/')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Group 1', json_data['objects'][0]['name'])
+
+        response = self.get('/api/v1/group/1/')
+        self.assertEqual(200, response.status_code)
+
+        response = self.get('/api/v1/group/2/')
+        self.assertEqual(401, response.status_code)
+
+    def test_user_authorization(self):
+        """
+        Test user authorization (user has only access to one object).
+        """
+        self.client.login(username='admin', password='admin')
+        response = self.client.get(
+            '/api/v1/group/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, len(json_data['objects']))
+        self.assertEqual('Group 1', json_data['objects'][0]['name'])
+
+        response = self.client.get(
+            '/api/v1/group/1/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(
+            '/api/v1/group/2/', ACCEPT='application/json')
+        self.assertEqual(401, response.status_code)
+
+
 class ProjectTestCase(ApiTestBase):
     """
     Tests for the project interface.

@@ -58,7 +58,7 @@ class GroupResource(ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='jobtemplate__worker__api_key',
+            api_key_path='project__worker_pools__workers__api_key',
             user_groups_path='',
         )
 
