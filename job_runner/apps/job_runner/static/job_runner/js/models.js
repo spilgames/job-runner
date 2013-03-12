@@ -262,7 +262,7 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'workerPool', 'mod
 /*
     Run model.
 */
-angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, dtformat, globalCache, $cookies, $http) {
+angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'worker', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, Worker, dtformat, globalCache, $cookies, $http) {
     // Required by Django and Django-tastypie
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
 
@@ -301,6 +301,14 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
         if (this.job) {
             var jobId = this.job.split('/').splice(-2, 1)[0];
             return Job.get({id: jobId}, success);
+        }
+    };
+
+    // Return the related worker
+    Run.prototype.get_worker = function(success) {
+        if (this.worker) {
+            var workerId = this.worker.split('/').splice(-2, 1)[0];
+            return Worker.get({'id': workerId}, success);
         }
     };
 

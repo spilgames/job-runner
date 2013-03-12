@@ -277,6 +277,13 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         blank=True
     )
 
+    worker = fields.ToOneField(
+        'job_runner.apps.job_runner.api.WorkerResource',
+        'worker',
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         queryset = Run.objects.filter()
         resource_name = 'run'

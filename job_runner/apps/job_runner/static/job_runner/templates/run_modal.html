@@ -31,6 +31,10 @@
                                 <td>{{ run.get_state_string() }}</td>
                             </tr>
                             <tr>
+                                <th>Assigned worker</th>
+                                <td>{{ run.get_worker().title }}</td>
+                            </tr>
+                            <tr>
                                 <th>Scheduled</th>
                                 <td>{{ run.schedule_dts | formatdts }}</td>
                             </tr>
