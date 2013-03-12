@@ -468,6 +468,7 @@ class Run(models.Model):
     Contains the data related to a (scheduled) job run.
     """
     job = models.ForeignKey(Job)
+    worker = models.ForeignKey(Worker, null=True, blank=True)
     schedule_dts = models.DateTimeField(db_index=True)
     enqueue_dts = models.DateTimeField(null=True, db_index=True)
     start_dts = models.DateTimeField(null=True, db_index=True)
