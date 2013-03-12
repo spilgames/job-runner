@@ -4,7 +4,6 @@ django_compressor
 django-smart-selects
 django-tastypie==0.9.12
 south
-sphinx
 pytz
 pyzmq
 
