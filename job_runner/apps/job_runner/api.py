@@ -237,7 +237,7 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
     class Meta:
         queryset = Job.objects.all()
         resource_name = 'job'
-        detail_allowed_methods = ['get', 'put']
+        detail_allowed_methods = ['get']
         list_allowed_methods = ['get']
         fields = [
             'id',

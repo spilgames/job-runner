@@ -100,6 +100,12 @@ class ProjectTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test project 1', json_data['objects'][0]['title'])
 
+        response = self.get('/api/v1/project/1/')
+        self.assertEqual(200, response.status_code)
+
+        response = self.get('/api/v1/project/2/')
+        self.assertEqual(401, response.status_code)
+
     def test_user_authorization(self):
         """
         Test user authorization (user has only access to one object).
@@ -112,6 +118,14 @@ class ProjectTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test project 1', json_data['objects'][0]['title'])
+
+        response = self.client.get(
+            '/api/v1/project/1/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(
+            '/api/v1/project/2/', ACCEPT='application/json')
+        self.assertEqual(401, response.status_code)
 
 
 class WorkerPoolTestCase(ApiTestBase):
@@ -155,6 +169,12 @@ class WorkerPoolTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Pool 1', json_data['objects'][0]['title'])
 
+        response = self.get('/api/v1/worker_pool/1/')
+        self.assertEqual(200, response.status_code)
+
+        response = self.get('/api/v1/worker_pool/2/')
+        self.assertEqual(401, response.status_code)
+
     def test_user_authorization(self):
         """
         Test user authorization (user has only access to one object).
@@ -167,6 +187,14 @@ class WorkerPoolTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Pool 1', json_data['objects'][0]['title'])
+
+        response = self.client.get(
+            '/api/v1/worker_pool/1/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(
+            '/api/v1/worker_pool/2/', ACCEPT='application/json')
+        self.assertEqual(401, response.status_code)
 
 
 class WorkerTestCase(ApiTestBase):
@@ -211,6 +239,12 @@ class WorkerTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test worker 1', json_data['objects'][0]['title'])
 
+        response = self.get('/api/v1/worker/1/')
+        self.assertEqual(200, response.status_code)
+
+        response = self.get('/api/v1/worker/2/')
+        self.assertEqual(401, response.status_code)
+
     def test_user_authorization(self):
         """
         Test user authorization (user has only access to one object).
@@ -223,6 +257,14 @@ class WorkerTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test worker 1', json_data['objects'][0]['title'])
+
+        response = self.client.get(
+            '/api/v1/worker/1/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(
+            '/api/v1/worker/2/', ACCEPT='application/json')
+        self.assertEqual(401, response.status_code)
 
     def test_patch_ping_response_dts(self):
         """
@@ -291,6 +333,12 @@ class JobTemplateTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test template 1', json_data['objects'][0]['title'])
 
+        response = self.get('/api/v1/job_template/1/')
+        self.assertEqual(200, response.status_code)
+
+        response = self.get('/api/v1/job_template/2/')
+        self.assertEqual(401, response.status_code)
+
     def test_user_authorization(self):
         """
         Test user authorization (user has only access to one object).
@@ -303,6 +351,14 @@ class JobTemplateTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test template 1', json_data['objects'][0]['title'])
+
+        response = self.client.get(
+            '/api/v1/job_template/1/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(
+            '/api/v1/job_template/2/', ACCEPT='application/json')
+        self.assertEqual(401, response.status_code)
 
 
 class JobTestCase(ApiTestBase):
@@ -326,8 +382,7 @@ class JobTestCase(ApiTestBase):
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
-        self.assertEqual(
-            ['get', 'put'], json_data['allowed_detail_http_methods'])
+        self.assertEqual(['get'], json_data['allowed_detail_http_methods'])
         self.assertEqual(['get'], json_data['allowed_list_http_methods'])
 
     def test_job_count(self):
@@ -347,6 +402,12 @@ class JobTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test job 1', json_data['objects'][0]['title'])
 
+        response = self.get('/api/v1/job/1/')
+        self.assertEqual(200, response.status_code)
+
+        response = self.get('/api/v1/job/2/')
+        self.assertEqual(401, response.status_code)
+
     def test_user_authorization(self):
         """
         Test user authorization (user has only access to one object).
@@ -359,6 +420,14 @@ class JobTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual('Test job 1', json_data['objects'][0]['title'])
+
+        response = self.client.get(
+            '/api/v1/job/1/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(
+            '/api/v1/job/2/', ACCEPT='application/json')
+        self.assertEqual(401, response.status_code)
 
 
 class RunTestCase(ApiTestBase):
@@ -406,6 +475,12 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual(1, json_data['objects'][0]['id'])
 
+        response = self.get('/api/v1/run/1/')
+        self.assertEqual(200, response.status_code)
+
+        response = self.get('/api/v1/run/2/')
+        self.assertEqual(401, response.status_code)
+
     def test_user_authorization(self):
         """
         Test user authorization (user has only access to one object).
@@ -418,6 +493,14 @@ class RunTestCase(ApiTestBase):
         json_data = json.loads(response.content)
         self.assertEqual(1, len(json_data['objects']))
         self.assertEqual(1, json_data['objects'][0]['id'])
+
+        response = self.client.get(
+            '/api/v1/run/1/', ACCEPT='application/json')
+        self.assertEqual(200, response.status_code)
+
+        response = self.client.get(
+            '/api/v1/run/2/', ACCEPT='application/json')
+        self.assertEqual(401, response.status_code)
 
     def test_scheduled(self):
         """
@@ -532,7 +615,7 @@ class RunTestCase(ApiTestBase):
                 '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
-    def test_patch_run_1(self):
+    def test_patch_run(self):
         """
         Test PATCH ``/api/v1/run/1/``.
         """
@@ -548,6 +631,21 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(202, response.status_code)
         run = Run.objects.get(pk=1)
         self.assertEqual(enqueue_dts, run.enqueue_dts)
+
+    def test_patch_run_no_permission(self):
+        """
+        Test PATCH ``/api/v1/run/2/`` (we don't have access to this object).
+        """
+        enqueue_dts = timezone.now()
+
+        response = self.patch(
+            '/api/v1/run/2/',
+            {
+                'enqueue_dts': enqueue_dts.isoformat(' ')
+            }
+        )
+
+        self.assertEqual(401, response.status_code)
 
     def test_patch_with_reschedule(self):
         """
@@ -756,6 +854,18 @@ class KillRequestTestCase(ApiTestBase):
         self.assertEqual(201, response.status_code)
         self.assertEqual(1, KillRequest.objects.filter(run_id=1).count())
 
+    def test_post_new_kill_request_no_permission(self):
+        """
+        Test POST ``/api/v1/kill_request/`` with run we don't have access to.
+        """
+        response = self.post(
+            '/api/v1/kill_request/',
+            {
+                'run': '/api/v1/run/2/',
+            }
+        )
+        self.assertEqual(401, response.status_code)
+
 
 class RunLogTestCase(ApiTestBase):
     """
@@ -783,3 +893,16 @@ class RunLogTestCase(ApiTestBase):
         )
         self.assertEqual(201, response.status_code)
         self.assertEqual(1, RunLog.objects.filter(run_id=1).count())
+
+    def test_post_new_run_log_no_access(self):
+        """
+        Test POST ``/api/v1/run_log/`` with run we don't have access to.
+        """
+        response = self.post(
+            '/api/v1/run_log/',
+            {
+                'run': '/api/v1/run/2/',
+                'content': 'foo bar',
+            }
+        )
+        self.assertEqual(401, response.status_code)
