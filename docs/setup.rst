@@ -14,10 +14,6 @@ Setup Job-Runner
    * ``build-essential``
    * ``libmysqlclient-dev``
 
-#. Clone the project::
-
-   $ git clone git@github.com:spilgames/job-runner.git
-
 #. Create a Virtualenv (http://virtualenvwrapper.readthedocs.org/en/latest/),
    to make sure all requirements are installed in an isolated environment. This
    is not required, but it will keep your system clean :)
@@ -28,14 +24,14 @@ Setup Job-Runner
 
 #. Install the Job-Runner (which will fetch all Python requirements as well)::
 
-       # OPTION 1: Install package in development mode.  Any changes you make
-       # will be reflected immediately without having to do an install again.
+       $ pip install job-runner
+
+   Alternatively, you could clone the ``job-runner`` repository and install
+   the package in development mode. Any changes you make will be reflected
+   immediately without having to do an install again::
+
        $ python setup.py develop
        $ pip install -r test-requirements.txt
-
-       # OPTION 2: Just install (you will have to do a new install if you have
-       # changed the code).
-       $ python setup.py install
 
 #. Initialize the database and run the migations::
 
