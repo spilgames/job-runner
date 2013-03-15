@@ -22,7 +22,6 @@ Setup Job-Runner
    * ``python-dev``
    * ``virtualenvwrapper``
    * ``build-essential``
-   * ``libmysqlclient-dev``
 
 #. Create a Virtualenv (http://virtualenvwrapper.readthedocs.org/en/latest/),
    to make sure all requirements are installed in an isolated environment. This
