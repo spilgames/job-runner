@@ -970,3 +970,24 @@ class RunLogTestCase(ApiTestBase):
             }
         )
         self.assertEqual(401, response.status_code)
+
+    def test_update_log(self):
+        """
+        Test update a log item.
+        """
+        response = self.post(
+            '/api/v1/run_log/',
+            {
+                'run': '/api/v1/run/1/',
+                'content': 'foo bar',
+            }
+        )
+        self.assertEqual(201, response.status_code)
+
+        response = self.patch(
+            '/api/v1/run_log/1/',
+            {
+                'content': 'bar foo',
+            }
+        )
+        self.assertEqual(202, response.status_code)
