@@ -6,6 +6,16 @@ Setup Job-Runner
    (using Sqlite as a database back-end). Use the ``--settings`` argument of
    ``manage.py`` to use different settings.
 
+   If you want to override the default settings, you could create a module
+   (eg: ``job_runner_config``) with your setting overrides::
+
+      from job_runner.settings.base import *
+
+      HOSTNAME = 'my.host.name'
+
+   See :doc:`settings` and https://docs.djangoproject.com/en/1.4/ref/settings/
+   for available settings.
+
 #. Make sure you have all requirements installed (the exact package names
    can vary per distribution, these are for Ubuntu).:
 
@@ -40,6 +50,9 @@ Setup Job-Runner
    $ manage.py collectstatic
 
 #. Run ``manage.py runserver``. This will start a development server with
-   the default development settings.
+   the default development settings. The development server will serve the
+   admin interface, the dashboard and the RESTful API.
 
 #. Run ``manage.py broadcast_queue``. This will start the queue broadcaster.
+   The queue broadcaster will broadcast the runs that are scheduled for
+   execution to the subscribed workers.
