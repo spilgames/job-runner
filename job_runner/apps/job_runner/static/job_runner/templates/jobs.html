@@ -105,6 +105,11 @@
                                 <p ng-switch-default>This job does not have any children.</p>
                             </div>
 
+                            <h5>Admin link (requires admin access)</h5>
+                            <p>
+                                <a href="/admin/job_runner/job/{{ job.id }}/" target="_blank">Open job in admin</a>
+                            </p>
+
                             <h5>Command</h5>
                             <p>
                                 <pre>{{ job.script_content }}</pre>
