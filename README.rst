@@ -48,6 +48,23 @@ Links
 Changes
 -------
 
+v2.0.0
+~~~~~~
+
+* Restructure the relations between models. Workers are now project independent
+  and are grouped by pools. Permissions are now managed on project level
+  (instead on project and job-template level) By assigning a job to a pool
+  containing multiple workers, the job will be loadbalanced
+  (by selecting a random worker).
+
+  After upgrading, make sure to run ``manage.py migrate`` to migrate your
+  data to the new structure.
+
+  .. warning:: Before running ``manage.py migrate``, make a backup of your
+               data! The new structure is not backwards compatible and
+               thus can not be migrated backwards.
+
+
 v1.4.3
 ~~~~~~
 
