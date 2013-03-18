@@ -58,6 +58,16 @@ Projects
     Returns the details of a specific project-id.
 
 
+Worker-pools
+~~~~~~~~~~~~
+
+``GET /api/v1/worker_pool/``
+    Returns a list of available worker-pools.
+
+``GET /api/vi/worker-pools/{WORKER_POOL_ID}/``
+    Return the details of a specific worker-pool id.
+
+
 Workers
 ~~~~~~~
 
@@ -66,6 +76,10 @@ Workers
 
 ``GET /api/v1/worker/{WORKER_ID}/``
     Returns the details of a specific worker-id.
+
+``PATCH /api/v1/worker/{WORKER_ID}/``
+    Update one or more worker fields (used to update
+    the ``ping_response_dts``).
 
 
 Job-templates
@@ -87,6 +101,9 @@ Jobs
 ``GET /api/v1/job/{JOB_ID}/``
     Returns the details of a specific job-id.
 
+``PUT /api/v1/job/{JOB_ID}/``
+    Update the job (used by AngularJS to enable / disable enqueue of a job).
+
 
 Runs
 ~~~~
@@ -105,6 +122,41 @@ Runs
 ``GET /api/v1/run/{RUN_ID}/``
     Returns the details of a specific job run.
 
+``POST /api/v1/run/``
+    Create a new run (used for ad-hoc scheduling a job in the dashboard).
+
 ``PATCH /api/v1/run/{RUN_ID}/``
     When the ``return_dts`` is patched, the job will be automatically
     rescheduled (if needed).
+
+
+Kill-requests
+~~~~~~~~~~~~~
+
+``GET /api/v1/kill_request/``
+    Returns a list of kill-requests.
+
+``GET /api/v1/kill_request/{KILL_REQUEST_ID}/``
+    Returns the details of a specific kill-request id.
+
+``POST /api/v1/kill_request/``
+    Create a new kill-request.
+
+``PATCH /api/v1/kill_request/{KILL_REQUEST_ID}/``
+    Update one or more fields of the given kill-request id.
+
+
+Run-logs
+~~~~~~~~
+
+``GET /api/v1/run_log/``
+    Returns a list of run-logs.
+
+``GET /api/vi/run_log/{RUN_LOG_ID}/``
+    Returns the details of a specific run-log id.
+
+``POST /api/v1/run_log/``
+    Create a new run-log.
+
+``PATCH /api/v1/run_log/{RUN_LOG_ID}/``
+    Update one or more fields of the given run-log id.
