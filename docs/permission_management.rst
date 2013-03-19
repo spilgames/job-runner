@@ -41,7 +41,7 @@ following permissions:
 * All *sessions | ...*
 
 Of course, you can finegrain this to your own needs (eg when you don't want
-your users to create or delete job-tempates).
+your users to create or delete job-templates).
 
 
 .. seealso:: :doc:`apps/job_runner/admin` for more technical details

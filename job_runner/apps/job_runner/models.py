@@ -145,6 +145,9 @@ class WorkerPool(models.Model):
         addresses = self.notification_addresses.strip().split('\n')
         return [x.strip() for x in addresses if x.strip() != '']
 
+    class Meta:
+        ordering = ('title', )
+
 
 class JobTemplate(models.Model):
     """
