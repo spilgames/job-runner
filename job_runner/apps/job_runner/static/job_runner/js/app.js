@@ -1,4 +1,4 @@
-angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project', 'job', 'jobTemplate', 'worker', 'run', 'group', 'killRequest']).config(function($routeProvider, $locationProvider) {
+angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project', 'job', 'jobTemplate', 'worker', 'workerPool', 'run', 'group', 'killRequest']).config(function($routeProvider, $locationProvider) {
     // this will make it possible to use deeplinks without "#"
     $locationProvider.html5Mode(true);
 

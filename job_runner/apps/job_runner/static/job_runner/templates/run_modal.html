@@ -1,7 +1,7 @@
 <div class="modal hide fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="run_modal_title" aria-hidden="true">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="run_modal_title">Run: <a href="/project/{{ global_state.data.projectId }}/jobs/{{ run.get_job().id }}/" target="_self">{{ run.get_job().title }}</a></h3>
+        <h3 id="run_modal_title">Run instance of <a href="/project/{{ global_state.data.projectId }}/jobs/{{ run.get_job().id }}/" target="_self">{{ run.get_job().title }}</a></h3>
     </div>
     <div class="modal-body" id="status-modal">
         <div class="tabbable">
@@ -29,6 +29,19 @@
                             <tr>
                                 <th>Status</th>
                                 <td>{{ run.get_state_string() }}</td>
+                            </tr>
+                            <tr>
+                                <th>Assigned worker</th>
+                                <td>{{ run.get_worker().title }}</td>
+                            </tr>
+                            <tr>
+                                <th>Manual run</th>
+                                <td>
+                                    <ng-switch on="run.is_manual">
+                                        <span ng-switch-when="true">yes</span>
+                                        <span ng-switch-when="false">no</span>
+                                    </ng-switch>
+                                </td>
                             </tr>
                             <tr>
                                 <th>Scheduled</th>

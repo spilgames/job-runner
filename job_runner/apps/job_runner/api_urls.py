@@ -10,6 +10,7 @@ from job_runner.apps.job_runner.api import (
     RunLogResource,
     RunResource,
     WorkerResource,
+    WorkerPoolResource,
 )
 
 
@@ -22,6 +23,7 @@ v1_api.register(ProjectResource())
 v1_api.register(RunLogResource())
 v1_api.register(RunResource())
 v1_api.register(WorkerResource())
+v1_api.register(WorkerPoolResource())
 
 urlpatterns = patterns(
     '',

@@ -9,6 +9,7 @@ from django.db import models
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.utils import timezone
+from smart_selects.db_fields import ChainedForeignKey
 
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
 
@@ -42,8 +43,23 @@ class Project(models.Model):
         Group,
         help_text=(
             'These are the groups that can see the project in the dashboard. '
-            'The admin permissions are set on template level. '
-
+        )
+    )
+    auth_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        related_name='auth_groups_set',
+        help_text=(
+            'These are the groups that are authorized to see this project '
+            'and its jobs in the admin and are able to re-schedule the jobs '
+            'of this project in the dashboard.'
+        )
+    )
+    worker_pools = models.ManyToManyField(
+        'job_runner.WorkerPool',
+        help_text=(
+            'These are the worker-pools that will be available for this '
+            'project.'
         )
     )
     notification_addresses = models.TextField(
@@ -81,11 +97,6 @@ class Worker(models.Model):
     description = models.TextField(blank=True)
     api_key = models.CharField(max_length=255, db_index=True, unique=True)
     secret = models.CharField(max_length=255, db_index=True)
-    project = models.ForeignKey(Project)
-    notification_addresses = models.TextField(
-        help_text='Separate e-mail addresses by a newline',
-        blank=True,
-    )
     enqueue_is_enabled = models.BooleanField(
         default=True,
         db_index=True,
@@ -98,19 +109,44 @@ class Worker(models.Model):
         blank=True, null=True, editable=False)
 
     def __unicode__(self):
-        return u'{0} > {1}'.format(self.project, self.title)
+        return self.title
+
+    class Meta:
+        ordering = ('title', )
+
+
+class WorkerPool(models.Model):
+    """
+    Worker-pool.
+    """
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    notification_addresses = models.TextField(
+        help_text='Separate e-mail addresses by a newline',
+        blank=True,
+    )
+    enqueue_is_enabled = models.BooleanField(
+        default=True,
+        db_index=True,
+        help_text=(
+            'If unchecked, nothing for this worker-pool will be added to '
+            'the worker queue. This will not affect already running jobs.'
+        )
+    )
+    workers = models.ManyToManyField(Worker)
+
+    def __unicode__(self):
+        return self.title
 
     def get_notification_addresses(self):
         """
-        Return a ``list`` of notification addresses.
+        Return a ``list`` notification addresses.
         """
         addresses = self.notification_addresses.strip().split('\n')
-        addresses = [x.strip() for x in addresses if x.strip() != '']
-        addresses.extend(self.project.get_notification_addresses())
-        return addresses
+        return [x.strip() for x in addresses if x.strip() != '']
 
     class Meta:
-        ordering = ('project__title', 'title', )
+        ordering = ('title', )
 
 
 class JobTemplate(models.Model):
@@ -123,16 +159,7 @@ class JobTemplate(models.Model):
         'Use {{ content|safe }} at the place where you want to render the '
         'script content of the job'
     ))
-    worker = models.ForeignKey(Worker)
-    auth_groups = models.ManyToManyField(
-        Group,
-        blank=True,
-        help_text=(
-            'These are the groups that are authorized to see this template '
-            'and its jobs in the admin and are able to re-schedule the jobs '
-            'using this template in the dashboard.'
-        )
-    )
+    project = models.ForeignKey(Project)
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
         blank=True,
@@ -147,7 +174,7 @@ class JobTemplate(models.Model):
     )
 
     def __unicode__(self):
-        return u'{0} > {1}'.format(self.worker, self.title)
+        return u'{0} > {1}'.format(self.project, self.title)
 
     def save(self, *args, **kwargs):
         """
@@ -167,11 +194,11 @@ class JobTemplate(models.Model):
         """
         addresses = self.notification_addresses.strip().split('\n')
         addresses = [x.strip() for x in addresses if x.strip() != '']
-        addresses.extend(self.worker.get_notification_addresses())
+        addresses.extend(self.project.get_notification_addresses())
         return addresses
 
     class Meta:
-        ordering = ('worker__project__title', 'worker__title', 'title', )
+        ordering = ('project__title', 'title', )
 
 
 class Job(models.Model):
@@ -181,6 +208,14 @@ class Job(models.Model):
     parent = models.ForeignKey(
         'self', blank=True, null=True, related_name='children')
     job_template = models.ForeignKey(JobTemplate)
+    worker_pool = ChainedForeignKey(
+        WorkerPool,
+        chained_field='job_template',
+        chained_model_field='project__jobtemplate',
+        show_all=False,
+        auto_choose=False,
+        help_text='Select a job-template first to see the available pools.',
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     script_content_partial = models.TextField('script content')
@@ -234,9 +269,9 @@ class Job(models.Model):
 
     class Meta:
         ordering = (
-            'job_template__worker__project__title',
-            'job_template__worker__title',
-            'job_template__title', 'title',
+            'job_template__project__title',
+            'job_template__title',
+            'title',
         )
         unique_together = (('title', 'job_template'),)
 
@@ -332,6 +367,7 @@ class Job(models.Model):
         addresses = self.notification_addresses.strip().split('\n')
         addresses = [x.strip() for x in addresses if x.strip() != '']
         addresses.extend(self.job_template.get_notification_addresses())
+        addresses.extend(self.worker_pool.get_notification_addresses())
         return addresses
 
     def _get_reschedule_incremented_dts(self, increment_date):
@@ -435,6 +471,7 @@ class Run(models.Model):
     Contains the data related to a (scheduled) job run.
     """
     job = models.ForeignKey(Job)
+    worker = models.ForeignKey(Worker, null=True, blank=True)
     schedule_dts = models.DateTimeField(db_index=True)
     enqueue_dts = models.DateTimeField(null=True, db_index=True)
     start_dts = models.DateTimeField(null=True, db_index=True)
@@ -456,7 +493,7 @@ class Run(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('job_runner:job_run', (), {
-            'project_id': self.job.job_template.worker.project.pk,
+            'project_id': self.job.job_template.project.pk,
             'job_id': self.job.pk,
             'run_id': self.pk,
         })

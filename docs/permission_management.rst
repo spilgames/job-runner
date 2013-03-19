@@ -21,7 +21,7 @@ Permission to schedule a job *now* or to suspend a job
 ------------------------------------------------------
 
 To grant the user permission to schedule a job *now* or to suspend a job, make
-sure the user is within at least one group that is linked to the job-template
+sure the user is within at least one auth-group that is linked to the project
 the job belongs to.
 
 
@@ -35,8 +35,13 @@ following permissions:
 
 * All *admin | log entry | ...*
 * All *job_runner | job | ...*
+* All *job_runner | job template | ...*
 * All *job_runner | reschedule exclude | ...*
 * All *job_runner | run | ...*
 * All *sessions | ...*
+
+Of course, you can finegrain this to your own needs (eg when you don't want
+your users to create or delete job-templates).
+
 
 .. seealso:: :doc:`apps/job_runner/admin` for more technical details

@@ -1,0 +1,36 @@
+[
+    {
+        "pk": 1, 
+        "model": "job_runner.project", 
+        "fields": {
+            "title": "Test project 1",
+            "notification_addresses": "project1@example.com\n", 
+            "groups": [
+                1
+            ],
+            "auth_groups": [
+                1
+            ],
+            "worker_pools": [
+                1
+            ]
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "job_runner.project", 
+        "fields": {
+            "title": "Test project 2",
+            "notification_addresses": " project2@example.com ", 
+            "groups": [
+                2
+            ],
+            "auth_groups": [
+                2
+            ],
+            "worker_pools": [
+                2
+            ]
+        }
+    }
+]

@@ -13,6 +13,7 @@ from job_runner.apps.job_runner.models import (
     RescheduleExclude,
     Run,
     Worker,
+    WorkerPool,
 )
 
 
@@ -27,7 +28,7 @@ class PermissionAdminMixin(object):
 
     Example::
 
-        'job_template__auth_groups'
+        'job_template__project__auth_groups'
 
     """
 
@@ -40,7 +41,7 @@ class PermissionAdminMixin(object):
 
         {
             'job_template': {
-                'path': 'auth_groups',
+                'path': 'project__auth_groups',
                 'model': JobTemplate,
             }
         }
@@ -76,9 +77,9 @@ class PermissionAdminMixin(object):
         return self._filter_groups(request, qs, self.groups_path)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name in self.fK_groups_path:
-            qs = self.fK_groups_path[db_field.name]['model'].objects.all()
-            group_path = self.fK_groups_path[db_field.name]['path']
+        if db_field.name in self.fk_groups_path:
+            qs = self.fk_groups_path[db_field.name]['model'].objects.all()
+            group_path = self.fk_groups_path[db_field.name]['path']
             kwargs['queryset'] = self._filter_groups(request, qs, group_path)
 
         return super(PermissionAdminMixin, self).formfield_for_foreignkey(
@@ -118,13 +119,12 @@ class WorkerAdmin(admin.ModelAdmin):
     Admin interface for workers.
     """
     list_display = (
-        'project',
         'title',
         'api_key',
         'enqueue_is_enabled',
         'ping_response'
     )
-    list_filter = ('project', 'enqueue_is_enabled')
+    list_filter = ('enqueue_is_enabled',)
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
 
@@ -172,14 +172,31 @@ class WorkerAdmin(admin.ModelAdmin):
     ping_response.short_description = 'Last ping response'
 
 
-class JobTemplateAdmin(admin.ModelAdmin):
+class WorkerPoolAdmin(admin.ModelAdmin):
+    """
+    Admin interface for worker-pools.
+    """
+    list_display = ('title', 'enqueue_is_enabled',)
+    list_editable = ('enqueue_is_enabled',)
+
+
+class JobTemplateAdmin(PermissionAdminMixin, admin.ModelAdmin):
     """
     Admin interface for job-templates.
     """
-    list_display = ('worker', 'title', 'enqueue_is_enabled')
-    list_filter = ('worker', 'worker__project', 'enqueue_is_enabled')
+    list_display = (
+        'project', 'title', 'enqueue_is_enabled')
+    list_filter = (
+        'project', 'enqueue_is_enabled',)
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
+    groups_path = 'project__auth_groups'
+    fk_groups_path = {
+        'project': {
+            'model': Project,
+            'path': 'auth_groups',
+        }
+    }
 
 
 class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
@@ -189,6 +206,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     list_display = (
         'job_template',
         'title',
+        'worker_pool',
         'enqueue_is_enabled',
         'reschedule_type',
         'parent'
@@ -198,31 +216,38 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
         'reschedule_interval_type',
         'reschedule_type',
         'job_template',
-        'job_template__worker',
-        'job_template__worker__project'
+        'job_template__project',
+        'worker_pool'
     )
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
     search_fields = ('title',)
+    save_as = True
     inlines = [
         RunInlineAdmin,
         RescheduleExcludeInlineAdmin,
     ]
-    groups_path = 'job_template__auth_groups'
-    fK_groups_path = {
+    groups_path = 'job_template__project__auth_groups'
+    fk_groups_path = {
         'job_template': {
             'model': JobTemplate,
-            'path': 'auth_groups',
+            'path': 'project__auth_groups',
         },
         'parent': {
             'model': Job,
-            'path': 'job_template__auth_groups',
+            'path': 'job_template__project__auth_groups',
         }
     }
 
     fieldsets = (
         (None, {
-            'fields': ('title', 'job_template', 'parent', 'description',)
+            'fields': (
+                'title',
+                'job_template',
+                'worker_pool',
+                'parent',
+                'description',
+            )
         }),
         ('Script', {
             'fields': ('script_content_partial',)
@@ -246,3 +271,4 @@ admin.site.register(Job, JobAdmin)
 admin.site.register(JobTemplate, JobTemplateAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Worker, WorkerAdmin)
+admin.site.register(WorkerPool, WorkerPoolAdmin)

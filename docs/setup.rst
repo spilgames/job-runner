@@ -6,17 +6,22 @@ Setup Job-Runner
    (using Sqlite as a database back-end). Use the ``--settings`` argument of
    ``manage.py`` to use different settings.
 
+   If you want to override the default settings, you could create a module
+   (eg: ``job_runner_config``) with your setting overrides::
+
+      from job_runner.settings.base import *
+
+      HOSTNAME = 'my.host.name'
+
+   See :doc:`settings` and https://docs.djangoproject.com/en/1.4/ref/settings/
+   for available settings.
+
 #. Make sure you have all requirements installed (the exact package names
    can vary per distribution, these are for Ubuntu).:
 
    * ``python-dev``
    * ``virtualenvwrapper``
    * ``build-essential``
-   * ``libmysqlclient-dev``
-
-#. Clone the project::
-
-   $ git clone git@github.com:spilgames/job-runner.git
 
 #. Create a Virtualenv (http://virtualenvwrapper.readthedocs.org/en/latest/),
    to make sure all requirements are installed in an isolated environment. This
@@ -28,14 +33,14 @@ Setup Job-Runner
 
 #. Install the Job-Runner (which will fetch all Python requirements as well)::
 
-       # OPTION 1: Install package in development mode.  Any changes you make
-       # will be reflected immediately without having to do an install again.
+       $ pip install job-runner
+
+   Alternatively, you could clone the ``job-runner`` repository and install
+   the package in development mode. Any changes you make will be reflected
+   immediately without having to do an install again::
+
        $ python setup.py develop
        $ pip install -r test-requirements.txt
-
-       # OPTION 2: Just install (you will have to do a new install if you have
-       # changed the code).
-       $ python setup.py install
 
 #. Initialize the database and run the migations::
 
@@ -44,6 +49,9 @@ Setup Job-Runner
    $ manage.py collectstatic
 
 #. Run ``manage.py runserver``. This will start a development server with
-   the default development settings.
+   the default development settings. The development server will serve the
+   admin interface, the dashboard and the RESTful API.
 
 #. Run ``manage.py broadcast_queue``. This will start the queue broadcaster.
+   The queue broadcaster will broadcast the runs that are scheduled for
+   execution to the subscribed workers.

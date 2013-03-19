@@ -106,9 +106,36 @@ angular.module('project', ['ngResource', 'getAll', 'modelCache']).factory('Proje
 
 
 /*
+    Worker-pool model.
+*/
+angular.module('workerPool', ['ngResource', 'getAll', 'modelCache']).factory('WorkerPool', function($resource, getAll, globalCache, cachedGet) {
+    var WorkerPool = $resource(
+        '/api/v1/worker_pool/:id/',
+        {'id': '@id'},
+        {
+            'get': {'method': 'GET'}
+        }
+    );
+
+    // Decorate get method to add caching.
+    WorkerPool.get = cachedGet(WorkerPool.get, globalCache, 'workerPool');
+
+    // Return all worker-pools.
+    WorkerPool.all = function(params, success, error) {
+        var output_list = [];
+        getAll(output_list, WorkerPool, 0, params, success, error);
+        return output_list;
+    };
+
+    return WorkerPool;
+
+});
+
+
+/*
     Worker model.
 */
-angular.module('worker', ['ngResource', 'getAll', 'project', 'modelCache']).factory('Worker', function($resource, getAll, Project, globalCache, cachedGet) {
+angular.module('worker', ['ngResource', 'getAll', 'modelCache']).factory('Worker', function($resource, getAll, globalCache, cachedGet) {
     var Worker = $resource(
         '/api/v1/worker/:id/',
         {'id': '@id'},
@@ -127,13 +154,6 @@ angular.module('worker', ['ngResource', 'getAll', 'project', 'modelCache']).fact
         return output_list;
     };
 
-    // Return the related project
-    Worker.prototype.get_project = function(success) {
-        if (this.project) {
-            return Project.get({'id': this.project.split('/').splice(-2, 1)[0]}, success);
-        }
-    };
-
     return Worker;
 });
 
@@ -141,7 +161,7 @@ angular.module('worker', ['ngResource', 'getAll', 'project', 'modelCache']).fact
 /*
     Job template model.
 */
-angular.module('jobTemplate', ['ngResource', 'getAll', 'worker', 'modelCache']).factory('JobTemplate', function($resource, getAll, Worker, globalCache, cachedGet) {
+angular.module('jobTemplate', ['ngResource', 'getAll', 'project', 'modelCache']).factory('JobTemplate', function($resource, getAll, Project, globalCache, cachedGet) {
     var JobTemplate = $resource(
         '/api/v1/job_template/:id/',
         {'id': '@id'},
@@ -160,11 +180,11 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker', 'modelCache']).
         return output_list;
     };
 
-    // Return the related worker object
-    JobTemplate.prototype.get_worker = function(success) {
-        if (this.worker) {
-            var workerId = this.worker.split('/').splice(-2, 1)[0];
-            return Worker.get({'id': workerId}, success);
+    // Return the related project object
+    JobTemplate.prototype.get_project = function(success) {
+        if (this.project) {
+            var projectId = this.project.split('/').splice(-2, 1)[0];
+            return Project.get({'id': parentId}, success);
         }
     };
 
@@ -175,7 +195,7 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'worker', 'modelCache']).
 /*
     Job model.
 */
-angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'modelCache', 'ngCookies']).factory('Job', function($resource, getAll, JobTemplate, $cookies, $http, globalCache, cachedGet) {
+angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'workerPool', 'modelCache', 'ngCookies']).factory('Job', function($resource, getAll, JobTemplate, WorkerPool, $cookies, $http, globalCache, cachedGet) {
     // Required by Django and Django-tastypie
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
 
@@ -203,6 +223,14 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'modelCache', 'ngC
         if (this.job_template) {
             var templateId = this.job_template.split('/').splice(-2, 1)[0];
             return JobTemplate.get({'id': templateId}, success);
+        }
+    };
+
+    // Return the related worker-pool
+    Job.prototype.get_worker_pool = function(success) {
+        if (this.worker_pool) {
+            var workerPoolId = this.worker_pool.split('/').splice(-2, 1)[0];
+            return WorkerPool.get({'id': workerPoolId}, success);
         }
     };
 
@@ -234,7 +262,7 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'modelCache', 'ngC
 /*
     Run model.
 */
-angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, dtformat, globalCache, $cookies, $http) {
+angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'worker', 'jobrunner.services', 'ngCookies']).factory('Run', function($resource, getAll, Job, RunLog, Worker, dtformat, globalCache, $cookies, $http) {
     // Required by Django and Django-tastypie
     $http.defaults.headers.common['X-CSRFToken'] = $cookies.csrftoken;
 
@@ -273,6 +301,14 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'jobrunner.servi
         if (this.job) {
             var jobId = this.job.split('/').splice(-2, 1)[0];
             return Job.get({id: jobId}, success);
+        }
+    };
+
+    // Return the related worker
+    Run.prototype.get_worker = function(success) {
+        if (this.worker) {
+            var workerId = this.worker.split('/').splice(-2, 1)[0];
+            return Worker.get({'id': workerId}, success);
         }
     };
 

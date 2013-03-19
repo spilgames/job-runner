@@ -118,12 +118,12 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.sessions',
-    # 'django.contrib.sites',
     'django.contrib.staticfiles',
 
     'south',
     'tastypie',
     'compressor',
+    'smart_selects',
 
     'job_runner.apps.job_runner',
 )

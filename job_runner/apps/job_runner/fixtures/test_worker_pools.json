@@ -1,0 +1,24 @@
+[
+    {
+        "pk": 1, 
+        "model": "job_runner.workerpool", 
+        "fields": {
+            "title": "Pool 1",
+            "notification_addresses": "pool1@example.com",
+            "workers": [
+                1
+            ]
+        }
+    },
+    {
+        "pk": 2, 
+        "model": "job_runner.workerpool", 
+        "fields": {
+            "title": "Pool 2",
+            "notification_addresses": "pool2@example.com ",
+            "workers": [
+                2
+            ]
+        }
+    }
+]

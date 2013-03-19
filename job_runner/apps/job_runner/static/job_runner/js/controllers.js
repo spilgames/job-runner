@@ -124,14 +124,14 @@ var ProjectCtrl = function($scope, $routeParams, Project, globalState) {
 /*
     Controller for run actions.
 */
-var RunActionCtrl = function($scope, $routeParams, Run, Job, JobTemplate, Group, KillRequest) {
+var RunActionCtrl = function($scope, $routeParams, globalState, Run, Job, Group, KillRequest) {
     var getPermissionsForJob = function(jobId) {
         $scope.auth_permissions = false;
         $scope.job = Job.get({id: jobId}, function(job) {
-            JobTemplate.get({id: job.job_template.split('/').splice(-2, 1)[0]}, function(jobTemplate) {
+            globalState.getProject(function(project) {
                 Group.all({}, function(groups) {
                     angular.forEach(groups, function(group) {
-                        if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
+                        if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
                             $scope.auth_permissions = true;
                         }
                     });
@@ -165,16 +165,16 @@ var RunActionCtrl = function($scope, $routeParams, Run, Job, JobTemplate, Group,
 /*
     Controller for job actions.
 */
-var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, JobTemplate, globalState, globalCache) {
+var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, globalState, globalCache) {
     // set $scope.auth_permissions to true if the user has auth permissions
     // for the given jobId.
     var getPermissionsForJob = function(jobId) {
         $scope.auth_permissions = false;
         $scope.job = Job.get({id: jobId}, function(job) {
-            JobTemplate.get({id: job.job_template.split('/').splice(-2, 1)[0]}, function(jobTemplate) {
+            globalState.getProject(function(project) {
                 Group.all({}, function(groups) {
                     angular.forEach(groups, function(group) {
-                        if(jobTemplate.auth_groups.indexOf(group.resource_uri) >= 0) {
+                        if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
                             $scope.auth_permissions = true;
                         }
                     });

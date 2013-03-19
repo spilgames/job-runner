@@ -7,8 +7,8 @@ Was manual:
 Was killed:
 {% if run.killrequest_set.all|length > 0 %}yes{% else %}no{% endif %}
 
-Worker:
-{{ run.job.job_template.worker.title }}
+Pool:
+{{ run.job.worker_pool.title }}
 
 Links:
  * Dashboard - http://{{ hostname }}{{ run.get_absolute_url }}

@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 import time
 from datetime import datetime, timedelta
 
@@ -54,22 +55,28 @@ class Command(NoArgsCommand):
 
         """
         enqueueable_runs = Run.objects.enqueueable().select_related()
-
         broadcasted_job_ids = []
 
         for run in enqueueable_runs:
+            # make sure we don't broadcast multiple runs for the same job
             if run.job.pk not in broadcasted_job_ids:
-                worker = run.job.job_template.worker
-                message = [
-                    'master.broadcast.{0}'.format(worker.api_key),
-                    json.dumps({'run_id': run.id, 'action': 'enqueue'})
-                ]
-                logger.debug('Sending: {0}'.format(message))
-                publisher.send_multipart(message)
+                # TODO: take ping response into account?
+                workers = run.job.worker_pool.workers.filter(
+                    enqueue_is_enabled=True)
+                if len(workers):
+                    # pick a random active worker
+                    worker = workers[random.randint(0, len(workers) - 1)]
 
-                # in raw sql, this can be avoided, I couldn't find a way how
-                # this can be done with the django orm
-                broadcasted_job_ids.append(run.job.pk)
+                    message = [
+                        'master.broadcast.{0}'.format(worker.api_key),
+                        json.dumps({'run_id': run.id, 'action': 'enqueue'})
+                    ]
+                    logger.info('Sending: {0}'.format(message))
+                    publisher.send_multipart(message)
+
+                    # in raw sql, this can be avoided, I couldn't find a way
+                    # how this can be done with the django orm
+                    broadcasted_job_ids.append(run.job.pk)
 
     def _broadcast_kill_requests(self, publisher):
         """
@@ -83,7 +90,7 @@ class Command(NoArgsCommand):
 
         for kill_request in kill_requests:
             run = kill_request.run
-            worker = run.job.job_template.worker
+            worker = run.worker
             message = [
                 'master.broadcast.{0}'.format(worker.api_key),
                 json.dumps({

@@ -14,6 +14,7 @@ from job_runner.apps.job_runner.models import (
     Run,
     RunLog,
     Worker,
+    WorkerPool,
 )
 
 
@@ -57,7 +58,7 @@ class GroupResource(ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='jobtemplate__worker__api_key',
+            api_key_path='project__worker_pools__workers__api_key',
             user_groups_path='',
         )
 
@@ -66,6 +67,12 @@ class ProjectResource(ModelResource):
     """
     RESTful resource for projects.
     """
+    worker_pools = fields.ToManyField(
+        'job_runner.apps.job_runner.api.WorkerPoolResource', 'worker_pools')
+
+    auth_groups = fields.ToManyField(
+        'job_runner.apps.job_runner.api.GroupResource', 'auth_groups')
+
     class Meta:
         queryset = Project.objects.all()
         resource_name = 'project'
@@ -79,8 +86,48 @@ class ProjectResource(ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='worker__api_key',
+            api_key_path='worker_pools__workers__api_key',
             user_groups_path='groups',
+        )
+
+
+class WorkerPoolResource(ModelResource):
+    """
+    RESTful resource for worker-pools.
+    """
+    workers = fields.ToManyField(
+        'job_runner.apps.job_runner.api.WorkerResource', 'workers')
+
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(WorkerPoolResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'project__id': filters['project_id']
+            })
+
+        return orm_filters
+
+    class Meta:
+        queryset = WorkerPool.objects.all()
+        resource_name = 'worker_pool'
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get']
+        fields = [
+            'id',
+            'title',
+            'description',
+            'enqueue_is_enabled',
+        ]
+
+        authentication = MultiAuthentication(
+            SessionAuthentication(), HmacAuthentication())
+
+        authorization = ModelAuthorization(
+            api_key_path='workers__api_key',
+            user_groups_path='project__groups',
         )
 
 
@@ -88,8 +135,17 @@ class WorkerResource(ModelResource):
     """
     RESTful resource for workers.
     """
-    project = fields.ToOneField(
-        'job_runner.apps.job_runner.api.ProjectResource', 'project')
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(WorkerResource, self).build_filters(filters)
+
+        if 'project_id' in filters:
+            orm_filters.update({
+                'workerpool__project__id': filters['project_id']
+            })
+
+        return orm_filters
 
     class Meta:
         queryset = Worker.objects.all()
@@ -105,7 +161,6 @@ class WorkerResource(ModelResource):
             'ping_response_dts'
         ]
         filtering = {
-            'project': ALL_WITH_RELATIONS,
             'api_key': ALL,
         }
 
@@ -114,7 +169,7 @@ class WorkerResource(ModelResource):
 
         authorization = ModelAuthorization(
             api_key_path='api_key',
-            user_groups_path='project__groups',
+            user_groups_path='workerpool__project__groups',
         )
 
 
@@ -122,13 +177,8 @@ class JobTemplateResource(ModelResource):
     """
     RESTful resource for job-templates.
     """
-    worker = fields.ToOneField(
-        'job_runner.apps.job_runner.api.WorkerResource', 'worker')
-    auth_groups = fields.ToManyField(
-        'job_runner.apps.job_runner.api.GroupResource',
-        'auth_groups',
-        null=True
-    )
+    project = fields.ToOneField(
+        'job_runner.apps.job_runner.api.ProjectResource', 'project')
 
     def build_filters(self, filters=None):
         if filters is None:
@@ -137,7 +187,7 @@ class JobTemplateResource(ModelResource):
 
         if 'project_id' in filters:
             orm_filters.update({
-                'worker__project__id': filters['project_id']
+                'project__id': filters['project_id']
             })
 
         return orm_filters
@@ -155,8 +205,8 @@ class JobTemplateResource(ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='worker__api_key',
-            user_groups_path='worker__project__groups',
+            api_key_path='project__worker_pools__workers__api_key',
+            user_groups_path='project__groups',
         )
 
 
@@ -166,6 +216,9 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
     """
     job_template = fields.ToOneField(
         'job_runner.apps.job_runner.api.JobTemplateResource', 'job_template')
+    worker_pool = fields.ToOneField(
+        'job_runner.apps.job_runner.api.WorkerPoolResource', 'worker_pool')
+
     parent = fields.ToOneField('self', 'parent', null=True)
     children = fields.ToManyField('self', 'children', null=True)
 
@@ -176,7 +229,7 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
 
         if 'project_id' in filters:
             orm_filters.update({
-                'job_template__worker__project__id': filters['project_id']
+                'job_template__project__id': filters['project_id']
             })
 
         return orm_filters
@@ -204,9 +257,10 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='job_template__worker__api_key',
-            user_groups_path='job_template__worker__project__groups',
-            auth_user_groups_path='job_template__auth_groups',
+            api_key_path=(
+                'job_template__project__worker_pools__workers__api_key'),
+            user_groups_path='job_template__project__groups',
+            auth_user_groups_path='job_template__project__auth_groups',
         )
 
 
@@ -223,6 +277,13 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         blank=True
     )
 
+    worker = fields.ToOneField(
+        'job_runner.apps.job_runner.api.WorkerResource',
+        'worker',
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         queryset = Run.objects.filter()
         resource_name = 'run'
@@ -237,9 +298,10 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='job__job_template__worker__api_key',
-            user_groups_path='job__job_template__worker__project__groups',
-            auth_user_groups_path='job__job_template__auth_groups',
+            api_key_path=(
+                'job__job_template__project__worker_pools__workers__api_key'),
+            user_groups_path='job__job_template__project__groups',
+            auth_user_groups_path='job__job_template__project__auth_groups',
         )
 
     def build_filters(self, filters=None):
@@ -284,7 +346,7 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
 
         if 'project_id' in filters:
             orm_filters.update({
-                'job__job_template__worker__project__id': filters['project_id']
+                'job__job_template__project__id': filters['project_id']
             })
 
         return orm_filters
@@ -360,9 +422,10 @@ class KillRequestResource(NoRelatedSaveMixin, ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='run__job__job_template__worker__api_key',
-            user_groups_path='run__job__job_template__worker__project__groups',
-            auth_user_groups_path='run__job__job_template__auth_groups',
+            api_key_path='run__job__worker_pool__workers__api_key',
+            user_groups_path='run__job__job_template__project__groups',
+            auth_user_groups_path=(
+                'run__job__job_template__project__auth_groups'),
         )
 
 
@@ -383,7 +446,8 @@ class RunLogResource(NoRelatedSaveMixin, ModelResource):
             SessionAuthentication(), HmacAuthentication())
 
         authorization = ModelAuthorization(
-            api_key_path='run__job__job_template__worker__api_key',
-            user_groups_path='run__job__job_template__worker__project__groups',
-            auth_user_groups_path='run__job__job_template__auth_groups',
+            api_key_path='run__job__worker_pool__workers__api_key',
+            user_groups_path='run__job__job_template__project__groups',
+            auth_user_groups_path=(
+                'run__job__job_template__project__auth_groups'),
         )

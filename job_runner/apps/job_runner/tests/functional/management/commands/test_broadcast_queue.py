@@ -14,19 +14,22 @@ class CommandTestCase(TestCase):
     """
     fixtures = [
         'test_auth',
-        'test_project',
-        'test_worker',
-        'test_job_template',
-        'test_job',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs',
     ]
 
     def test__broadcast_kill_requests(self):
         """
         Test :meth:`.Command._broadcast_kill_requests`.
         """
+        worker = Worker.objects.get(pk=1)
         run = Run.objects.get(pk=1)
         run.start_dts = timezone.now()
         run.pid = 1234
+        run.worker = worker
         run.save()
         KillRequest.objects.create(
             run=run,

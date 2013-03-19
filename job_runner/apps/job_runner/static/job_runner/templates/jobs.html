@@ -24,7 +24,7 @@
                     <h5><a href="/project/{{ global_state.data.projectId }}/jobs/{{ j.id }}/" class="details">{{ j.title }}</a></h5>
                     <ul>
                         <li>
-                            <i class="icon-hdd"></i> {{ j.get_job_template().get_worker().title }}
+                            <i class="icon-hdd"></i> {{ j.get_worker_pool().title }}
                         </li>
                     </ul>
                 </div>
@@ -104,6 +104,11 @@
                                 </p>
                                 <p ng-switch-default>This job does not have any children.</p>
                             </div>
+
+                            <h5>Admin link (requires admin access)</h5>
+                            <p>
+                                <a href="/admin/job_runner/job/{{ job.id }}/" target="_blank">Open job in admin</a>
+                            </p>
 
                             <h5>Command</h5>
                             <p>

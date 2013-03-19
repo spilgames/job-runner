@@ -52,7 +52,7 @@ jobrunnerServices.factory('globalCache', function($cacheFactory) {
 /*
     Global state.
 */
-jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, globalCache) {
+jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, globalCache) {
     return {
         data : {
             projectId: null,
@@ -93,14 +93,24 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
                             globalCache.put('jobTemplate.' + template.id, template);
                         });
 
-                        // cache all workers
-                        Worker.all({project_id: self.data.projectId}, function(workers) {
-                            globalCache.put('worker.all', workers);
-                            angular.forEach(workers, function(worker) {
-                                globalCache.put('worker.' + worker.id, worker);
+                        // cache all worker-pools
+                        WorkerPool.all({project_id: self.data.projectId}, function(workerPools) {
+                            globalCache.put('workerPool.all', workerPools);
+                            angular.forEach(workerPools, function(workerPool) {
+                                globalCache.put('workerPool.' + workerPool.id, workerPool);
                             });
-                            callback();
+
+                            // cache all workers
+                            Worker.all({project_id: self.data.projectId}, function(workers) {
+                                globalCache.put('worker.all', workers);
+                                angular.forEach(workers, function(worker) {
+                                    globalCache.put('worker.' + worker.id, worker);
+                                });
+                                callback();
+                            });
+
                         });
+
                     });
                 });
             } else {
@@ -109,13 +119,18 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
         },
 
         // get the current project object.
-        getProject: function() {
+        getProject: function(success) {
             var self = this;
             var project = globalCache.get('project.' + self.data.projectId);
             if (!project) {
                 project = Project.get({id: self.data.projectId}, function(project) {
                     globalCache.put('project.' + self.data.projectId);
+                    if(success) {
+                        success(project);
+                    }
                 });
+            } else if (success) {
+                success(project);
             }
             return project;
         },

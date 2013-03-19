@@ -4,11 +4,8 @@
         "model": "job_runner.jobtemplate", 
         "fields": {
             "body": "#!/usr/bin/env python\r\n\r\n{{ content|safe }}\r\n", 
-            "notification_addresses": "template@example.com", 
-            "worker": 1, 
-            "auth_groups": [
-                1
-            ], 
+            "notification_addresses": "template1@example.com", 
+            "project": 1, 
             "title": "Test template 1"
         }
     },
@@ -17,11 +14,8 @@
         "model": "job_runner.jobtemplate", 
         "fields": {
             "body": "#!/usr/bin/env python\r\n\r\n{{ content|safe }}\r\n", 
-            "notification_addresses": "template@example.com", 
-            "worker": 2, 
-            "auth_groups": [
-                2
-            ], 
+            "notification_addresses": "template1@example.com", 
+            "project": 2, 
             "title": "Test template 2"
         }
     }

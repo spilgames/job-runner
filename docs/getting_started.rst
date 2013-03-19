@@ -13,6 +13,8 @@ After a successful installation, you'll have four processes running:
 #. ``./scripts/job_runner_worker --config-path job_runner_worker.ini``, the
    worker executing our jobs
 
+For an explanation of the role of each component, see :ref:`overview`.
+
 
 Install all components
 ----------------------
@@ -61,6 +63,10 @@ Job-Runner
        $ workon job-runner
        $ manage.py broadcast_queue
 
+   .. note:: The first process is responsible for serving all HTTP requests
+      (dashboard, admin and RESTful API). The second process is responsible for
+      broadcasting scheduled runs to the subscribed workers.
+
 #. Open a browser and point it to http://localhost:8000/admin/. This will
    open the admin interface of the **Job-Runner**. While executing
    ``manage.py syncdb`` you were asked to create superuser credentials, use
@@ -77,6 +83,39 @@ Job-Runner
       new group (call it *Test Group* for now)
    #. Save the user
 
+   .. note:: You need to be assigned to at least one group, so in the following
+      steps, you can give yourself access to a project.
+
+#. Create a worker:
+
+   #. Go to *Job Runner - Workers*
+   #. Click on the **Add Worker** button
+
+      * Title: Test Worker
+      * API key: testworker
+      * Secret: verysecret
+
+   #. Click the save button
+
+   .. note:: A worker is responsible for the actual execution of the job and
+      will communicate back with the **Job-Runner** over the RESTful API with
+      the credentials you've just setup.
+
+#. Create a worker-pool:
+
+   #. Go to *Job Runner - Worker pools*
+   #. Click on the **Add worker pool** button
+
+      * Title: Test Worker Pool
+      * Workers: Select *Test Worker*
+
+   #. Click the save button
+
+   .. note:: A worker-pool contains one or multiple workers. The advantage of
+      having multiple workers is that jobs using this pool will be
+      loadbalanced. For now however we keep it simple and assign only one
+      worker.
+
 #. Create a project:
    
    #. Go to *Job-Runner - Projects*
@@ -84,23 +123,20 @@ Job-Runner
 
       * Title: Test Project
       * Groups: select *Test Group*
+      * Auth groups: select *Test Group*
+      * Worker pools: select *Test Worker Pool*
 
    #. Click the save button
 
-#. Create a worker for this project:
+   .. note:: You've just created a project which is visible for users in
+      *Test Group*, as well users in *Test Group* will be able to start had-hoc
+      job-runs and are able to enable / disable the enqueue of a job.
+      *Test Worker Pool* will be available when you create a new job within
+      this project.
 
-   #. Go to *Job Runner - Workers*
-   #. Click on the **Add Worker** button
 
-      * Title: Test Worker
-      * Api key: testworker
-      * Secret: verysecret
-      * Project: Select *Test Project*
-
-   #. Click the save button
-
-#. You now have created a group, project and worker :) Leave both processes you
-   started in the first step running!
+#. You now have created a group, project and a worker-pool with one worker :)
+   Leave both processes you started in the first step running!
 
 
 Job-Runner WebSocket Server
@@ -110,6 +146,10 @@ Job-Runner WebSocket Server
 
        $ workon job-runner-ws-server
        $ job_runner_ws_server
+
+   .. note:: The WebSocket server is responsible for sending events (sent by
+      the workers) to the dashboard. This makes it possible to show the
+      realtime state of job-runs.
 
 #. That's it! Leave this process running :)
 
@@ -147,7 +187,10 @@ Congratulations! You now have all components up and running. If you point your
 browser to http://localhost:8000/, you will see an empty dashboard, with
 top-right a label **Dashboard is live**, meaning that the dashboard is connected
 to the WebSocket server. If this is red with a warning, please make sure the
-``job_runner_ws_server`` process is still running!
+``job_runner_ws_server`` process is still running! An other reason could be
+that your browser can't connect to the port the WebSocket server is listening
+on (eg: when you are running the components in a VM and port 5000 is not
+forwarded).
 
 
 Your first job
@@ -158,12 +201,23 @@ Python script, printing "Hello world!" and then sleeping between 3 - 15 sec.
 This script will be re-scheduled every 1 minute after the schedule dts
 of the previous run.
 
+.. note:: There are two ways of rescheduling:
+
+   #. re-scheduling by *schedule dts*
+   #. re-scheduling by *complete dts*
+
+   If you have a job-run that is scheduled to run every minute
+   (starting 00:00:00) and would take 25 seconds to complete, it would run
+   at the following times for each case:
+
+   #. 00:00:00 - 00:01:00 (00:00:00 + 1 min) - 00:02:00 (00:01:00 + 1 min)
+   #. 00:00:00 - 00:01:25 (00:00:25 + 1 min) - 00:02:50 (00:01:50 + 1 min)
+
+
 #. Point your browser to http://localhost:8000/admin/
 
 #. First create a Python template which will form the base for all future
    Python jobs:
-
-
 
    #. Go to *Job-Runner - Job templates*
    #. Click the **Add job template** button
@@ -176,8 +230,7 @@ of the previous run.
 
             {{ content|safe }}
 
-      * Worker: Select *Test Worker*
-      * Auth groups: Select *Test Group*
+      * Project: Select *Test Project*
 
    #. Click the save button
 
@@ -188,7 +241,8 @@ of the previous run.
    #. Enter the following:
 
       * Title: Hello world!
-      * Job template: Python
+      * Job template: Select *Python*
+      * Worker pool: Select *Test Worker Pool*
       * Script content::
 
             import random

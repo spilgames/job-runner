@@ -5,6 +5,7 @@ import re
 from django.db.models import Q
 from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
+from tastypie.exceptions import Unauthorized
 
 from job_runner.apps.job_runner.models import Worker
 
@@ -99,13 +100,20 @@ class ModelAuthorization(Authorization):
         self.user_groups_path = user_groups_path
         self.auth_user_groups_path = auth_user_groups_path
 
-    def apply_limits(self, request, object_list):
+    def filter_object_list(self, object_list, bundle):
+        """
+        Return a filtered list of objects that the user has permission to.
+        """
+        request = bundle.request
+
+        # request is coming from the worker, use the ``api_key_path``.
         if request and 'HTTP_AUTHORIZATION' in request.META:
             auth_header = request.META.get('HTTP_AUTHORIZATION')
             api_key_match = re.match(r'^ApiKey (.*?):(.*?)$', auth_header)
             return object_list.filter(
                 **{self.api_key_path: api_key_match.group(1)}).distinct()
 
+        # request is from a logged in user (django session)
         elif (request and request.user.is_authenticated()
               and request.user.groups.count() > 0):
             groups_or = None
@@ -146,3 +154,22 @@ class ModelAuthorization(Authorization):
             return object_list
 
         return object_list.none()
+
+    def read_list(self, object_list, bundle):
+        return self.filter_object_list(object_list, bundle)
+
+    def read_detail(self, object_list, bundle):
+        # seems like this is the way to authorize /schema/ request?
+        # it looks like tastypie is creating an empty (dummy) object, which
+        # is not saved
+        if not bundle.obj.id:
+            return True
+
+        obj_list = self.filter_object_list(object_list, bundle)
+        if not bundle.obj in obj_list:
+            raise Unauthorized('You are not allowed to access that resource.')
+
+    def update_detail(self, object_list, bundle):
+        obj_list = self.filter_object_list(object_list, bundle)
+        if not bundle.obj in obj_list:
+            raise Unauthorized('You are not allowed to access that resource.')
