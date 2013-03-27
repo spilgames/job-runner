@@ -245,7 +245,7 @@ v1.0.0
 v0.7.4
 ~~~~~~
 
-* Deployar related changes.
+* Internal related changes.
 
 
 v0.7.3
@@ -274,7 +274,7 @@ v0.7.1
 v0.7.0
 ~~~~~~
 
-* **Major refactor:** It is now possible to use Sheldon assigned groups when
+* **Major refactor:** It is now possible to use AD assigned groups when
   creating projects. Since basically all models are changed / renamed, it was
   not possible to migrate old data to the new structure. Therefore you should
   re-create the database!
@@ -298,5 +298,5 @@ v0.6.1
 v0.6.0
 ~~~~~~
 
-* Move Job-Runner code out of engportal project.
+* Create standalone application.
 * Add overview of jobs + scheduling.
