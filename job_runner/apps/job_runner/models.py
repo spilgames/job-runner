@@ -12,6 +12,7 @@ from django.template.loader import get_template
 from django.utils import timezone
 from smart_selects.db_fields import ChainedForeignKey
 
+from job_runner.apps.job_runner import notifications
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
 from job_runner.apps.job_runner.signals import post_run_update
 
@@ -335,42 +336,26 @@ class Job(models.Model):
         if self.run_set.filter(return_dts__isnull=True).count():
             return
 
+        # check if job is setup for re-scheduling
         if (self.reschedule_type and self.reschedule_interval_type
                 and self.reschedule_interval):
             last_run = self.run_set.filter(is_manual=False)[0]
 
-            if last_run.return_dts:
-                if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
-                    reference_date = last_run.schedule_dts
-                elif self.reschedule_type == 'AFTER_COMPLETE_DTS':
-                    reference_date = last_run.return_dts
+            if not last_run.return_dts:
+                # we can't reschedule if there wasn't a previous run
+                return
 
-                try:
-                    reschedule_date = self._get_reschedule_date(reference_date)
+            # find the reschedule reference date
+            if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
+                reference_date = last_run.schedule_dts
+            elif self.reschedule_type == 'AFTER_COMPLETE_DTS':
+                reference_date = last_run.return_dts
 
-                    Run.objects.create(
-                        job=self,
-                        schedule_dts=reschedule_date,
-                    )
-
-                except RescheduleException:
-                    t = get_template('job_runner/email/reschedule_failed.txt')
-                    c = Context({
-                        'job': self,
-                        'hostname': settings.HOSTNAME,
-                    })
-                    email_body = t.render(c)
-
-                    addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
-                    addresses.extend(self.get_notification_addresses())
-
-                    if addresses:
-                        send_mail(
-                            'Reschedule error for: {0}'.format(self.title),
-                            email_body,
-                            settings.DEFAULT_FROM_EMAIL,
-                            addresses
-                        )
+            try:
+                reschedule_date = self._get_reschedule_date(reference_date)
+                Run.objects.create(job=self, schedule_dts=reschedule_date)
+            except RescheduleException:
+                notifications.reschedule_failed(self)
 
     def _get_reschedule_incremented_dts(self, increment_date):
         """
