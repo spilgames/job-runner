@@ -253,7 +253,7 @@ class RunTestCase(TestCase):
             Job.objects.get(pk=1).get_notification_addresses()
         )
 
-    def test_schedule_now(self):
+    def test_schedule(self):
         """
         Test direct schedule.
         """
@@ -262,14 +262,14 @@ class RunTestCase(TestCase):
         job = Job.objects.get(pk=1)
 
         self.assertEqual(0, job.run_set.count())
-        job.schedule_now()
+        job.schedule()
         self.assertEqual(1, job.run_set.count())
 
-    def test_schedule_now_already_scheduled(self):
+    def test_schedule_already_scheduled(self):
         """
         Test direct schedule when there is already a scheduled run available.
         """
         job = Job.objects.get(pk=1)
         self.assertEqual(1, job.run_set.count())
-        job.schedule_now()
+        job.schedule()
         self.assertEqual(1, job.run_set.count())

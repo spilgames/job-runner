@@ -40,4 +40,4 @@ def post_run_update(sender, instance, created, raw, **kwargs):
         if instance.return_success and instance.schedule_children:
             # the job completed successfully and has children to schedule now
             for child in instance.job.children.all():
-                child.schedule_now()
+                child.schedule()

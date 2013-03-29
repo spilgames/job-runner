@@ -297,15 +297,22 @@ class Job(models.Model):
         addresses.extend(self.worker_pool.get_notification_addresses())
         return addresses
 
-    def schedule_now(self):
+    def schedule(self, dts=None):
         """
-        Schedule the job to run now.
+        Schedule the job to run at the given ``dts``.
+
+        :param dts:
+            An instance of :class:`datetime.datetime` or ``None`` to schedule
+            now.
 
         When the job is already scheduled to run now, but the run has not yet
         been picked up by the worker (the worker could be dead or the job
         enqueue is disabled), it will not schedule a new run.
 
         """
+        if not dts:
+            dts = timezone.now()
+
         # don't schedule a new run when it is already scheduled to run now
         runs = Run.objects.filter(
             job=self,
