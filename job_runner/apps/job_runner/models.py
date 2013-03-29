@@ -1,14 +1,10 @@
 import calendar
-import copy
 from datetime import timedelta
 
-from django.conf import settings
-from django.core.mail import send_mail
 from django.contrib.auth.models import Group
 from django.db import models
 from django.db.models import signals
 from django.template import Context, Template
-from django.template.loader import get_template
 from django.utils import timezone
 from smart_selects.db_fields import ChainedForeignKey
 
@@ -484,29 +480,6 @@ class Run(models.Model):
             'job_id': self.job.pk,
             'run_id': self.pk,
         })
-
-    def send_error_notification(self):
-        """
-        Send out an error notification e-mail.
-        """
-        t = get_template('job_runner/email/job_failed.txt')
-        c = Context({
-            'time_zone': settings.TIME_ZONE,
-            'run': self,
-            'hostname': settings.HOSTNAME,
-        })
-        email_body = t.render(c)
-
-        addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
-        addresses.extend(self.job.get_notification_addresses())
-
-        if addresses:
-            send_mail(
-                'Run error for: {0}'.format(self.job.title),
-                email_body,
-                settings.DEFAULT_FROM_EMAIL,
-                addresses
-            )
 
 
 class KillRequest(models.Model):

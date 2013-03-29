@@ -27,3 +27,27 @@ def reschedule_failed(job):
             settings.DEFAULT_FROM_EMAIL,
             addresses
         )
+
+
+def run_failed(run):
+    """
+    Send out a notification that the given ``run`` failed.
+    """
+    t = get_template('job_runner/email/job_failed.txt')
+    c = Context({
+        'time_zone': settings.TIME_ZONE,
+        'run': run,
+        'hostname': settings.HOSTNAME,
+    })
+    email_body = t.render(c)
+
+    addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
+    addresses.extend(run.job.get_notification_addresses())
+
+    if addresses:
+        send_mail(
+            'Run error for: {0}'.format(run.job.title),
+            email_body,
+            settings.DEFAULT_FROM_EMAIL,
+            addresses
+        )

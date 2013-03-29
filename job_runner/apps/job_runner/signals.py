@@ -1,3 +1,4 @@
+from job_runner.apps.job_runner import notifications
 
 
 def post_run_update(sender, instance, created, raw, **kwargs):
@@ -19,7 +20,7 @@ def post_run_update(sender, instance, created, raw, **kwargs):
     if instance.return_dts:
         if instance.return_success is False:
             # the run failed
-            instance.send_error_notification()
+            notifications.run_failed(instance)
             job.fail_times += 1
 
             # disable job when it failed more than x times
