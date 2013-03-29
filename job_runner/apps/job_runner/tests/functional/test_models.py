@@ -137,11 +137,11 @@ class RunTestCase(TestCase):
         job.reschedule_interval_type = 'HOUR'
         job.save()
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.make_aware(
-            datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone())
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.make_aware(
+                datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone())
+        )
 
         RescheduleExclude.objects.create(
             job=job,
@@ -171,11 +171,11 @@ class RunTestCase(TestCase):
         job.reschedule_interval_type = 'HOUR'
         job.save()
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.make_aware(
-            datetime(2012, 1, 1, 11, 59), timezone.get_default_timezone())
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.make_aware(
+                datetime(2012, 1, 1, 11, 59), timezone.get_default_timezone())
+        )
 
         RescheduleExclude.objects.create(
             job=job,
@@ -199,11 +199,11 @@ class RunTestCase(TestCase):
         job = Job.objects.get(pk=1)
         self.assertEqual(1, Run.objects.filter(job=job).count())
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = timezone.now()
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         Run.objects.create(
             job=job,
@@ -221,12 +221,12 @@ class RunTestCase(TestCase):
         job = Job.objects.get(pk=1)
         self.assertEqual(1, Run.objects.filter(job=job).count())
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = timezone.now()
-        run.enqueue_dts = timezone.now()
-        run.start_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         Run.objects.create(
             job=job,

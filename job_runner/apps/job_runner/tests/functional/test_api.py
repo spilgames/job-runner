@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
+from mock import Mock, patch
 
 from job_runner.apps.job_runner.models import (
     Job,
@@ -629,6 +630,7 @@ class RunTestCase(ApiTestBase):
                 '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
+    @patch('job_runner.apps.job_runner.signals.post_run_update', Mock())
     def test_completed(self):
         """
         Test listing runs that are completed.
@@ -642,12 +644,12 @@ class RunTestCase(ApiTestBase):
             ('completed_with_error', 0),
         ]
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.start_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.return_success = True
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
+            return_dts=timezone.now(),
+            return_success=True,
+        )
 
         for argument, expected in expected:
             json_data = self.get_json(
@@ -667,12 +669,12 @@ class RunTestCase(ApiTestBase):
             ('completed_with_error', 1),
         ]
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.start_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.return_success = False
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
+            return_dts=timezone.now(),
+            return_success=False
+        )
 
         for argument, expected in expected:
             json_data = self.get_json(

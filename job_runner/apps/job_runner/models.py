@@ -6,12 +6,14 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.models import Group
 from django.db import models
+from django.db.models import signals
 from django.template import Context, Template
 from django.template.loader import get_template
 from django.utils import timezone
 from smart_selects.db_fields import ChainedForeignKey
 
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
+from job_runner.apps.job_runner.signals import post_run_update
 
 
 RESCHEDULE_INTERVAL_TYPE_CHOICES = (
@@ -543,3 +545,6 @@ class RunLog(models.Model):
 
     class Meta:
         ordering = ('-run',)
+
+
+signals.post_save.connect(post_run_update, sender=Run)
