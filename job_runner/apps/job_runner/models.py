@@ -215,6 +215,10 @@ class Job(models.Model):
         auto_choose=False,
         help_text='Select a job-template first to see the available pools.',
     )
+    run_on_all_workers = models.BooleanField(
+        default=False,
+        help_text='Run this job on all workers within the selected pool.',
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     script_content_partial = models.TextField('script content')
