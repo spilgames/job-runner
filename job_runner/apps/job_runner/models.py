@@ -317,13 +317,13 @@ class Job(models.Model):
         runs = Run.objects.filter(
             job=self,
             schedule_dts__lte=timezone.now(),
-            enqueue_dts__isnull=True,
+            return_dts__isnull=True,
             is_manual=False,
         )
         if not runs.count():
             Run.objects.create(
                 job=self,
-                schedule_dts=timezone.now(),
+                schedule_dts=dts,
             )
 
     def reschedule(self):
@@ -337,12 +337,6 @@ class Job(models.Model):
         addresses that are setup for this job, script and server.
 
         """
-        # there is already an other run which is not finished yet, do
-        # not re-schedule, it will be rescheduled when the other job
-        # finishes
-        if self.run_set.filter(return_dts__isnull=True).count():
-            return
-
         # check if job is setup for re-scheduling
         if (self.reschedule_type and self.reschedule_interval_type
                 and self.reschedule_interval):
@@ -360,7 +354,7 @@ class Job(models.Model):
 
             try:
                 reschedule_date = self._get_reschedule_date(reference_date)
-                Run.objects.create(job=self, schedule_dts=reschedule_date)
+                self.schedule(reschedule_date)
             except RescheduleException:
                 notifications.reschedule_failed(self)
 

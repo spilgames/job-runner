@@ -32,11 +32,11 @@ class RunTestCase(TestCase):
         Job.objects.get(pk=1).reschedule()
         self.assertEqual(1, Run.objects.filter(job_id=1).count())
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = timezone.now()
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         Job.objects.get(pk=1).reschedule()
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
@@ -53,11 +53,11 @@ class RunTestCase(TestCase):
         """
         dts_now = timezone.now()
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = dts_now - timedelta(days=31)
-        run.enqueue_dts = dts_now - timedelta(days=31)
-        run.return_dts = dts_now - timedelta(days=31)
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=dts_now - timedelta(days=31),
+            enqueue_dts=dts_now - timedelta(days=31),
+            return_dts=dts_now - timedelta(days=31)
+        )
 
         Job.objects.get(pk=1).reschedule()
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
@@ -73,10 +73,10 @@ class RunTestCase(TestCase):
         job.reschedule_type = 'AFTER_COMPLETE_DTS'
         job.save()
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         job.reschedule()
 
