@@ -280,6 +280,44 @@ class Job(models.Model):
     def __unicode__(self):
         return u'{0} > {1}'.format(self.job_template, self.title)
 
+    def save(self, *args, **kwargs):
+        t = Template(self.job_template.body)
+        c = Context({'content': self.script_content_partial})
+        self.script_content = t.render(c)
+        super(Job, self).save(*args, **kwargs)
+
+    def get_notification_addresses(self):
+        """
+        Return a ``list`` of notification addresses.
+        """
+        addresses = self.notification_addresses.strip().split('\n')
+        addresses = [x.strip() for x in addresses if x.strip() != '']
+        addresses.extend(self.job_template.get_notification_addresses())
+        addresses.extend(self.worker_pool.get_notification_addresses())
+        return addresses
+
+    def schedule_now(self):
+        """
+        Schedule the job to run now.
+
+        When the job is already scheduled to run now, but the run has not yet
+        been picked up by the worker (the worker could be dead or the job
+        enqueue is disabled), it will not schedule a new run.
+
+        """
+        # don't schedule a new run when it is already scheduled to run now
+        runs = Run.objects.filter(
+            job=self,
+            schedule_dts__lte=timezone.now(),
+            enqueue_dts__isnull=True,
+            is_manual=False,
+        )
+        if not runs.count():
+            Run.objects.create(
+                job=self,
+                schedule_dts=timezone.now(),
+            )
+
     def reschedule(self):
         """
         Reschedule job.
@@ -333,44 +371,6 @@ class Job(models.Model):
                             settings.DEFAULT_FROM_EMAIL,
                             addresses
                         )
-
-    def schedule_now(self):
-        """
-        Schedule the job to run now.
-
-        When the job is already scheduled to run now, but the run has not yet
-        been picked up by the worker (the worker could be dead or the job
-        enqueue is disabled), it will not schedule a new run.
-
-        """
-        # don't schedule a new run when it is already scheduled to run now
-        runs = Run.objects.filter(
-            job=self,
-            schedule_dts__lte=timezone.now(),
-            enqueue_dts__isnull=True,
-            is_manual=False,
-        )
-        if not runs.count():
-            Run.objects.create(
-                job=self,
-                schedule_dts=timezone.now(),
-            )
-
-    def save(self, *args, **kwargs):
-        t = Template(self.job_template.body)
-        c = Context({'content': self.script_content_partial})
-        self.script_content = t.render(c)
-        super(Job, self).save(*args, **kwargs)
-
-    def get_notification_addresses(self):
-        """
-        Return a ``list`` of notification addresses.
-        """
-        addresses = self.notification_addresses.strip().split('\n')
-        addresses = [x.strip() for x in addresses if x.strip() != '']
-        addresses.extend(self.job_template.get_notification_addresses())
-        addresses.extend(self.worker_pool.get_notification_addresses())
-        return addresses
 
     def _get_reschedule_incremented_dts(self, increment_date):
         """
