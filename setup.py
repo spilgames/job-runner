@@ -20,7 +20,7 @@ setup(
         'django-grappelli',
         'django_compressor',
         'django-smart-selects',
-        'django-tastypie==0.9.12',
+        'django-tastypie==0.9.14',
         'south',
         'pytz',
         'pyzmq',

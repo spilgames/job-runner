@@ -166,10 +166,8 @@ class ModelAuthorization(Authorization):
             return True
 
         obj_list = self.filter_object_list(object_list, bundle)
-        if not bundle.obj in obj_list:
-            raise Unauthorized('You are not allowed to access that resource.')
+        return bundle.obj in obj_list.filter(pk=bundle.obj.pk)
 
     def update_detail(self, object_list, bundle):
         obj_list = self.filter_object_list(object_list, bundle)
-        if not bundle.obj in obj_list:
-            raise Unauthorized('You are not allowed to access that resource.')
+        return bundle.obj in obj_list.filter(pk=bundle.obj.pk)

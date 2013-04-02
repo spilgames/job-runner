@@ -48,6 +48,13 @@ Links
 Changes
 -------
 
+v2.0.1
+~~~~~~
+
+* Optimize the way how the ``ModelAuthorization`` class is testing if the user
+  or worker has access to the object.
+
+
 v2.0.0
 ~~~~~~
 
