@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.test import TestCase
 from django.utils import timezone
 from mock import Mock, call
@@ -55,6 +57,47 @@ class CommandTestCase(TestCase):
         command = Command()
 
         publisher = Mock()
+        command._broadcast_runs(publisher)
+
+        self.assertEqual([
+            call([
+                'master.broadcast.worker1',
+                '{"action": "enqueue", "run_id": 1}'
+            ]),
+            call([
+                'master.broadcast.worker2',
+                '{"action": "enqueue", "run_id": 2}'
+            ]),
+        ], publisher.send_multipart.call_args_list)
+
+    def test__broadcast_runs_run_on_all_workers(self):
+        """
+        Test :meth:`.Command._broadcast_runs` with ``run_on_all_workers=True``.
+        """
+        job = Job.objects.get(pk=1)
+        job.run_on_all_workers = True
+        job.save()
+
+        run1 = Run.objects.get(pk=1)
+        run1.schedule_id = 'a-b-c-d'
+        run1.worker = Worker.objects.get(pk=1)
+        run1.save()
+
+        run2 = Run.objects.get(pk=2)
+        run2.job = Job.objects.get(pk=1)
+        run2.schedule_id = 'a-b-c-d'
+        run2.worker = Worker.objects.get(pk=2)
+        run2.save()
+
+        Run.objects.create(
+            job=Job.objects.get(pk=1),
+            schedule_dts=timezone.now(),
+            worker=Worker.objects.get(pk=1),
+        )
+
+        command = Command()
+        publisher = Mock()
+
         command._broadcast_runs(publisher)
 
         self.assertEqual([
