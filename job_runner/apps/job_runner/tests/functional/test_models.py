@@ -8,6 +8,8 @@ from job_runner.apps.job_runner.models import (
     Job,
     RescheduleExclude,
     Run,
+    Worker,
+    WorkerPool,
 )
 
 
@@ -264,6 +266,26 @@ class RunTestCase(TestCase):
         self.assertEqual(0, job.run_set.count())
         job.schedule()
         self.assertEqual(1, job.run_set.count())
+
+    def test_schedule_run_on_all_workers(self):
+        """
+        Test direct schedule, run on all workers.
+        """
+        Run.objects.all().delete()
+
+        pool = WorkerPool.objects.get(pk=1)
+        pool.workers.add(Worker.objects.get(pk=2))
+        pool.save()
+
+        job = Job.objects.get(pk=1)
+        job.run_on_all_workers = True
+        job.save()
+
+        self.assertEqual(0, job.run_set.count())
+        job.schedule()
+        self.assertEqual(2, job.run_set.count())
+        self.assertEqual(1, Worker.objects.get(pk=1).run_set.count())
+        self.assertEqual(1, Worker.objects.get(pk=2).run_set.count())
 
     def test_schedule_already_scheduled(self):
         """

@@ -13,10 +13,18 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
 
+        # Adding field 'Run.schedule_id'
+        db.add_column('job_runner_run', 'schedule_id',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=100, db_index=True),
+                      keep_default=False)
+
 
     def backwards(self, orm):
         # Deleting field 'Job.run_on_all_workers'
         db.delete_column('job_runner_job', 'run_on_all_workers')
+
+        # Deleting field 'Run.schedule_id'
+        db.delete_column('job_runner_run', 'schedule_id')
 
 
     models = {
@@ -107,6 +115,7 @@ class Migration(SchemaMigration):
             'return_success': ('django.db.models.fields.NullBooleanField', [], {'default': 'None', 'null': 'True', 'db_index': 'True', 'blank': 'True'}),
             'schedule_children': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
             'schedule_dts': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
+            'schedule_id': ('django.db.models.fields.CharField', [], {'max_length': '100', 'db_index': 'True'}),
             'start_dts': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'db_index': 'True'}),
             'worker': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.Worker']", 'null': 'True', 'blank': 'True'})
         },

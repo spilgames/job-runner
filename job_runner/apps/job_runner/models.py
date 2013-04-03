@@ -1,4 +1,5 @@
 import calendar
+import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import Group
@@ -321,10 +322,25 @@ class Job(models.Model):
             is_manual=False,
         )
         if not runs.count():
-            Run.objects.create(
-                job=self,
-                schedule_dts=dts,
-            )
+            schedule_id = str(uuid.uuid4())
+
+            if self.run_on_all_workers:
+                workers = self.worker_pool.workers.filter(
+                    enqueue_is_enabled=True)
+
+                for worker in workers:
+                    Run.objects.create(
+                        job=self,
+                        schedule_dts=dts,
+                        schedule_id=schedule_id,
+                        worker=worker,
+                    )
+            else:
+                Run.objects.create(
+                    job=self,
+                    schedule_dts=dts,
+                    schedule_id=schedule_id
+                )
 
     def reschedule(self):
         """
@@ -459,6 +475,7 @@ class Run(models.Model):
     Contains the data related to a (scheduled) job run.
     """
     job = models.ForeignKey(Job)
+    schedule_id = models.CharField(max_length=100, db_index=True)
     worker = models.ForeignKey(Worker, null=True, blank=True)
     schedule_dts = models.DateTimeField(db_index=True)
     enqueue_dts = models.DateTimeField(null=True, db_index=True)
