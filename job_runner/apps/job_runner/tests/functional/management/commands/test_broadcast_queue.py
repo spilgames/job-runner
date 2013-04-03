@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.test import TestCase
 from django.utils import timezone
 from mock import Mock, call
@@ -7,7 +5,7 @@ from mock import Mock, call
 from job_runner.apps.job_runner.management.commands.broadcast_queue import (
     Command)
 from job_runner.apps.job_runner.models import (
-    Job, JobTemplate, KillRequest, Project, Run, Worker)
+    Job, JobTemplate, KillRequest, Project, Run, Worker, WorkerPool)
 
 
 class CommandTestCase(TestCase):
@@ -78,22 +76,11 @@ class CommandTestCase(TestCase):
         job.run_on_all_workers = True
         job.save()
 
-        run1 = Run.objects.get(pk=1)
-        run1.schedule_id = 'a-b-c-d'
-        run1.worker = Worker.objects.get(pk=1)
-        run1.save()
+        pool = WorkerPool.objects.get(pk=1)
+        pool.workers.add(Worker.objects.get(pk=2))
+        pool.save()
 
-        run2 = Run.objects.get(pk=2)
-        run2.job = Job.objects.get(pk=1)
-        run2.schedule_id = 'a-b-c-d'
-        run2.worker = Worker.objects.get(pk=2)
-        run2.save()
-
-        Run.objects.create(
-            job=Job.objects.get(pk=1),
-            schedule_dts=timezone.now(),
-            worker=Worker.objects.get(pk=1),
-        )
+        Run.objects.get(pk=2).delete()
 
         command = Command()
         publisher = Mock()
@@ -103,11 +90,11 @@ class CommandTestCase(TestCase):
         self.assertEqual([
             call([
                 'master.broadcast.worker1',
-                '{"action": "enqueue", "run_id": 1}'
+                '{"action": "enqueue", "run_id": 2}'
             ]),
             call([
                 'master.broadcast.worker2',
-                '{"action": "enqueue", "run_id": 2}'
+                '{"action": "enqueue", "run_id": 3}'
             ]),
         ], publisher.send_multipart.call_args_list)
 

@@ -31,9 +31,9 @@ def post_run_update(sender, instance, created, raw, **kwargs):
             job.save()
 
         unfinished_siblings = instance.get_siblings().filter(
-            return_dts__isnull=True)
+            return_dts__isnull=True).count()
 
-        if not unfinished_siblings.count():
+        if not unfinished_siblings:
             job.reschedule()
 
         if instance.return_success:
@@ -42,7 +42,7 @@ def post_run_update(sender, instance, created, raw, **kwargs):
             job.save()
 
         if (instance.return_success and instance.schedule_children
-                and not unfinished_siblings.count()):
+                and not unfinished_siblings):
 
             failed_siblings = instance.get_siblings().filter(
                 return_success=False)

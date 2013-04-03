@@ -322,25 +322,10 @@ class Job(models.Model):
             is_manual=False,
         )
         if not runs.count():
-            schedule_id = str(uuid.uuid4())
-
-            if self.run_on_all_workers:
-                workers = self.worker_pool.workers.filter(
-                    enqueue_is_enabled=True)
-
-                for worker in workers:
-                    Run.objects.create(
-                        job=self,
-                        schedule_dts=dts,
-                        schedule_id=schedule_id,
-                        worker=worker,
-                    )
-            else:
-                Run.objects.create(
-                    job=self,
-                    schedule_dts=dts,
-                    schedule_id=schedule_id
-                )
+            Run.objects.create(
+                job=self,
+                schedule_dts=dts,
+            )
 
     def reschedule(self):
         """
@@ -475,7 +460,8 @@ class Run(models.Model):
     Contains the data related to a (scheduled) job run.
     """
     job = models.ForeignKey(Job)
-    schedule_id = models.CharField(max_length=100, db_index=True)
+    schedule_id = models.PositiveIntegerField(
+        null=True, default=None, db_index=True)
     worker = models.ForeignKey(Worker, null=True, blank=True)
     schedule_dts = models.DateTimeField(db_index=True)
     enqueue_dts = models.DateTimeField(null=True, db_index=True)
@@ -507,10 +493,18 @@ class Run(models.Model):
         """
         Return a ``QuerySet`` instance for the siblings of this run.
         """
-        return self.__class__.objects.filter(
+        return self.__class__.objects.exclude(
+            pk=self.pk,
+            schedule_id__isnull=True,
+        ).filter(
             schedule_id=self.schedule_id,
             job=self.job,
-        ).exclude(pk=self.pk)
+        )
+
+    def get_schedule_id(self):
+        if self.schedule_id:
+            return self.schedule_id
+        return self.pk
 
 
 class KillRequest(models.Model):
