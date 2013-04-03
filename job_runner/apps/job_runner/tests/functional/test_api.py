@@ -728,9 +728,90 @@ class RunTestCase(ApiTestBase):
         )
 
         self.assertEqual(202, response.status_code)
-        self.assertEqual(2, Run.objects.filter(job_id=1).count())
+        self.assertEqual(
+            1,
+            Run.objects.filter(job_id=1, enqueue_dts__isnull=True).count()
+        )
         self.assertEqual(
             return_dts, Run.objects.filter(job_id=1)[0].return_dts)
+
+    def test_patch_with_reschedule_run_on_all_workers(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` causing a reschedule for all workers.
+
+        After PATCH-in ``/api/v1/run/1/`` as completed, we expect that it will
+        be rescheduled for woker id 1 and 2.
+
+        """
+        job = Job.objects.get(pk=1)
+        job.run_on_all_workers = True
+        job.save()
+
+        pool = WorkerPool.objects.get(pk=1)
+        pool.workers.add(Worker.objects.get(pk=2))
+        pool.save()
+
+        return_dts = timezone.now()
+        Run.objects.update(enqueue_dts=timezone.now())
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': return_dts.isoformat(' '),
+                'return_success': True,
+            }
+        )
+
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(
+            2,
+            Run.objects.filter(job_id=1, enqueue_dts__isnull=True).count()
+        )
+
+    def test_patch_without_reschedule_run_on_all_workers(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` without reschedule run on all workers.
+
+        We have two runs that are enqueued. One will be PATCHed as completed.
+        Since the other one is still in progress, we don't expect any new
+        runs to be scheduled.
+
+        """
+        job = Job.objects.get(pk=1)
+        job.run_on_all_workers = True
+        job.save()
+
+        pool = WorkerPool.objects.get(pk=1)
+        pool.workers.add(Worker.objects.get(pk=2))
+        pool.save()
+
+        Run.objects.update(
+            enqueue_dts=timezone.now(),
+            schedule_id='a-b-c-d',
+            worker=Worker.objects.get(pk=1),
+        )
+
+        Run.objects.create(
+            job=Job.objects.get(pk=1),
+            schedule_id='a-b-c-d',
+            worker=Worker.objects.get(pk=2),
+            enqueue_dts=timezone.now(),
+            schedule_dts=timezone.now(),
+        )
+
+        return_dts = timezone.now()
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': return_dts.isoformat(' '),
+                'return_success': True,
+            }
+        )
+
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(
+            0,
+            Run.objects.filter(job_id=1, enqueue_dts__isnull=True).count()
+        )
 
     def test_returned_with_error(self):
         """

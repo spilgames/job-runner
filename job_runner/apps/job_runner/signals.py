@@ -30,14 +30,25 @@ def post_run_update(sender, instance, created, raw, **kwargs):
 
             job.save()
 
-        job.reschedule()
+        unfinished_siblings = instance.get_siblings().filter(
+            return_dts__isnull=True)
+
+        if not unfinished_siblings.count():
+            job.reschedule()
 
         if instance.return_success:
             # reset the fail count
             job.fail_times = 0
             job.save()
 
-        if instance.return_success and instance.schedule_children:
-            # the job completed successfully and has children to schedule now
-            for child in instance.job.children.all():
-                child.schedule()
+        if (instance.return_success and instance.schedule_children
+                and not unfinished_siblings.count()):
+
+            failed_siblings = instance.get_siblings().filter(
+                return_success=False)
+
+            if not failed_siblings.count():
+                # the job completed successfully including it's siblings
+                # and has children to schedule now
+                for child in instance.job.children.all():
+                    child.schedule()

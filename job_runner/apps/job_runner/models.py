@@ -503,6 +503,15 @@ class Run(models.Model):
             'run_id': self.pk,
         })
 
+    def get_siblings(self):
+        """
+        Return a ``QuerySet`` instance for the siblings of this run.
+        """
+        return self.__class__.objects.filter(
+            schedule_id=self.schedule_id,
+            job=self.job,
+        ).exclude(pk=self.pk)
+
 
 class KillRequest(models.Model):
     """
