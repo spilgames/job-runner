@@ -33,9 +33,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="run in runs | filter:runFilter('scheduled') | orderBy:'-schedule_dts'">
+                            <tr ng-repeat="run in runs | filter:runFilter('scheduled') | orderBy:'schedule_dts'">
                                 <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
-                                <td>{{ run.schedule_dts | formatdts }}</td>
+                                <td ng-class="{disabled: run.get_job().enqueue_is_enabled != true}">{{ run.schedule_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
                             </tr>
