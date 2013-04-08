@@ -12,6 +12,10 @@ var RunsCtrl = function($scope, $routeParams, Project, Run, Job, globalState) {
             };
         };
 
+        $scope.setTab = function(tabId) {
+            globalState.data.runTab = tabId;
+        };
+
         $scope.runs = globalState.getRuns();
 
         // show run details

@@ -55,6 +55,7 @@ jobrunnerServices.factory('globalCache', function($cacheFactory) {
 jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, globalCache) {
     return {
         data : {
+            runTab: 'scheduled',
             projectId: null,
             page: null,
             jobTab: 'details',
