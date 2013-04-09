@@ -341,6 +341,18 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
             }
         }
 
+        if 'state' in filters and filters['state'] == 'last_completed':
+            jobs = Job.objects.all()
+            last_completed_schedule_ids = [
+                job.last_completed_schedule_id for job in jobs]
+
+            state_filters['last_completed'] = {
+                'enqueue_dts__isnull': False,
+                'start_dts__isnull': False,
+                'return_dts__isnull': False,
+                'schedule_id__in': last_completed_schedule_ids
+            }
+
         if 'state' in filters and filters['state'] in state_filters:
             orm_filters.update(state_filters[filters['state']])
 
