@@ -13,6 +13,11 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.BooleanField')(default=False),
                       keep_default=False)
 
+        # Adding field 'Job.last_completed_schedule_id'
+        db.add_column('job_runner_job', 'last_completed_schedule_id',
+                      self.gf('django.db.models.fields.PositiveIntegerField')(null=True, blank=True),
+                      keep_default=False)
+
         # Adding field 'Run.schedule_id'
         db.add_column('job_runner_run', 'schedule_id',
                       self.gf('django.db.models.fields.PositiveIntegerField')(default=None, null=True, db_index=True),
@@ -22,6 +27,9 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting field 'Job.run_on_all_workers'
         db.delete_column('job_runner_job', 'run_on_all_workers')
+
+        # Deleting field 'Job.last_completed_schedule_id'
+        db.delete_column('job_runner_job', 'last_completed_schedule_id')
 
         # Deleting field 'Run.schedule_id'
         db.delete_column('job_runner_run', 'schedule_id')
@@ -56,6 +64,7 @@ class Migration(SchemaMigration):
             'fail_times': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'job_template': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['job_runner.JobTemplate']"}),
+            'last_completed_schedule_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': "orm['job_runner.Job']"}),
             'reschedule_interval': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),

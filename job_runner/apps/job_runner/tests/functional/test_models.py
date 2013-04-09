@@ -8,8 +8,6 @@ from job_runner.apps.job_runner.models import (
     Job,
     RescheduleExclude,
     Run,
-    Worker,
-    WorkerPool,
 )
 
 

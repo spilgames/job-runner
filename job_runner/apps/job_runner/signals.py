@@ -34,6 +34,7 @@ def post_run_update(sender, instance, created, raw, **kwargs):
             # the run failed
             notifications.run_failed(instance)
             job.fail_times += 1
+            job.last_completed_schedule_id = instance.schedule_id
 
             # disable job when it failed more than x times
             if (job.disable_enqueue_after_fails and
@@ -51,6 +52,7 @@ def post_run_update(sender, instance, created, raw, **kwargs):
         if instance.return_success:
             # reset the fail count
             job.fail_times = 0
+            job.last_completed_schedule_id = instance.schedule_id
             job.save()
 
         if (instance.return_success and instance.schedule_children

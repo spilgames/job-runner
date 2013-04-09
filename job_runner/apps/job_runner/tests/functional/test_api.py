@@ -734,6 +734,7 @@ class RunTestCase(ApiTestBase):
         )
         self.assertEqual(
             return_dts, Run.objects.filter(job_id=1)[0].return_dts)
+        self.assertEqual(1, Job.objects.get(pk=1).last_completed_schedule_id)
 
     def test_returned_with_error(self):
         """
@@ -755,6 +756,7 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(4, len(mail.outbox[0].to))
         self.assertEqual('Run error for: Test job 1', mail.outbox[0].subject)
+        self.assertEqual(1, Job.objects.get(pk=1).last_completed_schedule_id)
 
     def test_returned_with_error_disable_enqueue(self):
         """
@@ -791,6 +793,7 @@ class RunTestCase(ApiTestBase):
 
         job = Job.objects.get(pk=1)
         self.assertFalse(job.enqueue_is_enabled)
+        self.assertEqual(1, job.last_completed_schedule_id)
 
     def test_create_new_run(self):
         """

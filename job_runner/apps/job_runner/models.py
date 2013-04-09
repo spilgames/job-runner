@@ -269,6 +269,11 @@ class Job(models.Model):
             'be disabled when it failed (blank = never disable enqeueue).'
         )
     )
+    last_completed_schedule_id = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        editable=False,
+    )
 
     class Meta:
         ordering = (
