@@ -8,6 +8,9 @@
                 <li ng-class="{active: global_state.data.runTab == 'scheduled'}" ng-click="setTab('scheduled')">
                     <a href="#scheduled" data-toggle="tab" target="_self">Scheduled</a>
                 </li>
+                <li ng-class="{active: global_state.data.runTab == 'scheduled_enqueue_disabled'}" ng-click="setTab('scheduled_enqueue_disabled')">
+                    <a href="#scheduled_enqueue_disabled" data-toggle="tab" target="_self">Scheduled (enqueue disabled)</a>
+                </li>
                 <li ng-class="{active: global_state.data.runTab == 'inqueue'}" ng-click="setTab('inqueue')">
                     <a href="#inqueue" data-toggle="tab" target="_self">In queue</a>
                 </li>
@@ -33,9 +36,29 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="run in runs | filter:runFilter('scheduled') | orderBy:'schedule_dts'">
+                            <tr ng-repeat="run in runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(true) | orderBy:'schedule_dts'">
                                 <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
                                 <td ng-class="{disabled: run.get_job().enqueue_is_enabled != true}">{{ run.schedule_dts | formatdts }}</td>
+                                <td>{{ run.get_job().get_worker_pool().title }}</td>
+                                <td>{{ run.get_worker().title }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="scheduled_enqueue_disabled" ng-class="{active: global_state.data.runTab == 'scheduled_enqueue_disabled', 'tab-pane': true}">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Job</th>
+                                <th>Scheduled</th>
+                                <th>Worker pool</th>
+                                <th>Assigned worker</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="run in runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(false) | orderBy:'schedule_dts'">
+                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td>{{ run.schedule_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
                             </tr>

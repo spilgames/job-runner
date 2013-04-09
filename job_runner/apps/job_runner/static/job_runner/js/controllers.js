@@ -12,6 +12,12 @@ var RunsCtrl = function($scope, $routeParams, Project, Run, Job, globalState) {
             };
         };
 
+        $scope.enqueueEnabledFilter = function(bool) {
+            return function(run) {
+                return (run.get_job().enqueue_is_enabled == bool);
+            };
+        };
+
         $scope.setTab = function(tabId) {
             globalState.data.runTab = tabId;
         };
