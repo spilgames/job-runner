@@ -299,8 +299,14 @@ angular.module('run', ['ngResource', 'getAll', 'job', 'runLog', 'worker', 'jobru
     // Return the related job
     Run.prototype.get_job = function(success) {
         if (this.job) {
+            var self = this;
             var jobId = this.job.split('/').splice(-2, 1)[0];
-            return Job.get({id: jobId}, success);
+            return Job.get({id: jobId}, function(job) {
+                self._job_title = job.title;
+                if (success) {
+                    success(job);
+                }
+            });
         }
     };
 

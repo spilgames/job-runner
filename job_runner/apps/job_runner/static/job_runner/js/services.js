@@ -60,6 +60,7 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
             page: null,
             jobTab: 'details',
             jobFilter: {},
+            runFilter: {},
             runs: null,
             wsConnected: false
         },
