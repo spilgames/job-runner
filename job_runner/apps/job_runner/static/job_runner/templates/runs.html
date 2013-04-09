@@ -6,22 +6,22 @@
         <div class="tabbable">
             <ul class="nav nav-tabs">
                 <li ng-class="{active: global_state.data.runTab == 'scheduled'}" ng-click="setTab('scheduled')">
-                    <a href="#scheduled" data-toggle="tab" target="_self">Scheduled</a>
+                    <a href="#scheduled" data-toggle="tab" target="_self">Scheduled ({{ (runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(true)).length }})</a>
                 </li>
                 <li ng-class="{active: global_state.data.runTab == 'scheduled_enqueue_disabled'}" ng-click="setTab('scheduled_enqueue_disabled')">
-                    <a href="#scheduled_enqueue_disabled" data-toggle="tab" target="_self">Scheduled (enqueue disabled)</a>
+                    <a href="#scheduled_enqueue_disabled" data-toggle="tab" target="_self">Scheduled, enqueue disabled ({{ (runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(false)).length }})</a>
                 </li>
                 <li ng-class="{active: global_state.data.runTab == 'inqueue'}" ng-click="setTab('inqueue')">
-                    <a href="#inqueue" data-toggle="tab" target="_self">In queue</a>
+                    <a href="#inqueue" data-toggle="tab" target="_self">In queue ({{ (runs | filter:runFilter('in_queue')).length }})</a>
                 </li>
                 <li ng-class="{active: global_state.data.runTab == 'started'}" ng-click="setTab('started')">
-                    <a href="#started" data-toggle="tab" target="_self">Started</a>
+                    <a href="#started" data-toggle="tab" target="_self">Started ({{ (runs | filter:runFilter('started')).length }})</a>
                 </li>
                 <li ng-class="{active: global_state.data.runTab == 'completed'}" ng-click="setTab('completed')">
-                    <a href="#completed" data-toggle="tab" target="_self">Completed</a>
+                    <a href="#completed" data-toggle="tab" target="_self">Completed ({{ (runs | filter:runFilter('completed')).length }})</a>
                 </li>
                 <li ng-class="{active: global_state.data.runTab == 'error'}" ng-click="setTab('error')">
-                    <a href="#error" data-toggle="tab" target="_self">Completed with error</a>
+                    <a href="#error" data-toggle="tab" target="_self">Completed with error ({{ (runs | filter:runFilter('completed_with_error')).length }})</a>
                 </li>
             </ul>
             <div class="tab-content">
