@@ -275,3 +275,13 @@ class RunTestCase(TestCase):
         self.assertEqual(1, job.run_set.count())
         job.schedule()
         self.assertEqual(1, job.run_set.count())
+
+    def test_schedule_id_set_on_create(self):
+        """
+        Test that the ``schedule_id`` is set on create.
+        """
+        run = Run.objects.create(
+            job=Job.objects.get(pk=1),
+            schedule_dts=timezone.now()
+        )
+        self.assertTrue(run.pk == run.schedule_id)

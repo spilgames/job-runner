@@ -1,6 +1,18 @@
 from job_runner.apps.job_runner import notifications
 
 
+def post_run_create(sender, instance, raw, **kwargs):
+    """
+    Post action after creating a run instance.
+
+    This will make sure the ``schedule_id`` field is set.
+
+    """
+    if not instance.schedule_id:
+        instance.schedule_id = instance.id
+        instance.save()
+
+
 def post_run_update(sender, instance, created, raw, **kwargs):
     """
     Post action after saving a run instance.

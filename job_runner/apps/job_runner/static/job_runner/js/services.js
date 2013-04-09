@@ -186,16 +186,10 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
                     });
                 });
 
-                // get for each job the last complated run
-                // TODO: make it possible to retrieve this in one call from the
-                //       API.
-                Job.all({project_id: this.data.projectId}, function(jobs) {
-                    angular.forEach(jobs, function(job) {
-                        var runs = Run.query({job: job.id, limit: 1, state: 'completed'}, function() {
-                            angular.forEach(runs, function(run) {
-                                self.data.runs.push(run);
-                            });
-                        });
+                // get all last completed
+                Run.all({state: 'last_completed', project_id: this.data.projectId}, function(lastCompleted) {
+                    angular.forEach(lastCompleted, function(run) {
+                        self.data.runs.push(run);
                     });
                 });
 

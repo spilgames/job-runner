@@ -1,5 +1,4 @@
 import calendar
-import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import Group
@@ -11,7 +10,7 @@ from smart_selects.db_fields import ChainedForeignKey
 
 from job_runner.apps.job_runner import notifications
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
-from job_runner.apps.job_runner.signals import post_run_update
+from job_runner.apps.job_runner.signals import post_run_update, post_run_create
 
 
 RESCHEDULE_INTERVAL_TYPE_CHOICES = (
@@ -531,3 +530,4 @@ class RunLog(models.Model):
 
 
 signals.post_save.connect(post_run_update, sender=Run)
+signals.post_save.connect(post_run_create, sender=Run)
