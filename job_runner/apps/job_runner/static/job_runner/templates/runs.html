@@ -30,15 +30,15 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th>Scheduled</th>
-                                <th>Worker pool</th>
-                                <th>Assigned worker</th>
+                                <th class="twenty">Scheduled</th>
+                                <th class="twenty">Worker pool</th>
+                                <th class="twenty">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(true) | orderBy:'schedule_dts'">
                                 <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
-                                <td ng-class="{disabled: run.get_job().enqueue_is_enabled != true}">{{ run.schedule_dts | formatdts }}</td>
+                                <td>{{ run.schedule_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
                             </tr>
@@ -50,9 +50,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th>Scheduled</th>
-                                <th>Worker pool</th>
-                                <th>Assigned worker</th>
+                                <th class="twenty">Scheduled</th>
+                                <th class="twenty">Worker pool</th>
+                                <th class="twenty">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,9 +70,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th>In queue</th>
-                                <th>Worker pool</th>
-                                <th>Assigned worker</th>
+                                <th class="twenty">In queue</th>
+                                <th class="twenty">Worker pool</th>
+                                <th class="twenty">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,9 +90,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th>Started</th>
-                                <th>Worker pool</th>
-                                <th>Assigned worker</th>
+                                <th class="twenty">Started</th>
+                                <th class="twenty">Worker pool</th>
+                                <th class="twenty">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,9 +110,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th>Returned</th>
-                                <th>Worker pool</th>
-                                <th>Assigned worker</th>
+                                <th class="twenty">Returned</th>
+                                <th class="twenty">Worker pool</th>
+                                <th class="twenty">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -130,9 +130,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th>Returned</th>
-                                <th>Worker pool</th>
-                                <th>Assigned worker</th>
+                                <th class="twenty">Returned</th>
+                                <th class="twenty">Worker pool</th>
+                                <th class="twenty">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
