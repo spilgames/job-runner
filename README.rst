@@ -48,6 +48,14 @@ Links
 Changes
 -------
 
+v3.0.0
+~~~~~~
+
+* New dashboard layout to make it more easy to view large sets of data.
+* Optimization of the initial load of data (fewer API requests).
+* Add support to run a job across all workers within a worker-pool.
+
+
 v2.0.1
 ~~~~~~
 
