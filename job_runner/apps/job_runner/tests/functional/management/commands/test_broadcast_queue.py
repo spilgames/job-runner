@@ -5,7 +5,7 @@ from mock import Mock, call
 from job_runner.apps.job_runner.management.commands.broadcast_queue import (
     Command)
 from job_runner.apps.job_runner.models import (
-    Job, JobTemplate, KillRequest, Project, Run, Worker)
+    Job, JobTemplate, KillRequest, Project, Run, Worker, WorkerPool)
 
 
 class CommandTestCase(TestCase):
@@ -65,6 +65,36 @@ class CommandTestCase(TestCase):
             call([
                 'master.broadcast.worker2',
                 '{"action": "enqueue", "run_id": 2}'
+            ]),
+        ], publisher.send_multipart.call_args_list)
+
+    def test__broadcast_runs_run_on_all_workers(self):
+        """
+        Test :meth:`.Command._broadcast_runs` with ``run_on_all_workers=True``.
+        """
+        job = Job.objects.get(pk=1)
+        job.run_on_all_workers = True
+        job.save()
+
+        pool = WorkerPool.objects.get(pk=1)
+        pool.workers.add(Worker.objects.get(pk=2))
+        pool.save()
+
+        Run.objects.get(pk=2).delete()
+
+        command = Command()
+        publisher = Mock()
+
+        command._broadcast_runs(publisher)
+
+        self.assertEqual([
+            call([
+                'master.broadcast.worker1',
+                '{"action": "enqueue", "run_id": 2}'
+            ]),
+            call([
+                'master.broadcast.worker2',
+                '{"action": "enqueue", "run_id": 3}'
             ]),
         ], publisher.send_multipart.call_args_list)
 

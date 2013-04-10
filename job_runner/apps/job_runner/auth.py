@@ -5,7 +5,6 @@ import re
 from django.db.models import Q
 from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
-from tastypie.exceptions import Unauthorized
 
 from job_runner.apps.job_runner.models import Worker
 

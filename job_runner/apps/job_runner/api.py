@@ -341,6 +341,18 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
             }
         }
 
+        if 'state' in filters and filters['state'] == 'last_completed':
+            jobs = Job.objects.all()
+            last_completed_schedule_ids = [
+                job.last_completed_schedule_id for job in jobs]
+
+            state_filters['last_completed'] = {
+                'enqueue_dts__isnull': False,
+                'start_dts__isnull': False,
+                'return_dts__isnull': False,
+                'schedule_id__in': last_completed_schedule_ids
+            }
+
         if 'state' in filters and filters['state'] in state_filters:
             orm_filters.update(state_filters[filters['state']])
 
@@ -350,59 +362,6 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
             })
 
         return orm_filters
-
-    def obj_update(self, bundle, request=None, *args, **kwargs):
-        """
-        Override of the default obj_update method.
-
-        This will call the ``reschedule`` method after a successful object
-        update, which will re-schedule the job if needed (incl. children).
-
-        If the object update represents the returning of a run with error,
-        it will call also ``send_error_notification`` method.
-
-        """
-        deserialized = self.deserialize(
-            request,
-            request.raw_post_data,
-            format=request.META.get('CONTENT_TYPE', 'application/json')
-        )
-
-        result = super(RunResource, self).obj_update(
-            bundle, request, *args, **kwargs)
-
-        job = bundle.obj.job
-
-        if (deserialized.get('return_dts', None) and
-                deserialized.get('return_success', None) is False):
-            # the job failed
-            bundle.obj.send_error_notification()
-            job.fail_times = job.fail_times + 1
-
-            # disable job when it failed more than x times
-            if (job.disable_enqueue_after_fails and
-                    job.fail_times > job.disable_enqueue_after_fails):
-                job.enqueue_is_enabled = False
-
-            job.save()
-
-        job.reschedule()
-
-        if (deserialized.get('return_dts', None) and
-                deserialized.get('return_success', None) is True):
-            # reset the fail count
-            job.fail_times = 0
-            job.save()
-
-        if (deserialized.get('return_dts', None) and
-                deserialized.get('return_success', None) is True and
-                bundle.obj.schedule_children):
-            # the job completed successfully and has children to
-            # schedule now
-            for child in bundle.obj.job.children.all():
-                child.schedule_now()
-
-        return result
 
 
 class KillRequestResource(NoRelatedSaveMixin, ModelResource):

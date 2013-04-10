@@ -1,17 +1,16 @@
 import calendar
-import copy
 from datetime import timedelta
 
-from django.conf import settings
-from django.core.mail import send_mail
 from django.contrib.auth.models import Group
 from django.db import models
+from django.db.models import signals
 from django.template import Context, Template
-from django.template.loader import get_template
 from django.utils import timezone
 from smart_selects.db_fields import ChainedForeignKey
 
+from job_runner.apps.job_runner import notifications
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
+from job_runner.apps.job_runner.signals import post_run_update, post_run_create
 
 
 RESCHEDULE_INTERVAL_TYPE_CHOICES = (
@@ -216,6 +215,10 @@ class Job(models.Model):
         auto_choose=False,
         help_text='Select a job-template first to see the available pools.',
     )
+    run_on_all_workers = models.BooleanField(
+        default=False,
+        help_text='Run this job on all workers within the selected pool.',
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     script_content_partial = models.TextField('script content')
@@ -266,6 +269,11 @@ class Job(models.Model):
             'be disabled when it failed (blank = never disable enqeueue).'
         )
     )
+    last_completed_schedule_id = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        editable=False,
+    )
 
     class Meta:
         ordering = (
@@ -277,82 +285,6 @@ class Job(models.Model):
 
     def __unicode__(self):
         return u'{0} > {1}'.format(self.job_template, self.title)
-
-    def reschedule(self):
-        """
-        Reschedule job.
-
-        This will check if the job is setup for reschedule. Then it will
-        try to get the next reschedule date. When getting this date fails
-        (eg: when the rescheduling always falls within the reschedule exclude),
-        it will send out an e-mail to the Job-Runner admins and the e-mail
-        addresses that are setup for this job, script and server.
-
-        """
-        # there is already an other run which is not finished yet, do
-        # not re-schedule, it will be rescheduled when the other job
-        # finishes
-        if self.run_set.filter(return_dts__isnull=True).count():
-            return
-
-        if (self.reschedule_type and self.reschedule_interval_type
-                and self.reschedule_interval):
-            last_run = self.run_set.filter(is_manual=False)[0]
-
-            if last_run.return_dts:
-                if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
-                    reference_date = last_run.schedule_dts
-                elif self.reschedule_type == 'AFTER_COMPLETE_DTS':
-                    reference_date = last_run.return_dts
-
-                try:
-                    reschedule_date = self._get_reschedule_date(reference_date)
-
-                    Run.objects.create(
-                        job=self,
-                        schedule_dts=reschedule_date,
-                    )
-
-                except RescheduleException:
-                    t = get_template('job_runner/email/reschedule_failed.txt')
-                    c = Context({
-                        'job': self,
-                        'hostname': settings.HOSTNAME,
-                    })
-                    email_body = t.render(c)
-
-                    addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
-                    addresses.extend(self.get_notification_addresses())
-
-                    if addresses:
-                        send_mail(
-                            'Reschedule error for: {0}'.format(self.title),
-                            email_body,
-                            settings.DEFAULT_FROM_EMAIL,
-                            addresses
-                        )
-
-    def schedule_now(self):
-        """
-        Schedule the job to run now.
-
-        When the job is already scheduled to run now, but the run has not yet
-        been picked up by the worker (the worker could be dead or the job
-        enqueue is disabled), it will not schedule a new run.
-
-        """
-        # don't schedule a new run when it is already scheduled to run now
-        runs = Run.objects.filter(
-            job=self,
-            schedule_dts__lte=timezone.now(),
-            enqueue_dts__isnull=True,
-            is_manual=False,
-        )
-        if not runs.count():
-            Run.objects.create(
-                job=self,
-                schedule_dts=timezone.now(),
-            )
 
     def save(self, *args, **kwargs):
         t = Template(self.job_template.body)
@@ -369,6 +301,67 @@ class Job(models.Model):
         addresses.extend(self.job_template.get_notification_addresses())
         addresses.extend(self.worker_pool.get_notification_addresses())
         return addresses
+
+    def schedule(self, dts=None):
+        """
+        Schedule the job to run at the given ``dts``.
+
+        :param dts:
+            An instance of :class:`datetime.datetime` or ``None`` to schedule
+            now.
+
+        When the job is already scheduled to run now, but the run has not yet
+        been picked up by the worker (the worker could be dead or the job
+        enqueue is disabled), it will not schedule a new run.
+
+        """
+        if not dts:
+            dts = timezone.now()
+
+        # don't schedule a new run when it is already scheduled to run now
+        runs = Run.objects.filter(
+            job=self,
+            schedule_dts__lte=timezone.now(),
+            return_dts__isnull=True,
+            is_manual=False,
+        )
+        if not runs.count():
+            Run.objects.create(
+                job=self,
+                schedule_dts=dts,
+            )
+
+    def reschedule(self):
+        """
+        Reschedule job.
+
+        This will check if the job is setup for reschedule. Then it will
+        try to get the next reschedule date. When getting this date fails
+        (eg: when the rescheduling always falls within the reschedule exclude),
+        it will send out an e-mail to the Job-Runner admins and the e-mail
+        addresses that are setup for this job, script and server.
+
+        """
+        # check if job is setup for re-scheduling
+        if (self.reschedule_type and self.reschedule_interval_type
+                and self.reschedule_interval):
+            last_run = self.run_set.filter(is_manual=False)[0]
+
+            if not last_run.return_dts:
+                # we can't reschedule if there wasn't a previous run
+                return
+
+            # find the reschedule reference date
+            if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
+                reference_date = last_run.schedule_dts
+            elif self.reschedule_type == 'AFTER_COMPLETE_DTS':
+                reference_date = last_run.return_dts
+
+            try:
+                reschedule_date = self._get_reschedule_date(reference_date)
+                self.schedule(reschedule_date)
+            except RescheduleException:
+                notifications.reschedule_failed(self)
 
     def _get_reschedule_incremented_dts(self, increment_date):
         """
@@ -471,6 +464,8 @@ class Run(models.Model):
     Contains the data related to a (scheduled) job run.
     """
     job = models.ForeignKey(Job)
+    schedule_id = models.PositiveIntegerField(
+        null=True, default=None, db_index=True)
     worker = models.ForeignKey(Worker, null=True, blank=True)
     schedule_dts = models.DateTimeField(db_index=True)
     enqueue_dts = models.DateTimeField(null=True, db_index=True)
@@ -498,28 +493,22 @@ class Run(models.Model):
             'run_id': self.pk,
         })
 
-    def send_error_notification(self):
+    def get_siblings(self):
         """
-        Send out an error notification e-mail.
+        Return a ``QuerySet`` instance for the siblings of this run.
         """
-        t = get_template('job_runner/email/job_failed.txt')
-        c = Context({
-            'time_zone': settings.TIME_ZONE,
-            'run': self,
-            'hostname': settings.HOSTNAME,
-        })
-        email_body = t.render(c)
+        return self.__class__.objects.exclude(
+            pk=self.pk,
+            schedule_id__isnull=True,
+        ).filter(
+            schedule_id=self.schedule_id,
+            job=self.job,
+        )
 
-        addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
-        addresses.extend(self.job.get_notification_addresses())
-
-        if addresses:
-            send_mail(
-                'Run error for: {0}'.format(self.job.title),
-                email_body,
-                settings.DEFAULT_FROM_EMAIL,
-                addresses
-            )
+    def get_schedule_id(self):
+        if self.schedule_id:
+            return self.schedule_id
+        return self.pk
 
 
 class KillRequest(models.Model):
@@ -543,3 +532,7 @@ class RunLog(models.Model):
 
     class Meta:
         ordering = ('-run',)
+
+
+signals.post_save.connect(post_run_update, sender=Run)
+signals.post_save.connect(post_run_create, sender=Run)

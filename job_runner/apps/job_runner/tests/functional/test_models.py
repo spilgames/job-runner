@@ -32,11 +32,11 @@ class RunTestCase(TestCase):
         Job.objects.get(pk=1).reschedule()
         self.assertEqual(1, Run.objects.filter(job_id=1).count())
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = timezone.now()
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         Job.objects.get(pk=1).reschedule()
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
@@ -53,11 +53,11 @@ class RunTestCase(TestCase):
         """
         dts_now = timezone.now()
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = dts_now - timedelta(days=31)
-        run.enqueue_dts = dts_now - timedelta(days=31)
-        run.return_dts = dts_now - timedelta(days=31)
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=dts_now - timedelta(days=31),
+            enqueue_dts=dts_now - timedelta(days=31),
+            return_dts=dts_now - timedelta(days=31)
+        )
 
         Job.objects.get(pk=1).reschedule()
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
@@ -73,10 +73,10 @@ class RunTestCase(TestCase):
         job.reschedule_type = 'AFTER_COMPLETE_DTS'
         job.save()
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         job.reschedule()
 
@@ -137,11 +137,11 @@ class RunTestCase(TestCase):
         job.reschedule_interval_type = 'HOUR'
         job.save()
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.make_aware(
-            datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone())
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.make_aware(
+                datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone())
+        )
 
         RescheduleExclude.objects.create(
             job=job,
@@ -171,11 +171,11 @@ class RunTestCase(TestCase):
         job.reschedule_interval_type = 'HOUR'
         job.save()
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.make_aware(
-            datetime(2012, 1, 1, 11, 59), timezone.get_default_timezone())
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.make_aware(
+                datetime(2012, 1, 1, 11, 59), timezone.get_default_timezone())
+        )
 
         RescheduleExclude.objects.create(
             job=job,
@@ -199,11 +199,11 @@ class RunTestCase(TestCase):
         job = Job.objects.get(pk=1)
         self.assertEqual(1, Run.objects.filter(job=job).count())
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = timezone.now()
-        run.enqueue_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         Run.objects.create(
             job=job,
@@ -221,12 +221,12 @@ class RunTestCase(TestCase):
         job = Job.objects.get(pk=1)
         self.assertEqual(1, Run.objects.filter(job=job).count())
 
-        run = Run.objects.get(pk=1)
-        run.schedule_dts = timezone.now()
-        run.enqueue_dts = timezone.now()
-        run.start_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.save()
+        Run.objects.filter(pk=1).update(
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
 
         Run.objects.create(
             job=job,
@@ -253,7 +253,7 @@ class RunTestCase(TestCase):
             Job.objects.get(pk=1).get_notification_addresses()
         )
 
-    def test_schedule_now(self):
+    def test_schedule(self):
         """
         Test direct schedule.
         """
@@ -262,14 +262,24 @@ class RunTestCase(TestCase):
         job = Job.objects.get(pk=1)
 
         self.assertEqual(0, job.run_set.count())
-        job.schedule_now()
+        job.schedule()
         self.assertEqual(1, job.run_set.count())
 
-    def test_schedule_now_already_scheduled(self):
+    def test_schedule_already_scheduled(self):
         """
         Test direct schedule when there is already a scheduled run available.
         """
         job = Job.objects.get(pk=1)
         self.assertEqual(1, job.run_set.count())
-        job.schedule_now()
+        job.schedule()
         self.assertEqual(1, job.run_set.count())
+
+    def test_schedule_id_set_on_create(self):
+        """
+        Test that the ``schedule_id`` is set on create.
+        """
+        run = Run.objects.create(
+            job=Job.objects.get(pk=1),
+            schedule_dts=timezone.now()
+        )
+        self.assertTrue(run.pk == run.schedule_id)

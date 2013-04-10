@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
+from mock import Mock, patch
 
 from job_runner.apps.job_runner.models import (
     Job,
@@ -629,6 +630,7 @@ class RunTestCase(ApiTestBase):
                 '/api/v1/run/?state={0}'.format(argument))
             self.assertEqual(expected, len(json_data['objects']))
 
+    @patch('job_runner.apps.job_runner.signals.post_run_update', Mock())
     def test_completed(self):
         """
         Test listing runs that are completed.
@@ -642,12 +644,12 @@ class RunTestCase(ApiTestBase):
             ('completed_with_error', 0),
         ]
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.start_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.return_success = True
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
+            return_dts=timezone.now(),
+            return_success=True,
+        )
 
         for argument, expected in expected:
             json_data = self.get_json(
@@ -667,12 +669,12 @@ class RunTestCase(ApiTestBase):
             ('completed_with_error', 1),
         ]
 
-        run = Run.objects.get(pk=1)
-        run.enqueue_dts = timezone.now()
-        run.start_dts = timezone.now()
-        run.return_dts = timezone.now()
-        run.return_success = False
-        run.save()
+        Run.objects.filter(pk=1).update(
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
+            return_dts=timezone.now(),
+            return_success=False
+        )
 
         for argument, expected in expected:
             json_data = self.get_json(
@@ -726,9 +728,13 @@ class RunTestCase(ApiTestBase):
         )
 
         self.assertEqual(202, response.status_code)
-        self.assertEqual(2, Run.objects.filter(job_id=1).count())
+        self.assertEqual(
+            1,
+            Run.objects.filter(job_id=1, enqueue_dts__isnull=True).count()
+        )
         self.assertEqual(
             return_dts, Run.objects.filter(job_id=1)[0].return_dts)
+        self.assertEqual(1, Job.objects.get(pk=1).last_completed_schedule_id)
 
     def test_returned_with_error(self):
         """
@@ -750,6 +756,7 @@ class RunTestCase(ApiTestBase):
         self.assertEqual(1, len(mail.outbox))
         self.assertEqual(4, len(mail.outbox[0].to))
         self.assertEqual('Run error for: Test job 1', mail.outbox[0].subject)
+        self.assertEqual(1, Job.objects.get(pk=1).last_completed_schedule_id)
 
     def test_returned_with_error_disable_enqueue(self):
         """
@@ -786,6 +793,7 @@ class RunTestCase(ApiTestBase):
 
         job = Job.objects.get(pk=1)
         self.assertFalse(job.enqueue_is_enabled)
+        self.assertEqual(1, job.last_completed_schedule_id)
 
     def test_create_new_run(self):
         """

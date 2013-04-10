@@ -12,8 +12,8 @@
             <select ng-model="global_state.data.jobFilter.reschedule_interval_type" ng-options="item[0] as item[1] for item in [['', ''], ['MINUTE', 'minute'], ['HOUR', 'hour'], ['DAY', 'day'], ['MONTH', 'month']]"></select>
         </div>
         <div class="span3">
-            <h5>Search</h5>
-            <input ng-model="global_state.data.jobFilter.title" type="text" class="input-large" />
+            <h5>&nbsp;</h5>
+            <input ng-model="global_state.data.jobFilter.title" type="text" class="search-query" placeholder="Filter" />
         </div>
     </div>
     <div class="row">

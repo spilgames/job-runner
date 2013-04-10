@@ -118,6 +118,7 @@ Runs
     * ``completed`` (completed, either with or without error)
     * ``completed_successful`` (completed without error)
     * ``completed_with_errors`` (completed with error)
+    * ``last_completed`` (last completed runs for each job)
 
 ``GET /api/v1/run/{RUN_ID}/``
     Returns the details of a specific job run.

@@ -41,7 +41,12 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
             }
 
             // remove old completed runs
-            if (value.id != run.id && value.job == run.job && (run.get_state() == 'completed' || run.get_state() == 'completed_with_error') && (value.get_state() == 'completed' || value.get_state() == 'completed_with_error')) {
+            if (value.id != run.id && value.job == run.job && value.schedule_id != run.schedule_id && (run.get_state() == 'completed' || run.get_state() == 'completed_with_error') && (value.get_state() == 'completed' || value.get_state() == 'completed_with_error')) {
+                toPop.push(value);
+            }
+
+            // cleanup scheduled run on all workers runs
+            if (value.schedule_id == run.schedule_id && value.worker === null && run.worker !== null) {
                 toPop.push(value);
             }
         });
