@@ -13,7 +13,7 @@
                     <a href="#scheduled" data-toggle="tab" target="_self">Scheduled ({{ (runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(true)).length }})</a>
                 </li>
                 <li ng-class="{active: global_state.data.runTab == 'scheduled_enqueue_disabled'}" ng-click="setTab('scheduled_enqueue_disabled')">
-                    <a href="#scheduled_enqueue_disabled" data-toggle="tab" target="_self">Scheduled, enqueue disabled ({{ (runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(false)).length }})</a>
+                    <a href="#scheduled_enqueue_disabled" data-toggle="tab" target="_self">Enqueue suspended ({{ (runs | filter:runFilter('scheduled') | filter:enqueueEnabledFilter(false)).length }})</a>
                 </li>
                 <li ng-class="{active: global_state.data.runTab == 'inqueue'}" ng-click="setTab('inqueue')">
                     <a href="#inqueue" data-toggle="tab" target="_self">In queue ({{ (runs | filter:runFilter('in_queue')).length }})</a>
@@ -41,7 +41,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('scheduled') | filter:global_state.data.runFilter | filter:enqueueEnabledFilter(true) | orderBy:'schedule_dts'">
-                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a> (<a href="../jobs/{{ run.get_job().id }}/">job</a>)</td>
                                 <td>{{ run.schedule_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
@@ -61,7 +61,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('scheduled') | filter:global_state.data.runFilter | filter:enqueueEnabledFilter(false) | orderBy:'schedule_dts'">
-                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a> (<a href="../jobs/{{ run.get_job().id }}/">job</a>)</td>
                                 <td>{{ run.schedule_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
@@ -81,7 +81,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('in_queue') | filter:global_state.data.runFilter | orderBy:'enqueue_dts'">
-                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a> (<a href="../jobs/{{ run.get_job().id }}/">job</a>)</td>
                                 <td>{{ run.enqueue_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
@@ -101,7 +101,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('started') | filter:global_state.data.runFilter | orderBy:'-start_dts'">
-                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a> (<a href="../jobs/{{ run.get_job().id }}/">job</a>)</td>
                                 <td>{{ run.start_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
@@ -122,7 +122,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('completed') | filter:global_state.data.runFilter | orderBy:'-return_dts'">
-                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a> (<a href="../jobs/{{ run.get_job().id }}/">job</a>)</td>
                                 <td>{{ run.get_duration_string() }}</td>
                                 <td>{{ run.return_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
@@ -144,7 +144,7 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('completed_with_error') | filter:global_state.data.runFilter | orderBy:'-return_dts'">
-                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a> (<a href="../jobs/{{ run.get_job().id }}/">job</a>)</td>
                                 <td>{{ run.get_duration_string() }}</td>
                                 <td>{{ run.return_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>

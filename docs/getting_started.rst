@@ -122,8 +122,8 @@ Job-Runner
    #. Click the **Add project** button
 
       * Title: Test Project
-      * Groups: select *Test Group*
-      * Auth groups: select *Test Group*
+      * Viewers (groups): select *Test Group*
+      * Project admins (groups): select *Test Group*
       * Worker pools: select *Test Worker Pool*
 
    #. Click the save button
