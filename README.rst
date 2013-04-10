@@ -6,11 +6,17 @@ Job-Runner
     :target: https://travis-ci.org/spilgames/job-runner
 
 **Job-Runner** is a crontab like tool, with a nice web-frontend for
-administration and (live) monitoring the current status. It is possible to
-schedule recurring jobs, chaining jobs and the option to run or kill jobs
-ad-hoc (from the dashboard). As well it provides permission management
-(eg: so that some people are able to only see jobs on the dashboard, where
-other people are also able to start them ad-hoc or kill them).
+administration and (live) monitoring the current status.
+
+Features:
+
+* Schedule recurring jobs
+* Chaining of jobs
+* Load-balance workers by putting them in a pool
+* Schedule jobs to run on all workers within a pool
+* Live dashboard (with option to kill runs and ad-hoc scheduling)
+* Multiple projects and per-project permission management
+
 
 The whole project consists of three separate components (and repositories):
 
