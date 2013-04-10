@@ -112,6 +112,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ('title', 'enqueue_is_enabled')
     list_filter = ('enqueue_is_enabled',)
     list_editable = ('enqueue_is_enabled',)
+    filter_horizontal = ('groups', 'auth_groups', 'worker_pools',)
 
 
 class WorkerAdmin(admin.ModelAdmin):
@@ -178,6 +179,7 @@ class WorkerPoolAdmin(admin.ModelAdmin):
     """
     list_display = ('title', 'enqueue_is_enabled',)
     list_editable = ('enqueue_is_enabled',)
+    filter_horizontal = ('workers',)
 
 
 class JobTemplateAdmin(PermissionAdminMixin, admin.ModelAdmin):

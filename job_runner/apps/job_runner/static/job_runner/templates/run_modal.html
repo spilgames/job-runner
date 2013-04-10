@@ -66,6 +66,10 @@
                         </tbody>
                     </table>
 
+                    <p>
+                        <a href="/admin/job_runner/job/{{ run.get_job().id }}/" target="_blank">Open job in admin</a> (requires admin access).
+                    </p>
+
                     <div ng-switch on="run.get_job().description != null">
                         <p ng-switch-when="true">{{ run.get_job().description }}</p>
                     </div>

@@ -40,12 +40,14 @@ class Project(models.Model):
     description = models.TextField(blank=True)
     groups = models.ManyToManyField(
         Group,
+        verbose_name='Viewers (groups)',
         help_text=(
             'These are the groups that can see the project in the dashboard. '
         )
     )
     auth_groups = models.ManyToManyField(
         Group,
+        verbose_name='Project admins (groups)',
         blank=True,
         related_name='auth_groups_set',
         help_text=(
