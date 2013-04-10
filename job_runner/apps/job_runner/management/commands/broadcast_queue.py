@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
+from django.db import transaction
 
 from job_runner.apps.job_runner.models import KillRequest, Run, Worker
 
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 class Command(NoArgsCommand):
     help = 'Broadcast runs and kill-requests to workers'
 
+    @transaction.commit_manually
     def handle_noargs(self, **options):
         logger.info('Starting queue broadcaster')
         context = zmq.Context(1)
@@ -37,11 +39,13 @@ class Command(NoArgsCommand):
                 next_ping_request = datetime.utcnow() + ping_delta
             self._broadcast_runs(publisher)
             self._broadcast_kill_requests(publisher)
+            transaction.commit()
             time.sleep(5)
 
         publisher.close()
         context.term()
 
+    @transaction.commit_manually
     def _broadcast_runs(self, publisher):
         """
         Broadcast runs that are scheduled to run now.
@@ -56,6 +60,7 @@ class Command(NoArgsCommand):
         """
         enqueueable_runs = Run.objects.enqueueable().select_related()
         broadcasted = {}
+        to_broadcast = []
 
         for run in enqueueable_runs:
             # schedule the run if we haven't already scheduled a run for the
@@ -85,8 +90,9 @@ class Command(NoArgsCommand):
                                     is_manual=run.is_manual,
                                     schedule_children=run.schedule_children,
                                 )
-                                self._broadcast_run(
-                                    assigned_run, w, publisher)
+                                to_broadcast.append(
+                                    (assigned_run, w, publisher))
+
                             # delete the "old" unassigned run
                             run.delete()
 
@@ -101,8 +107,15 @@ class Command(NoArgsCommand):
                                 random.randint(0, len(workers) - 1)]
 
                 if worker:
-                    self._broadcast_run(run, worker, publisher)
+                    to_broadcast.append((run, worker, publisher))
                     broadcasted[run.job.pk] = run.get_schedule_id()
+
+        # make sure that we commit, before we are actually broadcasting the
+        # runs :-)
+        transaction.commit()
+
+        for brocast_args in to_broadcast:
+            self._broadcast_run(*brocast_args)
 
     def _broadcast_run(self, run, worker, publisher):
         message = [
