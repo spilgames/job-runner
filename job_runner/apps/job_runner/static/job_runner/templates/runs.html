@@ -34,9 +34,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th class="twenty">Scheduled</th>
-                                <th class="twenty">Worker pool</th>
-                                <th class="twenty">Assigned worker</th>
+                                <th class="fifteen">Scheduled</th>
+                                <th class="fifteen">Worker pool</th>
+                                <th class="fifteen">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,9 +54,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th class="twenty">Scheduled</th>
-                                <th class="twenty">Worker pool</th>
-                                <th class="twenty">Assigned worker</th>
+                                <th class="fifteen">Scheduled</th>
+                                <th class="fifteen">Worker pool</th>
+                                <th class="fifteen">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,9 +74,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th class="twenty">In queue</th>
-                                <th class="twenty">Worker pool</th>
-                                <th class="twenty">Assigned worker</th>
+                                <th class="fifteen">In queue</th>
+                                <th class="fifteen">Worker pool</th>
+                                <th class="fifteen">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -94,9 +94,9 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th class="twenty">Started</th>
-                                <th class="twenty">Worker pool</th>
-                                <th class="twenty">Assigned worker</th>
+                                <th class="fifteen">Started</th>
+                                <th class="fifteen">Worker pool</th>
+                                <th class="fifteen">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,14 +114,16 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th class="twenty">Returned</th>
-                                <th class="twenty">Worker pool</th>
-                                <th class="twenty">Assigned worker</th>
+                                <th class="fifteen">Duration</th>
+                                <th class="fifteen">Returned</th>
+                                <th class="fifteen">Worker pool</th>
+                                <th class="fifteen">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('completed') | filter:global_state.data.runFilter | orderBy:'-return_dts'">
                                 <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td>{{ run.get_duration_string() }}</td>
                                 <td>{{ run.return_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
@@ -134,14 +136,16 @@
                         <thead>
                             <tr>
                                 <th>Job</th>
-                                <th class="twenty">Returned</th>
-                                <th class="twenty">Worker pool</th>
-                                <th class="twenty">Assigned worker</th>
+                                <th class="fifteen">Duration</th>
+                                <th class="fifteen">Returned</th>
+                                <th class="fifteen">Worker pool</th>
+                                <th class="fifteen">Assigned worker</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="run in runs | filter:runFilter('completed_with_error') | filter:global_state.data.runFilter | orderBy:'-return_dts'">
                                 <td><a href="{{ run.id }}/">{{ run.get_job().title }}</a></td>
+                                <td>{{ run.get_duration_string() }}</td>
                                 <td>{{ run.return_dts | formatdts }}</td>
                                 <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <td>{{ run.get_worker().title }}</td>
