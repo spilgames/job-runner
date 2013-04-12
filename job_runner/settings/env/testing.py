@@ -10,6 +10,8 @@ DATABASES = {
     }
 }
 
+TIME_ZONE = 'Europe/Amsterdam'
+
 JOB_RUNNER_WS_SERVER = 'ws://localhost:5000/'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

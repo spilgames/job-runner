@@ -54,6 +54,16 @@ Links
 Changes
 -------
 
+v3.0.1
+~~~~~~
+
+* Fix re-schedule issue (duplicates) when manually schedule a recurring job.
+* Fix schedule-time when switching from or to daylight saving-time. Before
+  the time of a job would change when switching from or to DST. Now a job
+  will be always re-scheduled at the same time (when increment schedule dts by
+  interval is selected).
+
+
 v3.0.0
 ~~~~~~
 

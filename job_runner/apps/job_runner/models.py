@@ -11,6 +11,7 @@ from smart_selects.db_fields import ChainedForeignKey
 from job_runner.apps.job_runner import notifications
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
 from job_runner.apps.job_runner.signals import post_run_update, post_run_create
+from job_runner.apps.job_runner.utils import correct_dst_difference
 
 
 RESCHEDULE_INTERVAL_TYPE_CHOICES = (
@@ -344,6 +345,12 @@ class Job(models.Model):
         addresses that are setup for this job, script and server.
 
         """
+        # there is already an other run which is not finished yet, do
+        # not re-schedule, it will be rescheduled when the other job
+        # finishes
+        if self.run_set.filter(return_dts__isnull=True).count():
+            return
+
         # check if job is setup for re-scheduling
         if (self.reschedule_type and self.reschedule_interval_type
                 and self.reschedule_interval):
@@ -361,6 +368,13 @@ class Job(models.Model):
 
             try:
                 reschedule_date = self._get_reschedule_date(reference_date)
+
+                if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
+                    # correct daylight saving-time changes to make sure we keep
+                    # re-scheduling at the same hour (in local time).
+                    reschedule_date = correct_dst_difference(
+                        last_run.schedule_dts, reschedule_date)
+
                 self.schedule(reschedule_date)
             except RescheduleException:
                 notifications.reschedule_failed(self)
