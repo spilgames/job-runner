@@ -292,6 +292,7 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         filtering = {
             'schedule_dts': ALL,
             'job': ALL_WITH_RELATIONS,
+            'worker': ALL_WITH_RELATIONS,
         }
 
         authentication = MultiAuthentication(
