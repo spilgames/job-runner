@@ -54,6 +54,12 @@ Links
 Changes
 -------
 
+v3.0.1
+~~~~~~
+
+* Fix re-schedule issue (duplicates) when manually schedule a recurring job.
+
+
 v3.0.0
 ~~~~~~
 

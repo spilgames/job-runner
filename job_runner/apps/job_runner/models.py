@@ -344,6 +344,12 @@ class Job(models.Model):
         addresses that are setup for this job, script and server.
 
         """
+        # there is already an other run which is not finished yet, do
+        # not re-schedule, it will be rescheduled when the other job
+        # finishes
+        if self.run_set.filter(return_dts__isnull=True).count():
+            return
+
         # check if job is setup for re-scheduling
         if (self.reschedule_type and self.reschedule_interval_type
                 and self.reschedule_interval):
