@@ -9,6 +9,7 @@ from job_runner.apps.job_runner.models import (
     RescheduleExclude,
     Run,
 )
+from job_runner.apps.job_runner.utils import correct_dst_difference
 
 
 class RunTestCase(TestCase):
@@ -43,7 +44,10 @@ class RunTestCase(TestCase):
 
         runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
-            runs[0].schedule_dts + timedelta(days=1),
+            correct_dst_difference(
+                runs[0].schedule_dts,
+                runs[0].schedule_dts + timedelta(days=1)
+            ),
             runs[1].schedule_dts
         )
 
@@ -63,7 +67,16 @@ class RunTestCase(TestCase):
         self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
         run = Run.objects.get(pk=3)
-        self.assertEqual(run.schedule_dts, dts_now + timedelta(days=1))
+
+        # we have to make sure to use correct_dst_difference since between
+        # 31 days ago and tomorrow, we might have changed from or to DTS.
+        self.assertEqual(
+            run.schedule_dts,
+            correct_dst_difference(
+                dts_now - timedelta(days=31),
+                dts_now + timedelta(days=1)
+            )
+        )
 
     def test_reschedule_after_complete_dts(self):
         """
@@ -126,7 +139,10 @@ class RunTestCase(TestCase):
 
             job.reschedule()
             run = Run.objects.filter(job=1, enqueue_dts__isnull=True)[0]
-            self.assertEqual(expected_dts, run.schedule_dts)
+            self.assertEqual(
+                correct_dst_difference(in_dts, expected_dts),
+                run.schedule_dts
+            )
 
     def test_reschedule_with_exclude(self):
         """
