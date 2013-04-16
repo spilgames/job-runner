@@ -18,18 +18,18 @@
     </div>
     <div class="row">
         <div class="span6 jobs">
-
-            <div ng-repeat="j in jobs | orderBy:title | filter:global_state.data.jobFilter" class="span2">
-                <div ng-class="{selected: j.id == job.id, job: true, suspended: j.enqueue_is_enabled != true}">
-                    <h5><a href="/project/{{ global_state.data.projectId }}/jobs/{{ j.id }}/" class="details">{{ j.title }}</a></h5>
-                    <ul>
-                        <li>
-                            <i class="icon-hdd"></i> {{ j.get_worker_pool().title }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Job</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="j in jobs | orderBy:title | filter:global_state.data.jobFilter" ng-class="{info: j.id == job.id}">
+                        <td><a href="/project/{{ global_state.data.projectId }}/jobs/{{ j.id }}/">{{ j.title }}</a></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <div class="span6 job-details" ng-switch on="job != null">
             <div ng-switch-when="true">
