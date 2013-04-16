@@ -6,6 +6,13 @@ angular.module('getAll', []).factory('getAll', function() {
     var extend = angular.extend;
 
     var getAll = function(output_list, model, offset, params, success, error) {
+
+        // project_id = 0 means all projects, so in this case we don't want
+        // to apply this filter!
+        if (params !== undefined && params.project_id !== undefined && parseInt(params.project_id) === 0) {
+            delete params['project_id'];
+        }
+
         model.get(extend({}, params, {offset: offset}), function(items) {
             forEach(items.objects, function(item) {
                 output_list.push(new model(item));

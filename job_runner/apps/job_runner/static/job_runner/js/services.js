@@ -123,11 +123,19 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
         // get the current project object.
         getProject: function(success) {
             var self = this;
+
+            if (parseInt(self.data.projectId) === 0) {
+                $window.document.title = 'All projects' + ' - Job-Runner';
+                return {
+                    title: 'All projects'
+                };
+            }
+
             var project = globalCache.get('project.' + self.data.projectId);
             if (!project) {
                 project = Project.get({id: self.data.projectId}, function(project) {
                     globalCache.put('project.' + self.data.projectId);
-                     $window.document.title = project.title + ' - Job-Runner';
+                    $window.document.title = project.title + ' - Job-Runner';
                     if(success) {
                         success(project);
                     }
