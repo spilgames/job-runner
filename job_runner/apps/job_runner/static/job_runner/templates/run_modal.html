@@ -10,7 +10,10 @@
                     <a href="#log" data-toggle="tab" target="_self">Log output</a>
                 </li>
                 <li ng-class="{active: run.get_run_log() == null}">
-                    <a href="#details" data-toggle="tab" target="_self">Details</a>
+                    <a href="#details" data-toggle="tab" target="_self">Overview</a>
+                </li>
+                <li>
+                    <a href="#description" data-toggle="tab" target="_self">Description</a>
                 </li>
                 <li>
                     <a href="#command" data-toggle="tab" target="_self">Script</a>
@@ -22,6 +25,9 @@
                 </div>
                 <div id="command" class="tab-pane">
                     <p><pre>{{ run.get_job().script_content }}</pre></p>
+                </div>
+                <div id="description" class="tab-pane">
+                    <p>{{ run.get_job().description }}</p>
                 </div>
                 <div id="details" ng-class="{'tab-pane': true, active: run.get_run_log() == null}">
                     <table class="table table-bordered">
@@ -69,10 +75,6 @@
                     <p>
                         <a href="/admin/job_runner/job/{{ run.get_job().id }}/" target="_blank">Open job in admin</a> (requires admin access).
                     </p>
-
-                    <div ng-switch on="run.get_job().description != null">
-                        <p ng-switch-when="true">{{ run.get_job().description }}</p>
-                    </div>
                 </div>
             </div>
         </div>
