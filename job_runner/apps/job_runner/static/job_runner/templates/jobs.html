@@ -77,6 +77,9 @@
                                 </ng-switch>
                             </p>
 
+                            <h5>Project</h5>
+                            <p>{{ job.get_job_template().get_project().title }}</p>
+
                             <h5>Description</h5>
                             <div ng-switch on="job.description != ''">
                                 <p ng-switch-when="true">{{ job.description }}</p>
