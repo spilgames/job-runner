@@ -1,37 +1,30 @@
 <ng-include src="'/static/job_runner/templates/run_modal.html'"></ng-include>
 
 <section class="jobs">
-    <div class="row filters">
-        <div class="span3">
-            <h5>Template</h5>
-            <select ng-model="global_state.data.jobFilter.job_template" ng-options="job_template.resource_uri as job_template.title for job_template in job_templates">
-            </select>
-        </div>
-        <div class="span3">
-            <h5>Reschedule interval type</h5>
-            <select ng-model="global_state.data.jobFilter.reschedule_interval_type" ng-options="item[0] as item[1] for item in [['', ''], ['MINUTE', 'minute'], ['HOUR', 'hour'], ['DAY', 'day'], ['MONTH', 'month']]"></select>
-        </div>
-        <div class="span3">
-            <h5>&nbsp;</h5>
-            <input ng-model="global_state.data.jobFilter.title" type="text" class="search-query" placeholder="Filter" />
-        </div>
-    </div>
     <div class="row">
-        <div class="span6 jobs">
+        <form class="navbar-search pull-right">
+            <input ng-model="global_state.data.jobFilter.title" type="text" class="search-query" placeholder="Filter" />
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="span5 jobs">
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Job</th>
+                        <th>Available jobs</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="j in jobs | orderBy:title | filter:global_state.data.jobFilter" ng-class="{info: j.id == job.id}">
-                        <td><a href="/project/{{ global_state.data.projectId }}/jobs/{{ j.id }}/">{{ j.title }}</a></td>
+                        <td ng-class="{suspended: j.enqueue_is_enabled == false}">
+                            <a href="/project/{{ global_state.data.projectId }}/jobs/{{ j.id }}/">{{ j.title }}</a>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div class="span6 job-details" ng-switch on="job != null">
+        <div class="span7 job-details" ng-switch on="job != null">
             <div ng-switch-when="true">
                 <div class="tabbable">
                     <ul class="nav nav-tabs">
@@ -125,6 +118,7 @@
                                     <tr>
                                         <th>Start date</th>
                                         <th>Duration</th>
+                                        <th>Worker</th>
                                         <th>Return</th>
                                     </tr>
                                 </thead>
@@ -132,6 +126,7 @@
                                     <tr ng-repeat="run in recent_runs" ng-class="{error: run.return_success == false}">
                                         <td><a href="runs/{{ run.id }}/">{{ run.start_dts | formatdts }}</a></td>
                                         <td>{{ run.get_duration_string() }}</td>
+                                        <td>{{ run.get_worker().title }}</td>
                                         <td ng-switch on="run.return_success == true">
                                             <span ng-switch-when="true">OK</span>
                                             <span ng-switch-when="false">FAIL</span>
@@ -143,7 +138,7 @@
                     </div>
                 </div>
             </div>
-            <div class="hero-unit" ng-switch-default>
+            <div class="hero-unit margin-top" ng-switch-default>
                 <p>Click on a job to see its details and run history...</p>
             </div>
         </div>
