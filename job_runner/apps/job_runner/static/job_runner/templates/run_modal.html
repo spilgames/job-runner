@@ -33,14 +33,32 @@
                     <table class="table table-bordered">
                         <tbody>
                             <tr>
-                                <th>Status</th>
-                                <td>{{ run.get_state_string() }}</td>
+                                <th class="twentyfive">Project</th>
+                                <td class="twentyfive">{{ run.get_job().get_job_template().get_project().title }}</td>
+                                <th class="twentyfive">Status</th>
+                                <td class="twentyfive">{{ run.get_state_string() }}</td>
                             </tr>
                             <tr>
+                                <th>Worker pool</th>
+                                <td>{{ run.get_job().get_worker_pool().title }}</td>
                                 <th>Assigned worker</th>
                                 <td>{{ run.get_worker().title }}</td>
                             </tr>
                             <tr>
+                                <th>Scheduled</th>
+                                <td>{{ run.schedule_dts | formatdts }}</td>
+                                <th>In queue</th>
+                                <td>{{ run.enqueue_dts | formatdts }}</td>
+                            </tr>
+                            <tr>
+                                <th>Started</th>
+                                <td>{{ run.start_dts | formatdts }}</td>
+                                <th>Returned</th>
+                                <td>{{ run.return_dts | formatdts }}</td>
+                            </tr>
+                            <tr>
+                                <th>Run duration</th>
+                                <td>{{ run.get_duration_string() }}</td>
                                 <th>Manual run</th>
                                 <td>
                                     <ng-switch on="run.is_manual">
@@ -48,26 +66,6 @@
                                         <span ng-switch-when="false">no</span>
                                     </ng-switch>
                                 </td>
-                            </tr>
-                            <tr>
-                                <th>Scheduled</th>
-                                <td>{{ run.schedule_dts | formatdts }}</td>
-                            </tr>
-                            <tr>
-                                <th>In queue</th>
-                                <td>{{ run.enqueue_dts | formatdts }}</td>
-                            </tr>
-                            <tr>
-                                <th>Started</th>
-                                <td>{{ run.start_dts | formatdts }}</td>
-                            </tr>
-                            <tr>
-                                <th>Returned</th>
-                                <td>{{ run.return_dts | formatdts }}</td>
-                            </tr>
-                            <tr>
-                                <th>Run duration</th>
-                                <td>{{ run.get_duration_string() }}</td>
                             </tr>
                         </tbody>
                     </table>

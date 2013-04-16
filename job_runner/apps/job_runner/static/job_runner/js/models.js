@@ -191,7 +191,7 @@ angular.module('jobTemplate', ['ngResource', 'getAll', 'project', 'modelCache'])
     JobTemplate.prototype.get_project = function(success) {
         if (this.project) {
             var projectId = this.project.split('/').splice(-2, 1)[0];
-            return Project.get({'id': parentId}, success);
+            return Project.get({'id': projectId}, success);
         }
     };
 
