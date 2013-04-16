@@ -52,7 +52,7 @@ jobrunnerServices.factory('globalCache', function($cacheFactory) {
 /*
     Global state.
 */
-jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, globalCache) {
+jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, globalCache, $window) {
     return {
         data : {
             runTab: 'scheduled',
@@ -127,11 +127,13 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
             if (!project) {
                 project = Project.get({id: self.data.projectId}, function(project) {
                     globalCache.put('project.' + self.data.projectId);
+                     $window.document.title = project.title + ' - Job-Runner';
                     if(success) {
                         success(project);
                     }
                 });
             } else if (success) {
+                $window.document.title = project.title + ' - Job-Runner';
                 success(project);
             }
             return project;
