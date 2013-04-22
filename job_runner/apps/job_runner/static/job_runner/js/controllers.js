@@ -138,12 +138,14 @@ var RunActionCtrl = function($scope, $routeParams, globalState, Run, Job, Group,
     var getPermissionsForJob = function(jobId) {
         $scope.auth_permissions = false;
         $scope.job = Job.get({id: jobId}, function(job) {
-            globalState.getProject(function(project) {
-                Group.all({}, function(groups) {
-                    angular.forEach(groups, function(group) {
-                        if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
-                            $scope.auth_permissions = true;
-                        }
+            job.get_job_template(function(jobTemplate) {
+                jobTemplate.get_project(function(project) {
+                    Group.all({}, function(groups) {
+                        angular.forEach(groups, function(group) {
+                            if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
+                                $scope.auth_permissions = true;
+                            }
+                        });
                     });
                 });
             });
@@ -181,12 +183,14 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, glob
     var getPermissionsForJob = function(jobId) {
         $scope.auth_permissions = false;
         $scope.job = Job.get({id: jobId}, function(job) {
-            globalState.getProject(function(project) {
-                Group.all({}, function(groups) {
-                    angular.forEach(groups, function(group) {
-                        if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
-                            $scope.auth_permissions = true;
-                        }
+            job.get_job_template(function(jobTemplate) {
+                jobTemplate.get_project(function(project) {
+                    Group.all({}, function(groups) {
+                        angular.forEach(groups, function(group) {
+                            if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
+                                $scope.auth_permissions = true;
+                            }
+                        });
                     });
                 });
             });
