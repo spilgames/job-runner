@@ -54,6 +54,13 @@ Links
 Changes
 -------
 
+v3.0.2
+~~~~~~
+
+* Add dropdown option to see the runs / jobs of all projects.
+* Show assigned workers in last 100 completed runs.
+
+
 v3.0.1
 ~~~~~~
 
