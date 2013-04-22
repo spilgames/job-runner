@@ -113,6 +113,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ('enqueue_is_enabled',)
     list_editable = ('enqueue_is_enabled',)
     filter_horizontal = ('groups', 'auth_groups', 'worker_pools',)
+    save_as = True
 
 
 class WorkerAdmin(admin.ModelAdmin):
@@ -128,6 +129,7 @@ class WorkerAdmin(admin.ModelAdmin):
     list_filter = ('enqueue_is_enabled',)
     list_display_links = ('title',)
     list_editable = ('enqueue_is_enabled',)
+    save_as = True
 
     def ping_response(self, obj):
         interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
@@ -180,6 +182,7 @@ class WorkerPoolAdmin(admin.ModelAdmin):
     list_display = ('title', 'enqueue_is_enabled',)
     list_editable = ('enqueue_is_enabled',)
     filter_horizontal = ('workers',)
+    save_as = True
 
 
 class JobTemplateAdmin(PermissionAdminMixin, admin.ModelAdmin):
@@ -199,6 +202,7 @@ class JobTemplateAdmin(PermissionAdminMixin, admin.ModelAdmin):
             'path': 'auth_groups',
         }
     }
+    save_as = True
 
 
 class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
