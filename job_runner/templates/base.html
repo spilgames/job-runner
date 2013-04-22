@@ -58,6 +58,10 @@
                                     <li ng-repeat="project in projects">
                                         <a href="/project/{% templatetag openvariable %} project.id {% templatetag closevariable %}/{% templatetag openvariable %} global_state.data.page {% templatetag closevariable %}/">{% templatetag openvariable %} project.title {% templatetag closevariable %}</a>
                                     </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a href="/project/0/{% templatetag openvariable %} global_state.data.page {% templatetag closevariable %}/">Show all projects</a>
+                                    </li>
                                 </ul>
                             </li>
                         </ul>

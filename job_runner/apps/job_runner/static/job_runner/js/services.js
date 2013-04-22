@@ -52,7 +52,7 @@ jobrunnerServices.factory('globalCache', function($cacheFactory) {
 /*
     Global state.
 */
-jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, globalCache) {
+jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, globalCache, $window) {
     return {
         data : {
             runTab: 'scheduled',
@@ -81,40 +81,51 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
                 this.data.jobTemplates = null;
                 this.data.runs = null;
 
-                // cache all jobs
-                Job.all({project_id: this.data.projectId}, function(jobs) {
-                    globalCache.put('job.all', jobs);
-                    angular.forEach(jobs, function(job) {
-                        globalCache.put('job.' + job.id, job);
+                // cache all projects
+                Project.all({project_id: self.data.projectId}, function(projects) {
+                    globalCache.put('project.all', projects);
+                    angular.forEach(projects, function(project) {
+                        globalCache.put('project.' + project.id, project);
                     });
 
-                    // cache all job-templates
-                    JobTemplate.all({project_id: self.data.projectId}, function(jobTemplates) {
-                        globalCache.put('jobTemplate.all', jobTemplates);
-                        angular.forEach(jobTemplates, function(template) {
-                            globalCache.put('jobTemplate.' + template.id, template);
+                    // cache all jobs
+                    Job.all({project_id: self.data.projectId}, function(jobs) {
+                        globalCache.put('job.all', jobs);
+                        angular.forEach(jobs, function(job) {
+                            globalCache.put('job.' + job.id, job);
                         });
 
-                        // cache all worker-pools
-                        WorkerPool.all({project_id: self.data.projectId}, function(workerPools) {
-                            globalCache.put('workerPool.all', workerPools);
-                            angular.forEach(workerPools, function(workerPool) {
-                                globalCache.put('workerPool.' + workerPool.id, workerPool);
+                        // cache all job-templates
+                        JobTemplate.all({project_id: self.data.projectId}, function(jobTemplates) {
+                            globalCache.put('jobTemplate.all', jobTemplates);
+                            angular.forEach(jobTemplates, function(template) {
+                                globalCache.put('jobTemplate.' + template.id, template);
                             });
 
-                            // cache all workers
-                            Worker.all({project_id: self.data.projectId}, function(workers) {
-                                globalCache.put('worker.all', workers);
-                                angular.forEach(workers, function(worker) {
-                                    globalCache.put('worker.' + worker.id, worker);
+                            // cache all worker-pools
+                            WorkerPool.all({project_id: self.data.projectId}, function(workerPools) {
+                                globalCache.put('workerPool.all', workerPools);
+                                angular.forEach(workerPools, function(workerPool) {
+                                    globalCache.put('workerPool.' + workerPool.id, workerPool);
                                 });
-                                callback();
+
+                                // cache all workers
+                                Worker.all({project_id: self.data.projectId}, function(workers) {
+                                    globalCache.put('worker.all', workers);
+                                    angular.forEach(workers, function(worker) {
+                                        globalCache.put('worker.' + worker.id, worker);
+                                    });
+                                    callback();
+                                });
+
                             });
 
                         });
 
                     });
+
                 });
+
             } else {
                 callback();
             }
@@ -123,15 +134,25 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
         // get the current project object.
         getProject: function(success) {
             var self = this;
+
+            if (parseInt(self.data.projectId) === 0) {
+                $window.document.title = 'All projects' + ' - Job-Runner';
+                return {
+                    title: 'All projects'
+                };
+            }
+
             var project = globalCache.get('project.' + self.data.projectId);
             if (!project) {
                 project = Project.get({id: self.data.projectId}, function(project) {
                     globalCache.put('project.' + self.data.projectId);
+                    $window.document.title = project.title + ' - Job-Runner';
                     if(success) {
                         success(project);
                     }
                 });
             } else if (success) {
+                $window.document.title = project.title + ' - Job-Runner';
                 success(project);
             }
             return project;
