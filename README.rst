@@ -57,6 +57,8 @@ Changes
 v3.0.2
 ~~~~~~
 
+* Apply "Save as new" button to all model admins.
+* Fix validation of the reschedule interval field (should not accept 0).
 * Add dropdown option to see the runs / jobs of all projects.
 * Show assigned workers in last 100 completed runs.
 

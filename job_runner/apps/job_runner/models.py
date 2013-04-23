@@ -247,7 +247,10 @@ class Job(models.Model):
         null=True,
         blank=True,
         validators=[validate_positive],
-        help_text=('Leave blank if you do not want to re-schedule this job.')
+        help_text=(
+            'A positive number (greater than 0). '
+            'Leave blank if you do not want to re-schedule this job.'
+        )
     )
     reschedule_interval_type = models.CharField(
         max_length=6,
