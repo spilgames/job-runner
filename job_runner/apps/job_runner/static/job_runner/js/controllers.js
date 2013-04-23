@@ -51,6 +51,11 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
             globalState.data.jobTab = 'details';
         };
 
+        // function for displaying script content
+        $scope.showScript = function() {
+            globalState.data.jobTab = 'script';
+        };
+
         // function for displaying recent runs of a job
         $scope.showRecentRuns = function() {
             globalState.data.jobTab = 'runs';
