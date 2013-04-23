@@ -31,8 +31,11 @@
                         <li ng-class="{active: global_state.data.jobTab == 'details'}">
                             <a href="#tab1" data-toggle="tab" target="_self" ng-click="showDetails()">Job details</a>
                         </li>
+                        <li ng-class="{active: global_state.data.jobTab == 'script'}">
+                            <a href="#tab2" data-toggle="tab" target="_self" ng-click="showScript()">Script</a>
+                        </li>
                         <li ng-class="{active: global_state.data.jobTab == 'runs'}">
-                            <a href="#tab2" data-toggle="tab" target="_self" ng-click="showRecentRuns()">Last 100 completed runs</a>
+                            <a href="#tab3" data-toggle="tab" target="_self" ng-click="showRecentRuns()">Last 100 completed runs</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -70,8 +73,11 @@
                                 </ng-switch>
                             </p>
 
-                            <h5>Project</h5>
-                            <p>{{ job.get_job_template().get_project().title }}</p>
+                            <h5>Job-template (project)</h5>
+                            <p>{{ job.get_job_template().title }} ({{ job.get_job_template().get_project().title }})</p>
+
+                            <h5>Worker pool</h5>
+                            <p>{{ job.get_worker_pool().title }}</p>
 
                             <h5>Description</h5>
                             <div ng-switch on="job.description != ''">
@@ -106,12 +112,13 @@
                                 <a href="/admin/job_runner/job/{{ job.id }}/" target="_blank">Open job in admin</a>
                             </p>
 
-                            <h5>Command</h5>
+                        </div>
+                        <div ng-class="{'tab-pane': true, active: global_state.data.jobTab == 'script'}" id="tab2">
                             <p>
                                 <pre>{{ job.script_content }}</pre>
                             </p>
                         </div>
-                        <div ng-class="{'tab-pane': true, active: global_state.data.jobTab == 'runs'}" id="tab2">
+                        <div ng-class="{'tab-pane': true, active: global_state.data.jobTab == 'runs'}" id="tab3">
                             <div id="run-performance-graph" class="run-performance-graph"></div>
                             <table class="table table-striped">
                                 <thead>
