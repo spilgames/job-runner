@@ -54,6 +54,13 @@ Links
 Changes
 -------
 
+v3.0.3
+~~~~~~
+
+* Make sure to rollback transaction in case of an exception in
+  ``broadcast_queue`` management command.
+
+
 v3.0.2
 ~~~~~~
 
