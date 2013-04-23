@@ -59,6 +59,11 @@ class Command(NoArgsCommand):
 
         """
         enqueueable_runs = Run.objects.enqueueable().select_related()
+
+        # Use select_for_update so that the enqueueable runs will be locked.
+        # This is to make sure that in case of multiple broadcasters we're not
+        # creating any duplicate runs in case of run_on_all_workers=True.
+        enqueueable_runs = enqueueable_runs.select_for_update()
         broadcasted = {}
         to_broadcast = []
 
