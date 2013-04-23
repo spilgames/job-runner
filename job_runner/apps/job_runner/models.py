@@ -2,6 +2,7 @@ import calendar
 from datetime import timedelta
 
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import signals
 from django.template import Context, Template
@@ -25,6 +26,14 @@ RESCHEDULE_TYPE_CHOICES = (
     ('AFTER_SCHEDULE_DTS', 'Increment schedule dts by interval'),
     ('AFTER_COMPLETE_DTS', 'Increment complete dts by interval'),
 )
+
+
+def validate_positive(value):
+    """
+    Validate that the value is positive (> 0).
+    """
+    if value <= 0:
+        raise ValidationError(u'The input should be greater than 0.')
 
 
 class RescheduleException(Exception):
@@ -237,7 +246,11 @@ class Job(models.Model):
     reschedule_interval = models.PositiveIntegerField(
         null=True,
         blank=True,
-        help_text=('Leave blank if you do not want to re-schedule this job.')
+        validators=[validate_positive],
+        help_text=(
+            'A positive number (greater than 0). '
+            'Leave blank if you do not want to re-schedule this job.'
+        )
     )
     reschedule_interval_type = models.CharField(
         max_length=6,
