@@ -61,6 +61,9 @@ v3.0.2
 * Fix validation of the reschedule interval field (should not accept 0).
 * Add dropdown option to see the runs / jobs of all projects.
 * Show assigned workers in last 100 completed runs.
+* The ``broadcast_queue`` command is now locking the selected runs. This is
+  needed to make sure that when there are multiple broadcasters, no duplicated
+  runs are generated (in case of run on all workers).
 
 
 v3.0.1
