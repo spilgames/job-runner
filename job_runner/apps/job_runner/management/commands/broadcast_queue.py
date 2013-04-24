@@ -112,6 +112,8 @@ class Command(NoArgsCommand):
                                 worker = workers[
                                     random.randint(0, len(workers) - 1)]
 
+                    # this is the case when a run has already a worker assigned
+                    # to it, or when we selected a random worker.
                     if worker:
                         to_broadcast.append((run, worker, publisher))
                         broadcasted[run.job.pk] = run.get_schedule_id()

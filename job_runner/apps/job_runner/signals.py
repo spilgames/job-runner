@@ -45,6 +45,11 @@ def post_run_update(sender, instance, created, raw, **kwargs):
 
         # on purpose we are not using .count() since with that, the
         # .select_for_update() does not have any effect.
+
+        # we need to lock the selected records here, to make sure we do not
+        # run this part in parallel (with the risk that when both transactions
+        # are marking the run as finished, they still see each other as
+        # unfinished since the transaction hasn't been committed yet).
         unfinished_siblings = len(instance.get_siblings().filter(
             return_dts__isnull=True).select_for_update())
 
