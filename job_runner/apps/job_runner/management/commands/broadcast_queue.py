@@ -67,60 +67,65 @@ class Command(NoArgsCommand):
         broadcasted = {}
         to_broadcast = []
 
-        for run in enqueueable_runs:
-            # schedule the run if we haven't already scheduled a run for the
-            # same job, or when the run.schedule_id is equal to the already
-            # scheduled run (which indicates that it needs to be scheduled
-            # in parallel).
-            if (run.job.pk not in broadcasted or
-                    (run.job.pk in broadcasted and
-                        broadcasted[run.job.pk] == run.get_schedule_id())):
-                worker = run.worker
+        try:
+            for run in enqueueable_runs:
+                # schedule the run if we haven't already scheduled a run for
+                # the same job, or when the run.schedule_id is equal to the
+                # already scheduled run (which indicates that it needs to be
+                # scheduled in parallel).
+                if (run.job.pk not in broadcasted or
+                        (run.job.pk in broadcasted and
+                            broadcasted[run.job.pk] == run.get_schedule_id())):
+                    worker = run.worker
 
-                if not worker:
-                    # if the job should run on all workers
-                    if run.job.run_on_all_workers:
-                        workers = run.job.worker_pool.workers.filter(
-                            enqueue_is_enabled=True)
-                        if workers.count():
-                            broadcasted[run.job.pk] = run.get_schedule_id()
+                    if not worker:
+                        # if the job should run on all workers
+                        if run.job.run_on_all_workers:
+                            workers = run.job.worker_pool.workers.filter(
+                                enqueue_is_enabled=True)
+                            if workers.count():
+                                broadcasted[run.job.pk] = run.get_schedule_id()
 
-                            for w in workers:
-                                # assign a worker to each run
-                                assigned_run = Run.objects.create(
-                                    job=run.job,
-                                    schedule_id=run.get_schedule_id(),
-                                    worker=w,
-                                    schedule_dts=run.schedule_dts,
-                                    is_manual=run.is_manual,
-                                    schedule_children=run.schedule_children,
-                                )
-                                to_broadcast.append(
-                                    (assigned_run, w, publisher))
+                                for w in workers:
+                                    # assign a worker to each run
+                                    assigned_run = Run.objects.create(
+                                        job=run.job,
+                                        schedule_id=run.get_schedule_id(),
+                                        worker=w,
+                                        schedule_dts=run.schedule_dts,
+                                        is_manual=run.is_manual,
+                                        schedule_children=run.schedule_children
+                                    )
+                                    to_broadcast.append(
+                                        (assigned_run, w, publisher))
 
-                            # delete the "old" unassigned run
-                            run.delete()
+                                # delete the "old" unassigned run
+                                run.delete()
 
-                    # select a random worker
-                    else:
-                        # TODO: take ping response into account?
-                        workers = run.job.worker_pool.workers.filter(
-                            enqueue_is_enabled=True)
-                        if len(workers):
-                            # pick a random active worker
-                            worker = workers[
-                                random.randint(0, len(workers) - 1)]
+                        # select a random worker
+                        else:
+                            # TODO: take ping response into account?
+                            workers = run.job.worker_pool.workers.filter(
+                                enqueue_is_enabled=True)
+                            if len(workers):
+                                # pick a random active worker
+                                worker = workers[
+                                    random.randint(0, len(workers) - 1)]
 
-                if worker:
-                    to_broadcast.append((run, worker, publisher))
-                    broadcasted[run.job.pk] = run.get_schedule_id()
+                    # this is the case when a run has already a worker assigned
+                    # to it, or when we selected a random worker.
+                    if worker:
+                        to_broadcast.append((run, worker, publisher))
+                        broadcasted[run.job.pk] = run.get_schedule_id()
 
-        # make sure that we commit, before we are actually broadcasting the
-        # runs :-)
-        transaction.commit()
+        except Exception:
+            logger.exception('Something went wrong, rolling back transaction')
+            transaction.rollback()
+        else:
+            transaction.commit()
 
-        for brocast_args in to_broadcast:
-            self._broadcast_run(*brocast_args)
+            for brocast_args in to_broadcast:
+                self._broadcast_run(*brocast_args)
 
     def _broadcast_run(self, run, worker, publisher):
         message = [

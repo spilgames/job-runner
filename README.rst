@@ -54,6 +54,15 @@ Links
 Changes
 -------
 
+v3.0.3
+~~~~~~
+
+* Make sure to rollback transaction in case of an exception in
+  ``broadcast_queue`` management command.
+* Fix issue with "run on all workers" jobs, where it wasn't detected that
+  all siblings finished.
+
+
 v3.0.2
 ~~~~~~
 
