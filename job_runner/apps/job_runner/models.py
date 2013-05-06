@@ -345,12 +345,18 @@ class Job(models.Model):
         for active_run in active_runs:
             if not active_run.schedule_id in active_schedule_ids:
                 active_schedule_ids.append(active_run.schedule_id)
-        if len(active_schedule_ids) > 0:
+
+        # since we are pre-scheduling (a new run is created, before the
+        # scheduled run is sent to the worker), having one schedule id is valid
+        if len(active_schedule_ids) > 1:
             return
 
         # check if job is setup for re-scheduling
         if self.reschedule_interval_type and self.reschedule_interval:
-            last_run = self.run_set.filter(is_manual=False)[0]
+            try:
+                last_run = self.run_set.filter(is_manual=False)[0]
+            except IndexError:
+                return
 
             if not last_run.return_dts:
                 # we can't reschedule if there wasn't a previous run

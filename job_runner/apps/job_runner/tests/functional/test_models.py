@@ -187,7 +187,7 @@ class RunTestCase(TestCase):
 
     def test_reschedule_with_run_scheduled(self):
         """
-        Test reschedule when there is already a run scheduled.
+        Test reschedule when there are already two runs scheduled.
         """
         job = Job.objects.get(pk=1)
         self.assertEqual(1, Run.objects.filter(job=job).count())
@@ -195,6 +195,30 @@ class RunTestCase(TestCase):
         Run.objects.filter(pk=1).update(
             schedule_dts=timezone.now(),
             enqueue_dts=timezone.now(),
+            return_dts=timezone.now()
+        )
+
+        for x in range(2):
+            Run.objects.create(
+                job=job,
+                schedule_dts=timezone.now()
+            )
+
+        self.assertEqual(3, Run.objects.filter(job=job).count())
+        job.reschedule()
+        self.assertEqual(3, Run.objects.filter(job=job).count())
+
+    def test_reschedule_with_started_run(self):
+        """
+        Test reschedule when there is an other run started and one scheduled.
+        """
+        job = Job.objects.get(pk=1)
+        self.assertEqual(1, Run.objects.filter(job=job).count())
+
+        Run.objects.filter(pk=1).update(
+            schedule_dts=timezone.now(),
+            enqueue_dts=timezone.now(),
+            start_dts=timezone.now(),
             return_dts=timezone.now()
         )
 
@@ -203,24 +227,6 @@ class RunTestCase(TestCase):
             schedule_dts=timezone.now()
         )
 
-        self.assertEqual(2, Run.objects.filter(job=job).count())
-        job.reschedule()
-        self.assertEqual(2, Run.objects.filter(job=job).count())
-
-    def test_reschedule_with_started_run(self):
-        """
-        Test reschedule when there is already an other started run active.
-        """
-        job = Job.objects.get(pk=1)
-        self.assertEqual(1, Run.objects.filter(job=job).count())
-
-        Run.objects.filter(pk=1).update(
-            schedule_dts=timezone.now(),
-            enqueue_dts=timezone.now(),
-            start_dts=timezone.now(),
-            return_dts=timezone.now()
-        )
-
         Run.objects.create(
             job=job,
             schedule_dts=timezone.now(),
@@ -228,9 +234,9 @@ class RunTestCase(TestCase):
             start_dts=timezone.now(),
         )
 
-        self.assertEqual(2, Run.objects.filter(job=job).count())
+        self.assertEqual(3, Run.objects.filter(job=job).count())
         job.reschedule()
-        self.assertEqual(2, Run.objects.filter(job=job).count())
+        self.assertEqual(3, Run.objects.filter(job=job).count())
 
     def test_get_notification_addresses(self):
         """
