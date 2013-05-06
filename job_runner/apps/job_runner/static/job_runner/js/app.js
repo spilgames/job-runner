@@ -16,8 +16,8 @@ angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project
         var pushRun = true;
         var toPop = [];
 
-        // update scheduled runs, if our run completed
-        if (data.event == 'returned') {
+        // update scheduled runs, if our run was enqueued or returned
+        if (data.event == 'enqueued' || data.event == 'returned') {
             Run.all({state: 'scheduled', project_id: globalState.data.projectId}, function(scheduled) {
                 angular.forEach(scheduled, function(run) {
                     var inList = false;

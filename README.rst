@@ -54,6 +54,13 @@ Links
 Changes
 -------
 
+v3.1.0
+~~~~~~
+
+* Schedule the next run before broadcasting the current scheduled run.
+* Remove "after complete dts" reschedule option.
+
+
 v3.0.3
 ~~~~~~
 

@@ -22,11 +22,6 @@ RESCHEDULE_INTERVAL_TYPE_CHOICES = (
     ('MONTH', 'Every x months'),
 )
 
-RESCHEDULE_TYPE_CHOICES = (
-    ('AFTER_SCHEDULE_DTS', 'Increment schedule dts by interval'),
-    ('AFTER_COMPLETE_DTS', 'Increment complete dts by interval'),
-)
-
 
 def validate_positive(value):
     """
@@ -262,12 +257,6 @@ class Job(models.Model):
             'by the number of days in the month.'
         )
     )
-    reschedule_type = models.CharField(
-        max_length=18,
-        blank=True,
-        choices=RESCHEDULE_TYPE_CHOICES,
-        db_index=True,
-    )
     notification_addresses = models.TextField(
         help_text='Separate addresses by a newline',
         blank=True,
@@ -326,26 +315,14 @@ class Job(models.Model):
             An instance of :class:`datetime.datetime` or ``None`` to schedule
             now.
 
-        When the job is already scheduled to run now, but the run has not yet
-        been picked up by the worker (the worker could be dead or the job
-        enqueue is disabled), it will not schedule a new run.
-
         """
         if not dts:
             dts = timezone.now()
 
-        # don't schedule a new run when it is already scheduled to run now
-        runs = Run.objects.filter(
+        Run.objects.create(
             job=self,
-            schedule_dts__lte=timezone.now(),
-            return_dts__isnull=True,
-            is_manual=False,
+            schedule_dts=dts,
         )
-        if not runs.count():
-            Run.objects.create(
-                job=self,
-                schedule_dts=dts,
-            )
 
     def reschedule(self):
         """
@@ -361,32 +338,38 @@ class Job(models.Model):
         # there is already an other run which is not finished yet, do
         # not re-schedule, it will be rescheduled when the other job
         # finishes
-        if self.run_set.filter(return_dts__isnull=True).count():
+        active_runs = self.run_set.filter(return_dts__isnull=True)
+        active_schedule_ids = []
+
+        # TODO: is there a way in the Django ORM to achieve the same?
+        for active_run in active_runs:
+            if not active_run.schedule_id in active_schedule_ids:
+                active_schedule_ids.append(active_run.schedule_id)
+
+        # since we are pre-scheduling (a new run is created, before the
+        # scheduled run is sent to the worker), having one schedule id is valid
+        if len(active_schedule_ids) > 1:
             return
 
         # check if job is setup for re-scheduling
-        if (self.reschedule_type and self.reschedule_interval_type
-                and self.reschedule_interval):
-            last_run = self.run_set.filter(is_manual=False)[0]
+        if self.reschedule_interval_type and self.reschedule_interval:
+            try:
+                last_run = self.run_set.filter(is_manual=False)[0]
+            except IndexError:
+                return
 
             if not last_run.return_dts:
                 # we can't reschedule if there wasn't a previous run
                 return
 
-            # find the reschedule reference date
-            if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
-                reference_date = last_run.schedule_dts
-            elif self.reschedule_type == 'AFTER_COMPLETE_DTS':
-                reference_date = last_run.return_dts
-
             try:
-                reschedule_date = self._get_reschedule_date(reference_date)
+                reschedule_date = self._get_reschedule_date(
+                    last_run.schedule_dts)
 
-                if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
-                    # correct daylight saving-time changes to make sure we keep
-                    # re-scheduling at the same hour (in local time).
-                    reschedule_date = correct_dst_difference(
-                        last_run.schedule_dts, reschedule_date)
+                # correct daylight saving-time changes to make sure we keep
+                # re-scheduling at the same hour (in local time).
+                reschedule_date = correct_dst_difference(
+                    last_run.schedule_dts, reschedule_date)
 
                 self.schedule(reschedule_date)
             except RescheduleException:

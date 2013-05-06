@@ -212,7 +212,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, glob
             job: $scope.job.resource_uri,
             is_manual: true,
             schedule_children: withChildren,
-            schedule_dts: moment().format('YYYY-MM-DD HH:mm:ss')
+            schedule_dts: moment().format('YYYY-MM-DD HH:mm:ssZ')
         });
         newRun.$create(function() {
             $scope.scheduled_run = newRun;

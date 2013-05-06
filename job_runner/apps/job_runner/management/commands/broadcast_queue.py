@@ -78,6 +78,10 @@ class Command(NoArgsCommand):
                             broadcasted[run.job.pk] == run.get_schedule_id())):
                     worker = run.worker
 
+                    # reschedule the job (the reschedule method will take care
+                    # of checking if we should reschedule the job or not).
+                    run.job.reschedule()
+
                     if not worker:
                         # if the job should run on all workers
                         if run.job.run_on_all_workers:

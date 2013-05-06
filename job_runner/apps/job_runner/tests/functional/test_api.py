@@ -713,29 +713,6 @@ class RunTestCase(ApiTestBase):
 
         self.assertEqual(401, response.status_code)
 
-    def test_patch_with_reschedule(self):
-        """
-        Test PATCH ``/api/v1/run/1/`` causing a reschedule.
-        """
-        return_dts = timezone.now()
-        Run.objects.update(enqueue_dts=timezone.now())
-        response = self.patch(
-            '/api/v1/run/1/',
-            {
-                'return_dts': return_dts.isoformat(' '),
-                'return_success': True,
-            }
-        )
-
-        self.assertEqual(202, response.status_code)
-        self.assertEqual(
-            1,
-            Run.objects.filter(job_id=1, enqueue_dts__isnull=True).count()
-        )
-        self.assertEqual(
-            return_dts, Run.objects.filter(job_id=1)[0].return_dts)
-        self.assertEqual(1, Job.objects.get(pk=1).last_completed_schedule_id)
-
     def test_returned_with_error(self):
         """
         Test PATCH ``/api/v1/run/1/`` returned with error.
@@ -864,6 +841,7 @@ class ChainedRunTestCase(ApiTestBase):
 
         """
         Run.objects.update(enqueue_dts=timezone.now())
+        self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
         response = self.patch(
             '/api/v1/run/1/',
             {
@@ -873,7 +851,6 @@ class ChainedRunTestCase(ApiTestBase):
         )
 
         self.assertEqual(202, response.status_code)
-        self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
         self.assertEqual(1, Job.objects.get(pk=3).run_set.count())
 
     def test_patch_with_reschedule_no_children_reschedule(self):
@@ -895,7 +872,6 @@ class ChainedRunTestCase(ApiTestBase):
         )
 
         self.assertEqual(202, response.status_code)
-        self.assertEqual(2, Job.objects.get(pk=1).run_set.count())
         self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
 
 
