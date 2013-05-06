@@ -326,26 +326,14 @@ class Job(models.Model):
             An instance of :class:`datetime.datetime` or ``None`` to schedule
             now.
 
-        When the job is already scheduled to run now, but the run has not yet
-        been picked up by the worker (the worker could be dead or the job
-        enqueue is disabled), it will not schedule a new run.
-
         """
         if not dts:
             dts = timezone.now()
 
-        # don't schedule a new run when it is already scheduled to run now
-        runs = Run.objects.filter(
+        Run.objects.create(
             job=self,
-            schedule_dts__lte=timezone.now(),
-            return_dts__isnull=True,
-            is_manual=False,
+            schedule_dts=dts,
         )
-        if not runs.count():
-            Run.objects.create(
-                job=self,
-                schedule_dts=dts,
-            )
 
     def reschedule(self):
         """

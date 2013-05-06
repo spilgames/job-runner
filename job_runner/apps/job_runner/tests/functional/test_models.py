@@ -281,15 +281,6 @@ class RunTestCase(TestCase):
         job.schedule()
         self.assertEqual(1, job.run_set.count())
 
-    def test_schedule_already_scheduled(self):
-        """
-        Test direct schedule when there is already a scheduled run available.
-        """
-        job = Job.objects.get(pk=1)
-        self.assertEqual(1, job.run_set.count())
-        job.schedule()
-        self.assertEqual(1, job.run_set.count())
-
     def test_schedule_id_set_on_create(self):
         """
         Test that the ``schedule_id`` is set on create.
