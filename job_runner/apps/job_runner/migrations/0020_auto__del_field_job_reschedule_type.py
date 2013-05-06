@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Adding field 'Job.reschedule_type'
         db.add_column('job_runner_job', 'reschedule_type',
-                      self.gf('django.db.models.fields.CharField')(blank=True, default='', max_length=18, db_index=True),
+                      self.gf('django.db.models.fields.CharField')(blank=True, default='AFTER_SCHEDULE_DTS', max_length=18, db_index=True),
                       keep_default=False)
 
 
