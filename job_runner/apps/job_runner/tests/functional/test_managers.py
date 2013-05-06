@@ -29,7 +29,7 @@ class KillRequestManagerTestCase(TestCase):
     """
     Tests for the kill-request manager.
     """
-    fixtures = ['test_jobs', 'test_workers']
+    fixtures = ['test_jobs', 'test_workers', 'test_job_templates']
 
     def test_killable(self):
         """

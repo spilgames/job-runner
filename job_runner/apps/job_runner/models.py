@@ -349,7 +349,14 @@ class Job(models.Model):
         # there is already an other run which is not finished yet, do
         # not re-schedule, it will be rescheduled when the other job
         # finishes
-        if self.run_set.filter(return_dts__isnull=True).count():
+        active_runs = self.run_set.filter(return_dts__isnull=True)
+        active_schedule_ids = []
+
+        # TODO: is there a way in the Django ORM to achieve the same?
+        for active_run in active_runs:
+            if not active_run.schedule_id in active_schedule_ids:
+                active_schedule_ids.append(active_run.schedule_id)
+        if len(active_schedule_ids) > 0:
             return
 
         # check if job is setup for re-scheduling

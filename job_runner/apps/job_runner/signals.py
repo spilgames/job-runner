@@ -17,11 +17,11 @@ def post_run_update(sender, instance, created, raw, **kwargs):
     """
     Post action after saving a run instance.
 
-    This will call the ``reschedule`` method after a successful object
-    update, which will re-schedule the job if needed (incl. children).
+    This will:
 
-    If the object update represents the returning of a run with error,
-    it will call also ``send_error_notification`` method.
+        * send an error notification by e-mail when the job failed
+        * disable the job when it failed more times than allowed
+        * schedule it's children (if applicable)
 
     """
     if created or raw:
@@ -43,6 +43,12 @@ def post_run_update(sender, instance, created, raw, **kwargs):
 
             job.save()
 
+        else:
+            # reset the fail count
+            job.fail_times = 0
+            job.last_completed_schedule_id = instance.schedule_id
+            job.save()
+
         # on purpose we are not using .count() since with that, the
         # .select_for_update() does not have any effect.
 
@@ -52,15 +58,6 @@ def post_run_update(sender, instance, created, raw, **kwargs):
         # unfinished since the transaction hasn't been committed yet).
         unfinished_siblings = len(instance.get_siblings().filter(
             return_dts__isnull=True).select_for_update())
-
-        if not unfinished_siblings:
-            job.reschedule()
-
-        if instance.return_success:
-            # reset the fail count
-            job.fail_times = 0
-            job.last_completed_schedule_id = instance.schedule_id
-            job.save()
 
         if (instance.return_success and instance.schedule_children
                 and not unfinished_siblings):
