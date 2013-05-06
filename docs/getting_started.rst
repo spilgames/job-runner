@@ -253,7 +253,6 @@ of the previous run.
 
       * Reschedule interval: 1
       * Reschedule interval type: select *Every x minutes*
-      * Reschedule type: select *Increment schedule dts by interval*
 
    #. Under *Runs*, select the current date and type by clicking on the
       date-picker and time-picker icons.

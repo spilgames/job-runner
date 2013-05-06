@@ -22,11 +22,6 @@ RESCHEDULE_INTERVAL_TYPE_CHOICES = (
     ('MONTH', 'Every x months'),
 )
 
-RESCHEDULE_TYPE_CHOICES = (
-    ('AFTER_SCHEDULE_DTS', 'Increment schedule dts by interval'),
-    ('AFTER_COMPLETE_DTS', 'Increment complete dts by interval'),
-)
-
 
 def validate_positive(value):
     """
@@ -262,12 +257,6 @@ class Job(models.Model):
             'by the number of days in the month.'
         )
     )
-    reschedule_type = models.CharField(
-        max_length=18,
-        blank=True,
-        choices=RESCHEDULE_TYPE_CHOICES,
-        db_index=True,
-    )
     notification_addresses = models.TextField(
         help_text='Separate addresses by a newline',
         blank=True,
@@ -360,28 +349,21 @@ class Job(models.Model):
             return
 
         # check if job is setup for re-scheduling
-        if (self.reschedule_type and self.reschedule_interval_type
-                and self.reschedule_interval):
+        if self.reschedule_interval_type and self.reschedule_interval:
             last_run = self.run_set.filter(is_manual=False)[0]
 
             if not last_run.return_dts:
                 # we can't reschedule if there wasn't a previous run
                 return
 
-            # find the reschedule reference date
-            if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
-                reference_date = last_run.schedule_dts
-            elif self.reschedule_type == 'AFTER_COMPLETE_DTS':
-                reference_date = last_run.return_dts
-
             try:
-                reschedule_date = self._get_reschedule_date(reference_date)
+                reschedule_date = self._get_reschedule_date(
+                    last_run.schedule_dts)
 
-                if self.reschedule_type == 'AFTER_SCHEDULE_DTS':
-                    # correct daylight saving-time changes to make sure we keep
-                    # re-scheduling at the same hour (in local time).
-                    reschedule_date = correct_dst_difference(
-                        last_run.schedule_dts, reschedule_date)
+                # correct daylight saving-time changes to make sure we keep
+                # re-scheduling at the same hour (in local time).
+                reschedule_date = correct_dst_difference(
+                    last_run.schedule_dts, reschedule_date)
 
                 self.schedule(reschedule_date)
             except RescheduleException:

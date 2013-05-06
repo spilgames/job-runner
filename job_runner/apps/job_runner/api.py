@@ -247,7 +247,6 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
             'enqueue_is_enabled',
             'reschedule_interval',
             'reschedule_interval_type',
-            'reschedule_type',
         ]
         filtering = {
             'job_template': ALL_WITH_RELATIONS,

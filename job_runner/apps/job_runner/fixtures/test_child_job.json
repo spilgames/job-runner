@@ -4,7 +4,6 @@
         "model": "job_runner.job", 
         "fields": {
             "parent": 1, 
-            "reschedule_type": "", 
             "script_content": "#!/usr/bin/env python\r\n\r\nprint \"Hello world\"\r\n", 
             "job_template": 1, 
             "worker_pool": 1,

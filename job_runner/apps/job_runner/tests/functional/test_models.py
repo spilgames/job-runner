@@ -25,9 +25,9 @@ class RunTestCase(TestCase):
         'test_jobs'
     ]
 
-    def test_reschedule_after_schedule_dts(self):
+    def test_reschedule(self):
         """
-        Test reschedule after schedule dts.
+        Test reschedule.
         """
         self.assertEqual(1, Run.objects.filter(job_id=1).count())
         Job.objects.get(pk=1).reschedule()
@@ -51,9 +51,9 @@ class RunTestCase(TestCase):
             runs[1].schedule_dts
         )
 
-    def test_reschedule_after_schedule_dts_not_in_past(self):
+    def test_reschedule_not_in_past(self):
         """
-        Test reschedule after schedule dts is never in the past.
+        Test reschedule dts is never in the past.
         """
         dts_now = timezone.now()
 
@@ -76,29 +76,6 @@ class RunTestCase(TestCase):
                 dts_now - timedelta(days=31),
                 dts_now + timedelta(days=1)
             )
-        )
-
-    def test_reschedule_after_complete_dts(self):
-        """
-        Test reschedule after complete dts.
-        """
-        job = Job.objects.get(pk=1)
-        job.reschedule_type = 'AFTER_COMPLETE_DTS'
-        job.save()
-
-        Run.objects.filter(pk=1).update(
-            enqueue_dts=timezone.now(),
-            return_dts=timezone.now()
-        )
-
-        job.reschedule()
-
-        self.assertEqual(2, Run.objects.filter(job_id=1).count())
-
-        runs = Run.objects.filter(job_id=1).all()
-        self.assertEqual(
-            runs[0].return_dts + timedelta(days=1),
-            runs[1].schedule_dts
         )
 
     def test_reschedule_monthly_after_schedule_dts(self):
@@ -149,14 +126,15 @@ class RunTestCase(TestCase):
         Test reschedule with exclude time.
         """
         job = Job.objects.get(pk=1)
-        job.reschedule_type = 'AFTER_COMPLETE_DTS'
         job.reschedule_interval_type = 'HOUR'
         job.save()
 
         Run.objects.filter(pk=1).update(
             enqueue_dts=timezone.now(),
+            schedule_dts=timezone.make_aware(
+                datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone()),
             return_dts=timezone.make_aware(
-                datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone())
+                datetime(2032, 1, 1, 11, 59), timezone.get_default_timezone()),
         )
 
         RescheduleExclude.objects.create(
@@ -183,7 +161,6 @@ class RunTestCase(TestCase):
         Test reschedule with exclude time which is invalid.
         """
         job = Job.objects.get(pk=1)
-        job.reschedule_type = 'AFTER_COMPLETE_DTS'
         job.reschedule_interval_type = 'HOUR'
         job.save()
 
