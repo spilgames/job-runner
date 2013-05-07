@@ -57,6 +57,10 @@ Changes
 v3.1.0
 ~~~~~~
 
+.. warning:: Before deploying this version, make sure that there aren't any
+             running jobs! One way to do this is to disable all projects in the
+             admin, let all runs complete, and then upgrade.
+
 * Schedule the next run before broadcasting the current scheduled run.
 * Remove "after complete dts" reschedule option.
 
