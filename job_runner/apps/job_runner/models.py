@@ -227,7 +227,10 @@ class Job(models.Model):
         help_text='Run this job on all workers within the selected pool.',
     )
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(
+        blank=True,
+        help_text='You can use Markdown syntax to format this description.',
+    )
     script_content_partial = models.TextField('script content')
     script_content = models.TextField(editable=False)
     enqueue_is_enabled = models.BooleanField(
