@@ -81,7 +81,7 @@
 
                             <h5>Description</h5>
                             <div ng-switch on="job.description != ''">
-                                <p ng-switch-when="true">{{ job.description }}</p>
+                                <p ng-switch-when="true"><markdown>{{ job.description }}</markdown></p>
                                 <p ng-switch-default>No description given.</p>
                             </div>
 

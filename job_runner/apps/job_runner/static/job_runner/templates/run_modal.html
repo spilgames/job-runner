@@ -27,7 +27,7 @@
                     <p><pre>{{ run.get_job().script_content }}</pre></p>
                 </div>
                 <div id="description" class="tab-pane">
-                    <p>{{ run.get_job().description }}</p>
+                    <p><markdown>{{ run.get_job().description }}</markdown></p>
                 </div>
                 <div id="details" ng-class="{'tab-pane': true, active: run.get_run_log() == null}">
                     <table class="table table-bordered">
