@@ -46,9 +46,8 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
         $scope.jobs = globalState.getAllJobs();
         $scope.job_templates = globalState.getAllJobTemplates();
 
-        // function for displaying job details
-        $scope.showDetails = function() {
-            globalState.data.jobTab = 'details';
+        $scope.changeTab = function(tabName) {
+            globalState.data.jobTab = tabName;
         };
 
         // function for displaying script content
