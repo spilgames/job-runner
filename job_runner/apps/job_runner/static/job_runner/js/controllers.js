@@ -46,8 +46,13 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
         $scope.jobs = globalState.getAllJobs();
         $scope.job_templates = globalState.getAllJobTemplates();
 
-        $scope.changeTab = function(tabName) {
-            globalState.data.jobTab = tabName;
+        $scope.showDetails = function(tabName) {
+            globalState.data.jobTab = 'details';
+
+            // Get scheduled runs for this job
+            Run.all({job: $routeParams.job, state: 'scheduled'}, function(scheduledRuns) {
+                $scope.scheduled_runs = scheduledRuns;
+            });
         };
 
         // function for displaying script content
@@ -89,6 +94,9 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
             if (globalState.data.jobTab == 'runs') {
                 // make sure that we update the recent runs
                 $scope.showRecentRuns();
+            } else if (globalState.data.jobTab == 'details') {
+                // make sure that we update the next scheduled runs
+                $scope.showDetails();
             }
         }
 
