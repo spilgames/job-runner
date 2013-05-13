@@ -46,7 +46,7 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
         $scope.jobs = globalState.getAllJobs();
         $scope.job_templates = globalState.getAllJobTemplates();
 
-        $scope.showDetails = function(tabName) {
+        $scope.showDetails = function() {
             globalState.data.jobTab = 'details';
 
             // Get scheduled runs for this job
