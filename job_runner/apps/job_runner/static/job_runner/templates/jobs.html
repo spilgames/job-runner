@@ -93,12 +93,13 @@
                                     <tr>
                                         <th class="twentyfive">Next schedule(s)</th>
                                         <td class="seventyfive">
-                                            <ng-switch on="scheduled_runs != []">
+                                            <ng-switch on="scheduled_runs.length > 0">
                                                 <ul ng-switch-when="true">
                                                     <li ng-repeat="scheduled in scheduled_runs">
                                                         <a href="runs/{{ scheduled.id }}/">{{ scheduled.schedule_dts | formatdts }}</a>
                                                     </li>
                                                 </ul>
+                                                <span ng-switch-default>There are no scheduled runs.</span>
                                             </ng-switch>
                                         </td>
                                     </tr>

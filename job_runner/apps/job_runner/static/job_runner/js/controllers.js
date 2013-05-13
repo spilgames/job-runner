@@ -197,7 +197,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, glob
         $scope.job = Job.get({id: jobId}, function(job) {
             job.get_job_template(function(jobTemplate) {
                 jobTemplate.get_project(function(project) {
-                    Group.all({}, function(groups) {
+                    globalState.getAllGroups(function(groups) {
                         angular.forEach(groups, function(group) {
                             if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
                                 $scope.auth_permissions = true;
