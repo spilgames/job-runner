@@ -7,6 +7,7 @@ appModule.config(function($routeProvider, $locationProvider) {
     // setup URL routes
     $routeProvider.
         when('/', {controller: RedirectToFirstProjectCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
+        when('/no-projects/', {controller: NoProjectsCtrl, templateUrl: '/static/job_runner/templates/no_projects.html'}).
         when('/project/:project/runs/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/project/:project/runs/:run/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/project/:project/jobs/', {controller: JobListCtrl, templateUrl: '/static/job_runner/templates/jobs.html'}).

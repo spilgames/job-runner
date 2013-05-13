@@ -118,6 +118,21 @@ var RedirectToFirstProjectCtrl = function($location, Project) {
     Project.all({}, function(projects) {
         if (projects.length > 0) {
             $location.path('/project/'+ projects[0].id +'/runs/');
+        } else {
+            $location.path('/no-projects/');
+        }
+    });
+};
+
+
+/*
+    Controller when there are no projects available.
+*/
+var NoProjectsCtrl = function($location, Project) {
+    // Redirect the user when projects or permissions were added.
+    Project.all({}, function(projects) {
+        if (projects.length > 0) {
+            $location.path('/');
         }
     });
 };

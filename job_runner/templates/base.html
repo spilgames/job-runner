@@ -54,7 +54,13 @@
                     {% if user.is_authenticated %}
                         <ul class="nav pull-right">
                             <li class="dropdown">
-                                <a class="dropdown-toggle" data-toggle="dropdown">{% templatetag openvariable %} global_state.getProject().title {% templatetag closevariable %} <b class="caret"></b></a>
+                                <a class="dropdown-toggle" data-toggle="dropdown">
+                                    <ng-switch on="global_state.data.projectId != null">
+                                        <span ng-switch-when="true">{% templatetag openvariable %} global_state.getProject().title {% templatetag closevariable %} </span>
+                                        <span ng-switch-when="false">Select a project </span>
+                                    </ng-switch>
+                                    <b class="caret"></b>
+                                </a>
                                 <ul class="dropdown-menu">
                                     <li ng-repeat="project in projects">
                                         <a href="/project/{% templatetag openvariable %} project.id {% templatetag closevariable %}/{% templatetag openvariable %} global_state.data.page {% templatetag closevariable %}/">{% templatetag openvariable %} project.title {% templatetag closevariable %}</a>

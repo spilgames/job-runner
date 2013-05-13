@@ -10,6 +10,11 @@ view = login_required(DashboardView.as_view())
 urlpatterns = patterns(
     '',
     url(
+        r'^no-projects/$',
+        view,
+        name='no-projects',
+    ),
+    url(
         r'^project/(?P<project_id>\d+)/$',
         view,
         name='project'
