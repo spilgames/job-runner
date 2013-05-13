@@ -54,6 +54,14 @@ Links
 Changes
 -------
 
+v3.1.1
+~~~~~~
+
+* Markdown support for job descriptions was added.
+* Scheduled runs are now displayed in the job details.
+* Improve performance by increasing the default API page-size to 200.
+
+
 v3.1.0
 ~~~~~~
 
