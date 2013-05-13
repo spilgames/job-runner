@@ -46,9 +46,13 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
         $scope.jobs = globalState.getAllJobs();
         $scope.job_templates = globalState.getAllJobTemplates();
 
-        // function for displaying job details
         $scope.showDetails = function() {
             globalState.data.jobTab = 'details';
+
+            // Get scheduled runs for this job
+            Run.all({job: $routeParams.job, state: 'scheduled'}, function(scheduledRuns) {
+                $scope.scheduled_runs = scheduledRuns;
+            });
         };
 
         // function for displaying script content
@@ -90,6 +94,9 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
             if (globalState.data.jobTab == 'runs') {
                 // make sure that we update the recent runs
                 $scope.showRecentRuns();
+            } else if (globalState.data.jobTab == 'details') {
+                // make sure that we update the next scheduled runs
+                $scope.showDetails();
             }
         }
 
@@ -111,6 +118,21 @@ var RedirectToFirstProjectCtrl = function($location, Project) {
     Project.all({}, function(projects) {
         if (projects.length > 0) {
             $location.path('/project/'+ projects[0].id +'/runs/');
+        } else {
+            $location.path('/no-projects/');
+        }
+    });
+};
+
+
+/*
+    Controller when there are no projects available.
+*/
+var NoProjectsCtrl = function($location, Project) {
+    // Redirect the user when projects or permissions were added.
+    Project.all({}, function(projects) {
+        if (projects.length > 0) {
+            $location.path('/');
         }
     });
 };
@@ -190,7 +212,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, glob
         $scope.job = Job.get({id: jobId}, function(job) {
             job.get_job_template(function(jobTemplate) {
                 jobTemplate.get_project(function(project) {
-                    Group.all({}, function(groups) {
+                    globalState.getAllGroups(function(groups) {
                         angular.forEach(groups, function(group) {
                             if(project.auth_groups.indexOf(group.resource_uri) >= 0) {
                                 $scope.auth_permissions = true;

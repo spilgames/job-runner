@@ -164,6 +164,9 @@ GRAPPELLI_ADMIN_HEADLINE = 'Job-Runner'
 GRAPPELLI_ADMIN_TITLE = 'Job-Runner'
 
 
+API_LIMIT_PER_PAGE = 200
+
+
 JOB_RUNNER_WS_SERVER = 'ws://localhost:5000/'
 """
 The URL to the Job-Runner WebSocket server.

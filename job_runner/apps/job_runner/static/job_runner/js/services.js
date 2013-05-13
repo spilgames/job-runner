@@ -52,7 +52,7 @@ jobrunnerServices.factory('globalCache', function($cacheFactory) {
 /*
     Global state.
 */
-jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, globalCache, $window) {
+jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, Group, globalCache, $window) {
     return {
         data : {
             runTab: 'scheduled',
@@ -172,6 +172,22 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
                 success(jobs);
             }
             return jobs;
+        },
+
+        // get all groups
+        getAllGroups: function(success) {
+            var groups = globalCache.get('group.all');
+            if (!groups) {
+                groups = Group.all({}, function(groups) {
+                    globalCache.put('group.all', groups);
+                    if(success) {
+                        success(groups);
+                    }
+                });
+            } else if (success) {
+                success(groups);
+            }
+            return groups;
         },
 
         // get all job-templates.

@@ -29,7 +29,7 @@
                 <div class="tabbable">
                     <ul class="nav nav-tabs">
                         <li ng-class="{active: global_state.data.jobTab == 'details'}">
-                            <a href="#tab1" data-toggle="tab" target="_self" ng-click="showDetails()">Job details</a>
+                            <a href="#tab1" data-toggle="tab" target="_self" ng-click="showDetails()">Overview</a>
                         </li>
                         <li ng-class="{active: global_state.data.jobTab == 'script'}">
                             <a href="#tab2" data-toggle="tab" target="_self" ng-click="showScript()">Script</a>
@@ -41,76 +41,102 @@
                     <div class="tab-content">
                         <div ng-class="{'tab-pane': true, active: global_state.data.jobTab == 'details'}" id="tab1">
 
-                            <div class="pull-right" ng-controller="JobActionCtrl">
-                                <div ng-class="{hidden: auth_permissions != true}">
-                                    <ng-switch on="scheduled_run == null">
-                                        <div ng-switch-when="true" class="btn-group">
-                                            <button class="btn" ng-click="scheduleNow(false)"><i class="icon-play"></i> <span>Schedule now</span></button>
-                                            <button ng-class="{btn: true, 'dropdown-toggle': true, hidden: job.children.length < 1}" data-toggle="dropdown">
-                                                <span class="caret"></span>
-                                            </button>
-                                            <ul ng-class="{'dropdown-menu': true, hidden: job.children.length < 1}">
-                                                <li><a href="#" ng-click="scheduleNow(true)">Schedule now incl. children</a></li>
-                                            </ul>
-                                        </div>
-                                        <div ng-switch-when="false" class="btn-group">
-                                            <button class="btn" disabled="disabled"><i class="icon-ok"></i> Job scheduled</button>
-                                        </div>
-                                    </ng-switch>
+                            <div class="clearfix">
+                                <div class="pull-right" ng-controller="JobActionCtrl">
+                                    <div ng-class="{hidden: auth_permissions != true}">
+                                        <ng-switch on="scheduled_run == null">
+                                            <div ng-switch-when="true" class="btn-group">
+                                                <button class="btn" ng-click="scheduleNow(false)"><i class="icon-play"></i> <span>Schedule now</span></button>
+                                                <button ng-class="{btn: true, 'dropdown-toggle': true, hidden: job.children.length < 1}" data-toggle="dropdown">
+                                                    <span class="caret"></span>
+                                                </button>
+                                                <ul ng-class="{'dropdown-menu': true, hidden: job.children.length < 1}">
+                                                    <li><a href="#" ng-click="scheduleNow(true)">Schedule now incl. children</a></li>
+                                                </ul>
+                                            </div>
+                                            <div ng-switch-when="false" class="btn-group">
+                                                <button class="btn" disabled="disabled"><i class="icon-ok"></i> Job scheduled</button>
+                                            </div>
+                                        </ng-switch>
 
-                                    <ng-switch on="job.enqueue_is_enabled">
-                                        <button ng-switch-when="true" class="btn btn-danger" ng-click="toggleEnqueue(false)"><span>Suspend enqueue</span></button>
-                                        <button ng-switch-when="false" class="btn btn-success" ng-click="toggleEnqueue(true)"><span>Enable enqueue</span></button>
-                                    </ng-switch>
+                                        <ng-switch on="job.enqueue_is_enabled">
+                                            <button ng-switch-when="true" class="btn btn-danger" ng-click="toggleEnqueue(false)"><span>Suspend enqueue</span></button>
+                                            <button ng-switch-when="false" class="btn btn-success" ng-click="toggleEnqueue(true)"><span>Enable enqueue</span></button>
+                                        </ng-switch>
+                                    </div>
                                 </div>
                             </div>
 
-                            <h5>Title</h5>
-                            <p>
-                                {{ job.title }}
-                                <ng-switch on="job.enqueue_is_enabled">
-                                    <span ng-switch-when="false">(enqueue is suspended)</span>
-                                </ng-switch>
-                            </p>
+                            <table class="table margin-top">
+                                <tbody>
+                                    <tr>
+                                        <th class="width25pc">Title</th>
+                                        <td class="width75pc">{{ job.title }}</td> 
+                                    </tr>
+                                    <tr>
+                                        <th class="width25pc">Job-template (project)</th>
+                                        <td>{{ job.get_job_template().title }} ({{ job.get_job_template().get_project().title }})</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="width25pc">Worker pool</th>
+                                        <td class="width75pc">{{ job.get_worker_pool().title }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="width25pc">Re-schedule interval</th>
+                                        <td class="width75pc">
+                                            <ng-switch on="job.reschedule_interval != '' && job.reschedule_interval_type != ''">
+                                                <span ng-switch-when="true">Every {{ job.reschedule_interval }} {{ job.reschedule_interval_type |lowercase }}(s)</span>
+                                                <span ng-switch-default>No interval specified.</span>
+                                            </ng-switch>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="width25pc">Next schedule(s)</th>
+                                        <td class="width75pc">
+                                            <ng-switch on="scheduled_runs.length > 0">
+                                                <ul ng-switch-when="true">
+                                                    <li ng-repeat="scheduled in scheduled_runs">
+                                                        <a href="runs/{{ scheduled.id }}/">{{ scheduled.schedule_dts | formatdts }}</a>
+                                                    </li>
+                                                </ul>
+                                                <span ng-switch-default>There are no scheduled runs.</span>
+                                            </ng-switch>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="width25pc">Parent</th>
+                                        <td class=="width75pc">
+                                           <ng-switch on="job.parent != null">
+                                                <span ng-switch-when="true"><a href="../{{ job.get_parent().id }}/">{{ job.get_parent().title }}</a></span>
+                                                <span ng-switch-default>This job does not have a parent.</span>
+                                            </ng-switch>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="width25pc">Children</th>
+                                        <td class="width75pc">
+                                            <ng-switch on="job.children.length != 0">
+                                                <ul ng-switch-when="true">
+                                                    <li ng-repeat="child in job.get_children()"><a href="../{{ child.id }}/">{{ child.title }}</a></li>
+                                                </ul>
+                                                <span ng-switch-default>This job does not have any children.</span>
+                                            </ng-switch>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="width25pc">Admin link</th>
+                                        <td class="width75pc">
+                                            <a href="/admin/job_runner/job/{{ job.id }}/" target="_blank">Open job in admin</a> (requires admin access)
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                            <h5>Job-template (project)</h5>
-                            <p>{{ job.get_job_template().title }} ({{ job.get_job_template().get_project().title }})</p>
-
-                            <h5>Worker pool</h5>
-                            <p>{{ job.get_worker_pool().title }}</p>
-
-                            <h5>Description</h5>
-                            <div ng-switch on="job.description != ''">
-                                <p ng-switch-when="true">{{ job.description }}</p>
-                                <p ng-switch-default>No description given.</p>
-                            </div>
-
-                            <h5>Re-schedule interval</h5>
-                            <div ng-switch on="job.reschedule_interval != '' && job.reschedule_interval_type != ''">
-                                <p ng-switch-when="true">Every {{ job.reschedule_interval }} {{ job.reschedule_interval_type |lowercase }}(s)</p>
-                                <p ng-switch-default>No interval specified.</p>
-                            </div>
-
-                            <h5>Parent</h5>
-                            <div ng-switch on="job.parent != null">
-                                <p ng-switch-when="true"><a href="../{{ job.get_parent().id }}/">{{ job.get_parent().title }}</a></p>
-                                <p ng-switch-default>This job does not have a parent.</p>
-                            </div>
-
-                            <h5>Children</h5>
-                            <div ng-switch on="job.children.length != 0">
-                                <p ng-switch-when="true">
-                                    <ul>
-                                        <li ng-repeat="child in job.get_children()"><a href="../{{ child.id }}/">{{ child.title }}</a></li>
-                                    </ul>
-                                </p>
-                                <p ng-switch-default>This job does not have any children.</p>
-                            </div>
-
-                            <h5>Admin link (requires admin access)</h5>
-                            <p>
-                                <a href="/admin/job_runner/job/{{ job.id }}/" target="_blank">Open job in admin</a>
-                            </p>
+                            <ng-switch on="job.description != ''">
+                                <div ng-switch-when="true">
+                                    <markdown>{{ job.description }}</markdown>
+                                </div>
+                            </ng-switch>
 
                         </div>
                         <div ng-class="{'tab-pane': true, active: global_state.data.jobTab == 'script'}" id="tab2">
