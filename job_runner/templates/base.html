@@ -29,10 +29,12 @@
                     <a class="brand" href="/">Job-Runner</a>
 
                     {% if user.is_authenticated %}
-                        <ul class="nav">
-                            <li ng-class="{active: global_state.data.page == 'runs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/runs/">Dashboard</a></li>
-                            <li ng-class="{active: global_state.data.page == 'jobs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/jobs/">Jobs</a></li>
-                        </ul>
+                        <ng-switch on="global_state.data.projectId != null">
+                            <ul ng-switch-when="true" class="nav">
+                                <li ng-class="{active: global_state.data.page == 'runs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/runs/">Dashboard</a></li>
+                                <li ng-class="{active: global_state.data.page == 'jobs'}"><a href="/project/{% templatetag openvariable %} global_state.data.projectId {% templatetag closevariable %}/jobs/">Jobs</a></li>
+                            </ul>
+                        </ng-switch>
                     {% endif %}
 
                     <ul class="nav pull-right">
