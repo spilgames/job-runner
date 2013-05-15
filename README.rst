@@ -54,6 +54,13 @@ Links
 Changes
 -------
 
+v3.1.2
+~~~~~~
+
+* Fix: do not schedule disabled children (regression introduced by the new
+  way of scheduling in v3.1.0).
+
+
 v3.1.1
 ~~~~~~
 

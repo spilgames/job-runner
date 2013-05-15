@@ -853,6 +853,28 @@ class ChainedRunTestCase(ApiTestBase):
         self.assertEqual(202, response.status_code)
         self.assertEqual(1, Job.objects.get(pk=3).run_set.count())
 
+    def test_patch_with_disabled_child(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` for chained job with disabled child.
+
+        When enqueue_is_enabled=False, we do not expect that the child will
+        be scheduled.
+
+        """
+        Job.objects.filter(pk=3).update(enqueue_is_enabled=False)
+        Run.objects.update(enqueue_dts=timezone.now())
+        self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': timezone.now().isoformat(' '),
+                'return_success': True,
+            }
+        )
+
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
+
     def test_patch_with_reschedule_no_children_reschedule(self):
         """
         Test PATCH ``/api/v1/run/1/`` for chained job but not reschedule
