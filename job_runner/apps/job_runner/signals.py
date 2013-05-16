@@ -69,4 +69,5 @@ def post_run_update(sender, instance, created, raw, **kwargs):
                 # the job completed successfully including it's siblings
                 # and has children to schedule now
                 for child in instance.job.children.all():
-                    child.schedule()
+                    if child.enqueue_is_enabled:
+                        child.schedule()
