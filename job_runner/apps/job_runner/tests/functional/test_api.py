@@ -853,6 +853,48 @@ class ChainedRunTestCase(ApiTestBase):
         self.assertEqual(202, response.status_code)
         self.assertEqual(1, Job.objects.get(pk=3).run_set.count())
 
+    def test_patch_failed_run(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` and mark run as failed.
+
+        In this case, we're not expecting the job to schedule it's child.
+
+        """
+        Run.objects.update(enqueue_dts=timezone.now())
+        self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': timezone.now().isoformat(' '),
+                'return_success': False,
+            }
+        )
+
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
+
+    def test_patch_failed_run_with_schedule_child(self):
+        """
+        Test PATCH ``/api/v1/run/1/`` as failed, but schedule child.
+
+        Since we've set ``schedule_children_on_error=True``, we expect that
+        the chain will continue, even when the job failed.
+
+        """
+        Run.objects.update(enqueue_dts=timezone.now())
+        Job.objects.filter(pk=1).update(schedule_children_on_error=True)
+        self.assertEqual(0, Job.objects.get(pk=3).run_set.count())
+        response = self.patch(
+            '/api/v1/run/1/',
+            {
+                'return_dts': timezone.now().isoformat(' '),
+                'return_success': False,
+            }
+        )
+
+        self.assertEqual(202, response.status_code)
+        self.assertEqual(1, Job.objects.get(pk=3).run_set.count())
+
     def test_patch_with_disabled_child(self):
         """
         Test PATCH ``/api/v1/run/1/`` for chained job with disabled child.

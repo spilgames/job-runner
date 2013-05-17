@@ -54,6 +54,13 @@ Links
 Changes
 -------
 
+v3.2.0
+~~~~~~
+
+* Make it possible to continue the chain of jobs when one of the jobs failed
+  (or when a worker failed when run on all workers is selected).
+
+
 v3.1.2
 ~~~~~~
 

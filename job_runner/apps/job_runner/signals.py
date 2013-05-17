@@ -59,15 +59,12 @@ def post_run_update(sender, instance, created, raw, **kwargs):
         unfinished_siblings = len(instance.get_siblings().filter(
             return_dts__isnull=True).select_for_update())
 
-        if (instance.return_success and instance.schedule_children
-                and not unfinished_siblings):
-
+        if instance.schedule_children and not unfinished_siblings:
             failed_siblings = instance.get_siblings().filter(
                 return_success=False)
 
-            if not failed_siblings.count():
-                # the job completed successfully including it's siblings
-                # and has children to schedule now
+            if ((instance.return_success and not failed_siblings.count())
+                    or job.schedule_children_on_error):
                 for child in instance.job.children.all():
                     if child.enqueue_is_enabled:
                         child.schedule()

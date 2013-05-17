@@ -226,6 +226,14 @@ class Job(models.Model):
         default=False,
         help_text='Run this job on all workers within the selected pool.',
     )
+    schedule_children_on_error = models.BooleanField(
+        default=False,
+        help_text=(
+            'Schedule children when the job fails (or fails on one of the '
+            'workers in case you ticked run on all workers). '
+            'Normally a failed job means that it will stop the chain.'
+        )
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(
         blank=True,

@@ -220,6 +220,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     list_filter = (
         'enqueue_is_enabled',
         'run_on_all_workers',
+        'schedule_children_on_error',
         'reschedule_interval_type',
         'job_template',
         'job_template__project',
@@ -252,6 +253,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
                 'job_template',
                 'worker_pool',
                 'run_on_all_workers',
+                'schedule_children_on_error',
                 'parent',
                 'description',
             )
