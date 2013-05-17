@@ -273,3 +273,21 @@ class RunTestCase(TestCase):
             schedule_dts=timezone.now()
         )
         self.assertTrue(run.pk == run.schedule_id)
+
+    def test_mark_failed(self):
+        """
+        Test :meth:`.Run.mark_failed`.
+        """
+        run = Run.objects.get(pk=1)
+        run.mark_failed('Test mark failed')
+
+        run = Run.objects.get(pk=1)
+
+        self.assertEqual(
+            'This run was marked as failed. Reason: Test mark failed',
+            run.run_log.content
+        )
+        self.assertIsInstance(run.enqueue_dts, datetime)
+        self.assertIsInstance(run.start_dts, datetime)
+        self.assertIsInstance(run.return_dts, datetime)
+        self.assertFalse(run.return_success)

@@ -533,6 +533,42 @@ class Run(models.Model):
             return self.schedule_id
         return self.pk
 
+    def mark_failed(self, message):
+        """
+        Mark this run as failed (if ``return_dts`` is not set yet).
+
+        :param message:
+            A ``str`` explaining why this run was marked as failed.
+
+        """
+        if self.return_dts:
+            return
+
+        if not self.enqueue_dts:
+            self.enqueue_dts = timezone.now()
+
+        if not self.start_dts:
+            self.start_dts = timezone.now()
+
+        self.return_dts = timezone.now()
+        self.return_success = False
+        self.save()
+
+        log_message = 'This run was marked as failed. Reason: {0}'.format(
+            message)
+
+        try:
+            # In rare cases, it is possible that there is already a log for
+            # the run.
+            run_log = self.run_log
+            run_log.content = log_message
+            run_log.save()
+        except RunLog.DoesNotExist:
+            RunLog.objects.create(
+                run=self,
+                content=log_message
+            )
+
 
 class KillRequest(models.Model):
     """
