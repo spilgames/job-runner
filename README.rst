@@ -54,6 +54,13 @@ Links
 Changes
 -------
 
+v3.1.3
+~~~~~~
+
+* Redirect to the last selected project (failing that, to the first project
+  in the list).
+
+
 v3.1.2
 ~~~~~~
 
