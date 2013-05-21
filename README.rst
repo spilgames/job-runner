@@ -59,6 +59,9 @@ v3.2.0
 
 * Make it possible to continue the chain of jobs when one of the jobs failed
   (or when a worker failed when run on all workers is selected).
+* Add setting ``JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS`` to
+  to configure after how many missed ping-requests the assigned runs of a
+  worker should be marked as failed (disabled by default).
 
 
 v3.1.2
