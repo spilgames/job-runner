@@ -21,7 +21,12 @@ class Command(NoArgsCommand):
 
     publisher = None
     """
-    Holds the ZMQ ``publisher`` instance, which will publish to the workers.
+    Holds the ZMQ ``publisher`` instance, used to publish to the workers.
+    """
+
+    event_publisher = None
+    """
+    Holds the ZMQ ``publisher`` instance, used to publish to the WS server.
     """
 
     @transaction.commit_manually

@@ -569,7 +569,7 @@ class Run(models.Model):
             )
 
         # saving the records triggers the sending of error e-mails so we need
-        # so save the log before saving the run record.
+        # to save the log before saving the run record.
         self.save()
 
 
