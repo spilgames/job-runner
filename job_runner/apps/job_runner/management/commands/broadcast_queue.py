@@ -57,6 +57,7 @@ class Command(NoArgsCommand):
             time.sleep(5)
 
         self.publisher.close()
+        self.event_publisher.close()
         context.term()
 
     @transaction.commit_manually
