@@ -51,6 +51,8 @@ class Command(NoArgsCommand):
         while True:
             if next_ping_request <= datetime.utcnow():
                 self._broadcast_worker_ping()
+                if settings.JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS:
+                    self._find_unresponsive_workers_and_mark_runs_as_failed()
                 next_ping_request = datetime.utcnow() + ping_delta
             self._broadcast_runs()
             self._broadcast_kill_requests()
