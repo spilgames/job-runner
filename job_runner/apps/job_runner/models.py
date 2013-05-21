@@ -552,7 +552,6 @@ class Run(models.Model):
 
         self.return_dts = timezone.now()
         self.return_success = False
-        self.save()
 
         log_message = 'This run was marked as failed. Reason: {0}'.format(
             message)
@@ -568,6 +567,10 @@ class Run(models.Model):
                 run=self,
                 content=log_message
             )
+
+        # saving the records triggers the sending of error e-mails so we need
+        # so save the log before saving the run record.
+        self.save()
 
 
 class KillRequest(models.Model):
