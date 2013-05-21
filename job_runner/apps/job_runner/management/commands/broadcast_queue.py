@@ -18,12 +18,19 @@ logger = logging.getLogger(__name__)
 class Command(NoArgsCommand):
     help = 'Broadcast runs and kill-requests to workers'
 
+    publisher = None
+    """
+    Holds the ZMQ ``publisher`` instance, which will publish to the workers.
+    """
+
     @transaction.commit_manually
     def handle_noargs(self, **options):
         logger.info('Starting queue broadcaster')
         context = zmq.Context(1)
-        publisher = context.socket(zmq.PUB)
-        publisher.bind(
+
+        # setup the publisher to which the workers are subscribing
+        self.publisher = context.socket(zmq.PUB)
+        self.publisher.bind(
             'tcp://*:{0}'.format(settings.JOB_RUNNER_BROADCASTER_PORT))
 
         # give the subscribers some time to (re-)connect.
@@ -35,27 +42,24 @@ class Command(NoArgsCommand):
 
         while True:
             if next_ping_request <= datetime.utcnow():
-                self._broadcast_worker_ping(publisher)
+                self._broadcast_worker_ping()
                 next_ping_request = datetime.utcnow() + ping_delta
-            self._broadcast_runs(publisher)
-            self._broadcast_kill_requests(publisher)
+            self._broadcast_runs()
+            self._broadcast_kill_requests()
             transaction.commit()
             time.sleep(5)
 
-        publisher.close()
+        self.publisher.close()
         context.term()
 
     @transaction.commit_manually
-    def _broadcast_runs(self, publisher):
+    def _broadcast_runs(self):
         """
         Broadcast runs that are scheduled to run now.
 
         When the job has ``job__enqueue_is_enabled`` set to ``False``, its
         runs are not broadcasted, unless they are scheduled manually
         (``is_manual`` set to ``True``).
-
-        :param publisher:
-            A ``zmq`` publisher.
 
         """
         enqueueable_runs = Run.objects.enqueueable().select_related()
@@ -100,8 +104,7 @@ class Command(NoArgsCommand):
                                         is_manual=run.is_manual,
                                         schedule_children=run.schedule_children
                                     )
-                                    to_broadcast.append(
-                                        (assigned_run, w, publisher))
+                                    to_broadcast.append((assigned_run, w))
 
                                 # delete the "old" unassigned run
                                 run.delete()
@@ -119,7 +122,7 @@ class Command(NoArgsCommand):
                     # this is the case when a run has already a worker assigned
                     # to it, or when we selected a random worker.
                     if worker:
-                        to_broadcast.append((run, worker, publisher))
+                        to_broadcast.append((run, worker))
                         broadcasted[run.job.pk] = run.get_schedule_id()
 
         except Exception:
@@ -131,21 +134,20 @@ class Command(NoArgsCommand):
             for brocast_args in to_broadcast:
                 self._broadcast_run(*brocast_args)
 
-    def _broadcast_run(self, run, worker, publisher):
+    def _broadcast_run(self, run, worker):
+        """
+        Broadcast ``run`` to ``worker``.
+        """
         message = [
             'master.broadcast.{0}'.format(worker.api_key),
             json.dumps({'run_id': run.id, 'action': 'enqueue'})
         ]
         logger.info('Sending: {0}'.format(message))
-        publisher.send_multipart(message)
+        self.publisher.send_multipart(message)
 
-    def _broadcast_kill_requests(self, publisher):
+    def _broadcast_kill_requests(self):
         """
         Broadcast kill-requests.
-
-        :param publisher:
-            A ``zmq`` publisher.
-
         """
         kill_requests = KillRequest.objects.killable().select_related()
 
@@ -160,15 +162,11 @@ class Command(NoArgsCommand):
                 })
             ]
             logger.debug('Sending: {0}'.format(message))
-            publisher.send_multipart(message)
+            self.publisher.send_multipart(message)
 
-    def _broadcast_worker_ping(self, publisher):
+    def _broadcast_worker_ping(self):
         """
         Broadcast ping-request to all the workers.
-
-        :param publisher:
-            A ``zmq`` publisher.
-
         """
         workers = Worker.objects.all()
 
@@ -180,4 +178,4 @@ class Command(NoArgsCommand):
                 })
             ]
             logger.debug('Sending: {0}'.format(message))
-            publisher.send_multipart(message)
+            self.publisher.send_multipart(message)

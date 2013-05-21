@@ -38,15 +38,15 @@ class CommandTestCase(TestCase):
 
         command = Command()
 
-        publisher = Mock()
-        command._broadcast_kill_requests(publisher)
+        command.publisher = Mock()
+        command._broadcast_kill_requests()
 
         self.assertEqual([
             call([
                 'master.broadcast.worker1',
                 '{"action": "kill", "kill_request_id": 1}'
             ])
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs(self):
         """
@@ -54,8 +54,8 @@ class CommandTestCase(TestCase):
         """
         command = Command()
 
-        publisher = Mock()
-        command._broadcast_runs(publisher)
+        command.publisher = Mock()
+        command._broadcast_runs()
 
         self.assertEqual([
             call([
@@ -66,7 +66,7 @@ class CommandTestCase(TestCase):
                 'master.broadcast.worker2',
                 '{"action": "enqueue", "run_id": 2}'
             ]),
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs_run_on_all_workers(self):
         """
@@ -83,9 +83,9 @@ class CommandTestCase(TestCase):
         Run.objects.get(pk=2).delete()
 
         command = Command()
-        publisher = Mock()
+        command.publisher = Mock()
 
-        command._broadcast_runs(publisher)
+        command._broadcast_runs()
 
         self.assertEqual([
             call([
@@ -96,7 +96,7 @@ class CommandTestCase(TestCase):
                 'master.broadcast.worker2',
                 '{"action": "enqueue", "run_id": 3}'
             ]),
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs_project_disabled_enqueue(self):
         """
@@ -106,11 +106,11 @@ class CommandTestCase(TestCase):
         Project.objects.update(enqueue_is_enabled=False)
         command = Command()
 
-        publisher = Mock()
-        command._broadcast_runs(publisher)
+        command.publisher = Mock()
+        command._broadcast_runs()
 
         self.assertEqual([
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs_worker_disabled_enqueue(self):
         """
@@ -120,11 +120,11 @@ class CommandTestCase(TestCase):
         Worker.objects.update(enqueue_is_enabled=False)
         command = Command()
 
-        publisher = Mock()
-        command._broadcast_runs(publisher)
+        command.publisher = Mock()
+        command._broadcast_runs()
 
         self.assertEqual([
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs_job_template_disabled_enqueue(self):
         """
@@ -134,11 +134,11 @@ class CommandTestCase(TestCase):
         JobTemplate.objects.update(enqueue_is_enabled=False)
         command = Command()
 
-        publisher = Mock()
-        command._broadcast_runs(publisher)
+        command.publisher = Mock()
+        command._broadcast_runs()
 
         self.assertEqual([
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs_disabled_enqueue(self):
         """
@@ -148,11 +148,11 @@ class CommandTestCase(TestCase):
         Job.objects.update(enqueue_is_enabled=False)
         command = Command()
 
-        publisher = Mock()
-        command._broadcast_runs(publisher)
+        command.publisher = Mock()
+        command._broadcast_runs()
 
         self.assertEqual([
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs_with_active_run(self):
         """
@@ -171,10 +171,10 @@ class CommandTestCase(TestCase):
         )
 
         command = Command()
-        publisher = Mock()
-        command._broadcast_runs(publisher)
+        command.publisher = Mock()
+        command._broadcast_runs()
 
-        self.assertEqual([], publisher.send_multipart.call_args_list)
+        self.assertEqual([], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_runs_disabled_enqueue_with_manual(self):
         """
@@ -185,24 +185,24 @@ class CommandTestCase(TestCase):
         Run.objects.filter(pk=2).update(is_manual=True)
         command = Command()
 
-        publisher = Mock()
-        command._broadcast_runs(publisher)
+        command.publisher = Mock()
+        command._broadcast_runs()
 
         self.assertEqual([
             call([
                 'master.broadcast.worker2',
                 '{"action": "enqueue", "run_id": 2}'
             ]),
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
 
     def test__broadcast_worker_ping(self):
         """
         Test :meth:`.Command._broadcast_worker_ping`.
         """
         command = Command()
-        publisher = Mock()
+        command.publisher = Mock()
 
-        command._broadcast_worker_ping(publisher)
+        command._broadcast_worker_ping()
 
         self.assertEqual([
             call([
@@ -213,4 +213,4 @@ class CommandTestCase(TestCase):
                 'master.broadcast.worker2',
                 '{"action": "ping"}'
             ]),
-        ], publisher.send_multipart.call_args_list)
+        ], command.publisher.send_multipart.call_args_list)
