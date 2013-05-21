@@ -33,6 +33,13 @@ class Command(NoArgsCommand):
         self.publisher.bind(
             'tcp://*:{0}'.format(settings.JOB_RUNNER_BROADCASTER_PORT))
 
+        # setup the event publisher which is publishing to the WS server
+        self.event_publisher = context.socket(zmq.PUB)
+        self.event_publisher.connect('tcp://{0}:{1}'.format(
+            settings.JOB_RUNNER_WS_SERVER_HOSTNAME,
+            settings.JOB_RUNNER_WS_SERVER_PORT,
+        ))
+
         # give the subscribers some time to (re-)connect.
         time.sleep(2)
 
@@ -179,3 +186,43 @@ class Command(NoArgsCommand):
             ]
             logger.debug('Sending: {0}'.format(message))
             self.publisher.send_multipart(message)
+
+    @transaction.commit_manually
+    def _mark_worker_runs_as_failed(self, worker, message):
+        """
+        Mark the runs that are not finished yet as failed for ``worker``.
+
+        :param worker:
+            The worker for which to mark the runs as failed.
+
+        :param message:
+            A ``str`` containing a message why the runs were marked as failed.
+
+        """
+        run_ids = []
+
+        try:
+            active_runs = worker.run_set.filter(return_dts__isnull=True)
+            active_runs = active_runs.select_for_update()
+
+            for run in active_runs:
+                logger.warning('Marking run {0} as failed.'.format(run.pk))
+                run.mark_failed(message)
+                run_ids.append(run.pk)
+
+        except Exception:
+            logger.exception('Something went wrong, rolling back transaction')
+            transaction.rollback()
+        else:
+            transaction.commit()
+
+        # broadcast events after transaction has been comitted :-)
+        for run_id in run_ids:
+            self.event_publisher.send_multipart([
+                'worker.event',
+                json.dumps({
+                    'event': 'returned',
+                    'run_id': run_id,
+                    'kind': 'run',
+                })
+            ])

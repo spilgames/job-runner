@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 from django.utils import timezone
 from mock import Mock, call
@@ -214,3 +216,30 @@ class CommandTestCase(TestCase):
                 '{"action": "ping"}'
             ]),
         ], command.publisher.send_multipart.call_args_list)
+
+    def test__mark_worker_runs_as_failed(self):
+        """
+        Test :meth:`.Command._mark_worker_runs_as_failed`.
+        """
+        worker = Worker.objects.get(pk=1)
+        Run.objects.filter(pk=1).update(worker=worker)
+
+        command = Command()
+        command.event_publisher = Mock()
+
+        self.assertEqual(None, Run.objects.get(pk=1).return_dts)
+
+        command._mark_worker_runs_as_failed(worker, 'Test mark as failed')
+
+        run = Run.objects.get(pk=1)
+        self.assertNotEqual(None, run.return_dts)
+        self.assertFalse(run.return_success)
+
+        command.event_publisher.send_multipart.assert_called_once_with([
+            'worker.event',
+            json.dumps({
+                'event': 'returned',
+                'run_id': 1,
+                'kind': 'run',
+            })
+        ])
