@@ -112,15 +112,33 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
 
 
 /*
-    Controller which redirects to the first project.
+    Controller which redirects to:
+
+    * The last selected project
+    * Failing that, the first project in the list
+
 */
-var RedirectToFirstProjectCtrl = function($location, Project) {
+var RedirectToProjectCtrl = function($location, Project, localStorageService) {
     Project.all({}, function(projects) {
+        var redirectUrl = '/no-projects/';
+        var selectedProjectId = localStorageService.get('selectedProjectId');
+
+        // take the first project from the list (if there are any projects)
         if (projects.length > 0) {
-            $location.path('/project/'+ projects[0].id +'/runs/');
-        } else {
-            $location.path('/no-projects/');
+            redirectUrl = '/project/'+ projects[0].id +'/runs/';
         }
+
+        // if selectedProjectId exists, check if that project-id is in the list
+        // of available projects
+        if (selectedProjectId !== null) {
+            angular.forEach(projects, function(project) {
+                if (selectedProjectId == project.id) {
+                    redirectUrl = '/project/' + project.id + '/runs/';
+                }
+            });
+        }
+
+        $location.path(redirectUrl);
     });
 };
 

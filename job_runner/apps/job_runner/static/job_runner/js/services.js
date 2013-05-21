@@ -52,7 +52,7 @@ jobrunnerServices.factory('globalCache', function($cacheFactory) {
 /*
     Global state.
 */
-jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, Group, globalCache, $window) {
+jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run, Worker, WorkerPool, Group, globalCache, $window, localStorageService) {
     return {
         data : {
             runTab: 'scheduled',
@@ -69,6 +69,8 @@ jobrunnerServices.factory('globalState', function(Project, Job, JobTemplate, Run
         // the given callback will be executed.
         initialize: function(projectId, callback) {
             var self = this;
+
+            localStorageService.add('selectedProjectId', projectId);
 
             if (!this.data.projectId || this.data.projectId != projectId) {
                 this.data.projectId = projectId;
