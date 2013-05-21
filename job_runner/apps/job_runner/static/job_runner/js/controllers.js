@@ -120,25 +120,22 @@ var JobListCtrl = function($scope, $routeParams, Project, Job, JobTemplate, Work
 */
 var RedirectToProjectCtrl = function($location, Project, localStorageService) {
     Project.all({}, function(projects) {
-        var redirectUrl = null;
+        var redirectUrl = '/no-projects/';
         var selectedProjectId = localStorageService.get('selectedProjectId');
 
+        // take the first project from the list (if there are any projects)
+        if (projects.length > 0) {
+            redirectUrl = '/project/'+ projects[0].id +'/runs/';
+        }
+
+        // if selectedProjectId exists, check if that project-id is in the list
+        // of available projects
         if (selectedProjectId !== null) {
             angular.forEach(projects, function(project) {
                 if (selectedProjectId == project.id) {
                     redirectUrl = '/project/' + project.id + '/runs/';
                 }
             });
-        }
-
-        // redirectUrl can be null even when we have a selectedProjectId.
-        // this is the case when the selected project is not available anymore.
-        if (redirectUrl === null) {
-            if (projects.length > 0) {
-                redirectUrl = '/project/'+ projects[0].id +'/runs/';
-            } else {
-                redirectUrl = '/no-projects/';
-            }
         }
 
         $location.path(redirectUrl);
