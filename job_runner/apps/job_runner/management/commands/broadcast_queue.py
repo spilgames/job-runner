@@ -8,6 +8,7 @@ import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import transaction
+from django.utils import timezone
 
 from job_runner.apps.job_runner.models import KillRequest, Run, Worker
 
@@ -187,6 +188,26 @@ class Command(NoArgsCommand):
             ]
             logger.debug('Sending: {0}'.format(message))
             self.publisher.send_multipart(message)
+
+    def _find_unresponsive_workers_and_mark_runs_as_failed(self):
+        """
+        Detect unresponsive workers and mark their active runs as failed.
+        """
+        workers = Worker.objects.all()
+        failed_intervals = \
+            settings.JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS
+        ping_interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
+        ping_margin = settings.JOB_RUNNER_WORKER_PING_MARGIN
+
+        acceptable_delta = timedelta(
+            seconds=(failed_intervals * ping_interval) + ping_margin)
+
+        for worker in workers:
+            if worker.ping_response_dts + acceptable_delta < timezone.now():
+                self._mark_worker_runs_as_failed(
+                    worker,
+                    'Worker does not respond to ping requests.'
+                )
 
     @transaction.commit_manually
     def _mark_worker_runs_as_failed(self, worker, message):
