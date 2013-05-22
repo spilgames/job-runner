@@ -55,3 +55,6 @@ Setup Job-Runner
 #. Run ``manage.py broadcast_queue``. This will start the queue broadcaster.
    The queue broadcaster will broadcast the runs that are scheduled for
    execution to the subscribed workers.
+
+#. Run ``manage.py health_check``. This will monitor the health of the workers
+   and alert (don't forget to setup e-mail adresses) when there are problems.
