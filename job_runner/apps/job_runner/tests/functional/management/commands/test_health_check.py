@@ -53,9 +53,8 @@ class CommandTestCase(TestCase):
         """
         Test ``_find_unresponsive_workers_and_mark_runs_as_failed``.
         """
-        workers = Worker.objects.all()
-        Run.objects.filter(pk=1).update(worker=workers[0])
-        Run.objects.filter(pk=2).update(worker=workers[1])
+        Run.objects.filter(pk=1).update(worker=Worker.objects.get(pk=1))
+        Run.objects.filter(pk=2).update(worker=Worker.objects.get(pk=2))
 
         # In testing.py:
         # JOB_RUNNER_WORKER_PING_INTERVAL = 60 * 5

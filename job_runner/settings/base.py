@@ -226,11 +226,10 @@ The time to add to the interval before considering a worker is not responding.
 """
 
 
-JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS = 3
+JOB_RUNNER_WORKER_UNRESPONSIVE_AFTER_INTERVALS = 3
 """
-The number of ping intervals to wait for a ping-response before marking the
-runs of the unresponsive worker as failed.
-
+The number of missed ping responses after which to declade a worker
+unresponsive.
 """
 
 

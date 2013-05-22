@@ -7,7 +7,6 @@ import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import transaction
-from django.utils import timezone
 
 from job_runner.apps.job_runner.models import Worker
 
@@ -58,16 +57,9 @@ class Command(NoArgsCommand):
         """
         logger.info('Looking for unresponsive workers.')
         workers = Worker.objects.all()
-        failed_intervals = \
-            settings.JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS
-        ping_interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
-        ping_margin = settings.JOB_RUNNER_WORKER_PING_MARGIN
-
-        acceptable_delta = timedelta(
-            seconds=(failed_intervals * ping_interval) + ping_margin)
 
         for worker in workers:
-            if worker.ping_response_dts + acceptable_delta < timezone.now():
+            if not worker.is_responsive():
                 logger.warning(
                     'Worker ID {0} seems unresponsive.'.format(worker.pk))
                 self._mark_worker_runs_as_failed(

@@ -1,6 +1,7 @@
 import calendar
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -116,6 +117,24 @@ class Worker(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def is_responsive(self):
+        """
+        Return ``bool`` indicating if the worker is resposive.
+        """
+        unresponsive_intervals = \
+            settings.JOB_RUNNER_WORKER_UNRESPONSIVE_AFTER_INTERVALS
+        ping_interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
+        ping_margin = settings.JOB_RUNNER_WORKER_PING_MARGIN
+
+        acceptable_delta = timedelta(
+            seconds=(unresponsive_intervals * ping_interval) + ping_margin)
+
+        if self.ping_response_dts:
+            if self.ping_response_dts + acceptable_delta >= timezone.now():
+                return True
+
+        return False
 
     class Meta:
         ordering = ('title', )

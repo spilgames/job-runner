@@ -143,8 +143,7 @@ class WorkerAdmin(admin.ModelAdmin):
         date_formatted = DateFormat(date_local)
         date_formatted = date_formatted.format(settings.DATETIME_FORMAT)
 
-        if (obj.ping_response_dts <
-                timezone.now() - timedelta(seconds=2 * interval + margin)):
+        if not obj.is_responsive():
             return (
                 '<img src="{0}admin/img/icon_error.gif" /> '
                 '<span style="color: red;">{1}</span>'.format(
