@@ -8,7 +8,6 @@ import zmq
 from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import transaction
-from django.utils import timezone
 
 from job_runner.apps.job_runner.models import KillRequest, Run, Worker
 
@@ -56,8 +55,6 @@ class Command(NoArgsCommand):
         while True:
             if next_ping_request <= datetime.utcnow():
                 self._broadcast_worker_ping()
-                if settings.JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS:
-                    self._find_unresponsive_workers_and_mark_runs_as_failed()
                 next_ping_request = datetime.utcnow() + ping_delta
             self._broadcast_runs()
             self._broadcast_kill_requests()
@@ -195,63 +192,3 @@ class Command(NoArgsCommand):
             ]
             logger.debug('Sending: {0}'.format(message))
             self.publisher.send_multipart(message)
-
-    def _find_unresponsive_workers_and_mark_runs_as_failed(self):
-        """
-        Detect unresponsive workers and mark their active runs as failed.
-        """
-        workers = Worker.objects.all()
-        failed_intervals = \
-            settings.JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS
-        ping_interval = settings.JOB_RUNNER_WORKER_PING_INTERVAL
-        ping_margin = settings.JOB_RUNNER_WORKER_PING_MARGIN
-
-        acceptable_delta = timedelta(
-            seconds=(failed_intervals * ping_interval) + ping_margin)
-
-        for worker in workers:
-            if worker.ping_response_dts + acceptable_delta < timezone.now():
-                self._mark_worker_runs_as_failed(
-                    worker,
-                    'Worker does not respond to ping requests.'
-                )
-
-    @transaction.commit_manually
-    def _mark_worker_runs_as_failed(self, worker, message):
-        """
-        Mark the runs that are not finished yet as failed for ``worker``.
-
-        :param worker:
-            The worker for which to mark the runs as failed.
-
-        :param message:
-            A ``str`` containing a message why the runs were marked as failed.
-
-        """
-        run_ids = []
-
-        try:
-            active_runs = worker.run_set.filter(return_dts__isnull=True)
-            active_runs = active_runs.select_for_update()
-
-            for run in active_runs:
-                logger.warning('Marking run {0} as failed.'.format(run.pk))
-                run.mark_failed(message)
-                run_ids.append(run.pk)
-
-        except Exception:
-            logger.exception('Something went wrong, rolling back transaction')
-            transaction.rollback()
-        else:
-            transaction.commit()
-
-        # broadcast events after transaction has been comitted :-)
-        for run_id in run_ids:
-            self.event_publisher.send_multipart([
-                'worker.event',
-                json.dumps({
-                    'event': 'returned',
-                    'run_id': run_id,
-                    'kind': 'run',
-                })
-            ])

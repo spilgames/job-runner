@@ -214,18 +214,22 @@ The interval in seconds for sending ping-requests to the workers.
 """
 
 
+JOB_RUNNER_WORKER_HEALTH_CHECK_INTERVAL = 60 * 5
+"""
+The interval in seconds for running the health check.
+"""
+
+
 JOB_RUNNER_WORKER_PING_MARGIN = 15
 """
 The time to add to the interval before considering a worker is not responding.
 """
 
 
-JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS = None
+JOB_RUNNER_WORKER_MARK_JOB_FAILED_AFTER_INTERVALS = 3
 """
-The number of intervals to wait for a ping-response before marking the runs
-of the unresponsive worker as failed.
-
-To disable this functionality, set this to ``None``.
+The number of ping intervals to wait for a ping-response before marking the
+runs of the unresponsive worker as failed.
 
 """
 
