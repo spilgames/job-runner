@@ -8,7 +8,8 @@ from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.db import transaction
 
-from job_runner.apps.job_runner.models import Worker
+from job_runner.apps.job_runner.models import Worker, WorkerPool
+from job_runner.apps.job_runner import notifications
 
 
 logger = logging.getLogger(__name__)
@@ -44,6 +45,7 @@ class Command(NoArgsCommand):
         while True:
             if next_hc <= datetime.utcnow():
                 self._find_unresponsive_workers_and_mark_runs_as_failed()
+                self._find_unresponsive_worker_pools()
                 next_hc = datetime.utcnow() + hc_delta
             transaction.commit()
             time.sleep(5)
@@ -66,6 +68,25 @@ class Command(NoArgsCommand):
                     worker,
                     'Worker does not respond to ping requests.'
                 )
+
+    def _find_unresponsive_worker_pools(self):
+        """
+        Detect worker-pools where all workers are unresponsive.
+
+        In this case, an e-mail will be send with a warning.
+
+        """
+        logger.info('Looking for unresponsive worker-pools.')
+        worker_pools = WorkerPool.objects.all().prefetch_related('workers')
+
+        for worker_pool in worker_pools:
+            is_responsive = False
+            for worker in worker_pool.workers.all():
+                if worker.is_responsive():
+                    is_responsive = True
+
+            if not is_responsive and worker_pool.workers.count():
+                notifications.worker_pool_unresponsive(worker_pool)
 
     @transaction.commit_manually
     def _mark_worker_runs_as_failed(self, worker, message):
@@ -98,7 +119,7 @@ class Command(NoArgsCommand):
 
         # broadcast events after transaction has been comitted :-)
         for run_id in run_ids:
-            self.event_publisher.send_multipart([
+            self.publisher.send_multipart([
                 'worker.event',
                 json.dumps({
                     'event': 'returned',

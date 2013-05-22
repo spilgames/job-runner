@@ -51,3 +51,26 @@ def run_failed(run):
             settings.DEFAULT_FROM_EMAIL,
             addresses
         )
+
+
+def worker_pool_unresponsive(worker_pool):
+    """
+    Send out a notification that the given ``worker_pool`` is unresponsive.
+    """
+    t = get_template('job_runner/email/worker_pool_unresponsive.txt')
+    c = Context({
+        'worker_pool': worker_pool,
+        'hostname': settings.HOSTNAME,
+    })
+    email_body = t.render(c)
+
+    addresses = copy.copy(settings.JOB_RUNNER_ADMIN_EMAILS)
+    addresses.extend(worker_pool.get_notification_addresses())
+
+    if addresses:
+        send_mail(
+            'Worker-pool unresponsive: {0}'.format(worker_pool.title),
+            email_body,
+            settings.DEFAULT_FROM_EMAIL,
+            addresses
+        )

@@ -1,6 +1,7 @@
 import json
 from datetime import timedelta
 
+from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
 from mock import Mock
@@ -30,7 +31,7 @@ class CommandTestCase(TestCase):
         Run.objects.filter(pk=1).update(worker=worker)
 
         command = Command()
-        command.event_publisher = Mock()
+        command.publisher = Mock()
 
         self.assertEqual(None, Run.objects.get(pk=1).return_dts)
 
@@ -40,7 +41,7 @@ class CommandTestCase(TestCase):
         self.assertNotEqual(None, run.return_dts)
         self.assertFalse(run.return_success)
 
-        command.event_publisher.send_multipart.assert_called_once_with([
+        command.publisher.send_multipart.assert_called_once_with([
             'worker.event',
             json.dumps({
                 'event': 'returned',
@@ -66,7 +67,7 @@ class CommandTestCase(TestCase):
         Worker.objects.filter(pk=2).update(ping_response_dts=unacceptable)
 
         command = Command()
-        command.event_publisher = Mock()
+        command.publisher = Mock()
 
         command._find_unresponsive_workers_and_mark_runs_as_failed()
 
@@ -79,3 +80,24 @@ class CommandTestCase(TestCase):
         # Run pk=2 was not touched
         self.assertEqual(None, runs[1].return_success)
         self.assertEqual(None, runs[1].return_dts)
+
+    def test__find_unresponsive_worker_pools(self):
+        """
+        Test :meth:`.Command._find_unresponsive_worker_pools`.
+
+        In this case, we expect Pool 1 to be responsive and Pool 2 to be
+        unresponsive.
+
+        """
+        Worker.objects.filter(pk=1).update(ping_response_dts=timezone.now())
+        # from settings in ``base.py``:
+        # 915 = (60 * 5 * 3) + 15
+        Worker.objects.filter(pk=2).update(
+            ping_response_dts=timezone.now() - timedelta(seconds=915))
+
+        command = Command()
+        command._find_unresponsive_worker_pools()
+
+        self.assertEqual(1, len(mail.outbox))
+        self.assertEqual(
+            'Worker-pool unresponsive: Pool 2', mail.outbox[0].subject)
