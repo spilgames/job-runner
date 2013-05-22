@@ -23,11 +23,6 @@ class Command(NoArgsCommand):
     Holds the ZMQ ``publisher`` instance, used to publish to the workers.
     """
 
-    event_publisher = None
-    """
-    Holds the ZMQ ``publisher`` instance, used to publish to the WS server.
-    """
-
     @transaction.commit_manually
     def handle_noargs(self, **options):
         logger.info('Starting queue broadcaster')
@@ -37,13 +32,6 @@ class Command(NoArgsCommand):
         self.publisher = context.socket(zmq.PUB)
         self.publisher.bind(
             'tcp://*:{0}'.format(settings.JOB_RUNNER_BROADCASTER_PORT))
-
-        # setup the event publisher which is publishing to the WS server
-        self.event_publisher = context.socket(zmq.PUB)
-        self.event_publisher.connect('tcp://{0}:{1}'.format(
-            settings.JOB_RUNNER_WS_SERVER_HOSTNAME,
-            settings.JOB_RUNNER_WS_SERVER_PORT,
-        ))
 
         # give the subscribers some time to (re-)connect.
         time.sleep(2)
