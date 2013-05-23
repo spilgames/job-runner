@@ -228,7 +228,7 @@ The time to add to the interval before considering a worker is not responding.
 
 JOB_RUNNER_WORKER_UNRESPONSIVE_AFTER_INTERVALS = 3
 """
-The number of missed ping responses after which to declade a worker
+The number of missed ping responses after which to declare a worker
 unresponsive.
 """
 
