@@ -1,4 +1,4 @@
-var appModule = angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project', 'job', 'jobTemplate', 'worker', 'workerPool', 'run', 'group', 'killRequest']);
+var appModule = angular.module('jobrunner', ['jobrunner.filters', 'jobrunner.services', 'project', 'job', 'jobTemplate', 'worker', 'workerPool', 'run', 'group', 'killRequest', 'ngCookies', 'LocalStorageModule']);
 
 appModule.config(function($routeProvider, $locationProvider) {
     // this will make it possible to use deeplinks without "#"
@@ -6,7 +6,7 @@ appModule.config(function($routeProvider, $locationProvider) {
 
     // setup URL routes
     $routeProvider.
-        when('/', {controller: RedirectToFirstProjectCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
+        when('/', {controller: RedirectToProjectCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/no-projects/', {controller: NoProjectsCtrl, templateUrl: '/static/job_runner/templates/no_projects.html'}).
         when('/project/:project/runs/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
         when('/project/:project/runs/:run/', {controller: RunsCtrl, templateUrl: '/static/job_runner/templates/runs.html'}).
