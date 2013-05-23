@@ -223,6 +223,10 @@ The interval in seconds for running the health check.
 JOB_RUNNER_WORKER_PING_MARGIN = 15
 """
 The time to add to the interval before considering a worker is not responding.
+
+This is needed since the ping / pong are async (the PING is sent over ZMQ, the
+pong is done by making a request to the REST API).
+
 """
 
 
