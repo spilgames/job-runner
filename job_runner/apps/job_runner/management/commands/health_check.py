@@ -58,7 +58,7 @@ class Command(NoArgsCommand):
         Detect unresponsive workers and mark their active runs as failed.
         """
         logger.info('Looking for unresponsive workers.')
-        workers = Worker.objects.all()
+        workers = Worker.objects.filter(enqueue_is_enabled=True)
 
         for worker in workers:
             if not worker.is_responsive():
@@ -77,15 +77,16 @@ class Command(NoArgsCommand):
 
         """
         logger.info('Looking for unresponsive worker-pools.')
-        worker_pools = WorkerPool.objects.all().prefetch_related('workers')
+        worker_pools = WorkerPool.objects.filter(enqueue_is_enabled=True)
 
         for worker_pool in worker_pools:
             is_responsive = False
-            for worker in worker_pool.workers.all():
+            workers = worker_pool.workers.filter(enqueue_is_enabled=True)
+            for worker in workers:
                 if worker.is_responsive():
                     is_responsive = True
 
-            if not is_responsive and worker_pool.workers.count():
+            if not is_responsive and workers.count():
                 notifications.worker_pool_unresponsive(worker_pool)
 
     @transaction.commit_manually
