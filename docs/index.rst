@@ -33,7 +33,8 @@ The whole project consists of three separate components (and repositories):
 * **Job-Runner**: provides the REST interface, admin interface and (live)
   dashboard. As well this component provides a long-running process
   (``manage.py broadcast_queue``) to broadcast messages (over ZeroMQ) to the
-  workers. See: https://github.com/spilgames/job-runner
+  workers and a long-running process to alert when workers are unresponsive
+  (``manage.py health_check``). See: https://github.com/spilgames/job-runner
 
 * **Job-Runner Worker**: the process that is responsible for executing the job.
   It subscribes to (ZeroMQ) messages coming from ``broadcast_queue``, send data

@@ -196,14 +196,44 @@ Unless there is a specific need, you can keep the default.
 """
 
 
+JOB_RUNNER_WS_SERVER_HOSTNAME = 'localhost'
+"""
+The hostname of the WebSocket Server.
+"""
+
+
+JOB_RUNNER_WS_SERVER_PORT = 5555
+"""
+The port of the WebSocket Server.
+"""
+
+
 JOB_RUNNER_WORKER_PING_INTERVAL = 60 * 5
 """
 The interval in seconds for sending ping-requests to the workers.
 """
 
+
+JOB_RUNNER_WORKER_HEALTH_CHECK_INTERVAL = 60 * 5
+"""
+The interval in seconds for running the health check.
+"""
+
+
 JOB_RUNNER_WORKER_PING_MARGIN = 15
 """
 The time to add to the interval before considering a worker is not responding.
+
+This is needed since the ping / pong are async (the PING is sent over ZMQ, the
+pong is done by making a request to the REST API).
+
+"""
+
+
+JOB_RUNNER_WORKER_UNRESPONSIVE_AFTER_INTERVALS = 3
+"""
+The number of missed ping responses after which to declare a worker
+unresponsive.
 """
 
 

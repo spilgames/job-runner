@@ -143,8 +143,7 @@ class WorkerAdmin(admin.ModelAdmin):
         date_formatted = DateFormat(date_local)
         date_formatted = date_formatted.format(settings.DATETIME_FORMAT)
 
-        if (obj.ping_response_dts <
-                timezone.now() - timedelta(seconds=2 * interval + margin)):
+        if not obj.is_responsive():
             return (
                 '<img src="{0}admin/img/icon_error.gif" /> '
                 '<span style="color: red;">{1}</span>'.format(
@@ -220,6 +219,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
     list_filter = (
         'enqueue_is_enabled',
         'run_on_all_workers',
+        'schedule_children_on_error',
         'reschedule_interval_type',
         'job_template',
         'job_template__project',
@@ -252,6 +252,7 @@ class JobAdmin(PermissionAdminMixin, admin.ModelAdmin):
                 'job_template',
                 'worker_pool',
                 'run_on_all_workers',
+                'schedule_children_on_error',
                 'parent',
                 'description',
             )

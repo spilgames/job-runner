@@ -12,10 +12,11 @@ DATABASES = {
 
 TIME_ZONE = 'Europe/Amsterdam'
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 JOB_RUNNER_WS_SERVER = 'ws://localhost:5000/'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 
 # Make sure that test with naive datetime objects will fail
 import warnings

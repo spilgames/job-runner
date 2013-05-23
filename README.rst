@@ -54,6 +54,16 @@ Links
 Changes
 -------
 
+v3.2.0
+~~~~~~
+
+* Make it possible to continue the chain of jobs when one of the jobs failed
+  (or when a worker failed when run on all workers is selected).
+* Add management-command ``health_check`` which marks runs assigned to
+  unresponsive workers as failed and alert when all workers within a pool
+  are unresponsive.
+
+
 v3.1.3
 ~~~~~~
 

@@ -1,0 +1,8 @@
+All workers in "{{ worker_pool.title }}" are unresponsive!
+
+Workers:
+{% for worker in worker_pool.workers.all %}* {{ worker.title }}
+{% endfor %}
+
+Admin link:
+http://{{ hostname }}{% url admin:job_runner_workerpool_change worker_pool.pk %}
