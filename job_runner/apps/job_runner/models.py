@@ -243,12 +243,14 @@ class Job(models.Model):
     )
     run_on_all_workers = models.BooleanField(
         default=False,
-        help_text='Run this job on all workers within the selected pool.',
+        help_text=('Run this job on all workers within the selected pool.'
+            'NOTE: tick this *only* if you are aware of the implications.'
+            )
     )
     schedule_children_on_error = models.BooleanField(
         default=False,
         help_text=(
-            'Schedule children when the job fails (or fails on one of the '
+            'Schedule children even when the job fails (or fails on one of the '
             'workers in case you ticked run on all workers). '
             'Normally a failed job means that it will stop the chain.'
         )
