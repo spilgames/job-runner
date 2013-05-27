@@ -389,7 +389,10 @@ class Job(models.Model):
         # check if job is setup for re-scheduling
         if self.reschedule_interval_type and self.reschedule_interval:
             try:
-                last_run = self.run_set.filter(is_manual=False)[0]
+                # order by -pk to get the last non-manual scheduled run
+                # from which we need to increment
+                last_run = self.run_set.filter(
+                    is_manual=False).order_by('-pk')[0]
             except IndexError:
                 return
 

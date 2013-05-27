@@ -62,6 +62,7 @@ v3.2.0
 * Add management-command ``health_check`` which marks runs assigned to
   unresponsive workers as failed and alert when all workers within a pool
   are unresponsive.
+* Fix ``order_by`` in ``reschedule`` method.
 
 
 v3.1.3
