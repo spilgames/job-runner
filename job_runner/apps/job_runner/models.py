@@ -243,8 +243,10 @@ class Job(models.Model):
     )
     run_on_all_workers = models.BooleanField(
         default=False,
-        help_text=('Run this job on all workers within the selected pool.'
-            'NOTE: tick this *only* if you are aware of the implications.'
+        help_text=('Run this job on all workers within the selected pool. '
+            'NOTE: be aware that the job will be duplicated to run in parallel '
+            'on all workers of the pool. Leave this box unticked to have the '
+            'job run once on only one of twe workers.'
             )
     )
     schedule_children_on_error = models.BooleanField(
