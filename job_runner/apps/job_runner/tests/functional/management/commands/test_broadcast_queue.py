@@ -90,11 +90,11 @@ class CommandTestCase(TestCase):
         self.assertEqual([
             call([
                 'master.broadcast.worker1',
-                '{"action": "enqueue", "run_id": 2}'
+                '{"action": "enqueue", "run_id": 3}'
             ]),
             call([
                 'master.broadcast.worker2',
-                '{"action": "enqueue", "run_id": 3}'
+                '{"action": "enqueue", "run_id": 4}'
             ]),
         ], command.publisher.send_multipart.call_args_list)
 
