@@ -396,10 +396,6 @@ class Job(models.Model):
             except IndexError:
                 return
 
-            if not last_run.return_dts:
-                # we can't reschedule if there wasn't a previous run
-                return
-
             try:
                 reschedule_date = self._get_reschedule_date(
                     last_run.schedule_dts)

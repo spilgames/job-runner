@@ -31,7 +31,11 @@ class RunTestCase(TestCase):
         """
         self.assertEqual(1, Run.objects.filter(job_id=1).count())
         Job.objects.get(pk=1).reschedule()
-        self.assertEqual(1, Run.objects.filter(job_id=1).count())
+        # because of the pre-scheduling, reschedule should result in max
+        # 2 scheduled runs.
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
+        Job.objects.get(pk=1).reschedule()
+        self.assertEqual(2, Run.objects.filter(job_id=1).count())
 
         Run.objects.filter(pk=1).update(
             schedule_dts=timezone.now(),
@@ -39,16 +43,20 @@ class RunTestCase(TestCase):
             return_dts=timezone.now()
         )
 
+        # we just completed one run, so reschedule should result in a new
+        # schedule.
         Job.objects.get(pk=1).reschedule()
-        self.assertEqual(2, Run.objects.filter(job_id=1).count())
+        self.assertEqual(3, Run.objects.filter(job_id=1).count())
 
+        # make sure the last run is scheduled based on the schedule_dts of the
+        # pre-last run
         runs = Run.objects.filter(job_id=1).all()
         self.assertEqual(
             correct_dst_difference(
-                runs[0].schedule_dts,
-                runs[0].schedule_dts + timedelta(days=1)
+                runs[1].schedule_dts,
+                runs[1].schedule_dts + timedelta(days=1)
             ),
-            runs[1].schedule_dts
+            runs[2].schedule_dts
         )
 
     def test_reschedule_not_in_past(self):
