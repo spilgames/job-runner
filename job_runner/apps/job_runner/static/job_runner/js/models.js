@@ -45,13 +45,26 @@ angular.module('modelCache', []).factory('cachedGet', function() {
             }
             if (!output) {
                 output = fn(params, function(obj) {
+                    // on success
                     if (params.id) {
                         cache.put(cacheKey + '.' + params.id, obj);
                     }
                     if(success) {
                         success(obj);
                     }
-                }, error);
+                }, function() {
+                    // on error
+
+                    // when we can't fetch the resource from the server, cache
+                    // a dummy object, to avoid that angularjs will keep
+                    // trying (and will become unresponsive).
+                    cache.put(cacheKey + '.' + params.id, {
+                        title: '[failed to load worker]'
+                    });
+                    if (error) {
+                        error();
+                    }
+                });
             } else if (success) {
                 success(output);
             }
