@@ -60,6 +60,8 @@ v3.2.1
 * Handle error response when the user does not have access anymore to the
   worker data in the REST API. This can happen when a worker is removed from a
   worker-pool.
+* Show the full job-chain on the jobs page (note that this only works when
+  there isn't any recursion in the job-chain).
 
 
 v3.2.0
