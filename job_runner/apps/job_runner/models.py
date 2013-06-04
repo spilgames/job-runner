@@ -47,7 +47,9 @@ def validate_no_recursion(value, seen=[]):
     seen.append(value)
 
     if value.parent:
-        validate_no_recursion(value, seen)
+        validate_no_recursion(value.parent, seen)
+
+    return None
 
 
 class RescheduleException(Exception):
