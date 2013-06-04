@@ -104,22 +104,13 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th class="width25pc">Parent</th>
+                                        <th class="width25pc">Job-chain</th>
                                         <td class=="width75pc">
-                                           <ng-switch on="job.parent != null">
-                                                <span ng-switch-when="true"><a href="../{{ job.get_parent().id }}/">{{ job.get_parent().title }}</a></span>
-                                                <span ng-switch-default>This job does not have a parent.</span>
-                                            </ng-switch>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th class="width25pc">Children</th>
-                                        <td class="width75pc">
-                                            <ng-switch on="job.children.length != 0">
+                                            <ng-switch on="job.parent != null || job.children.length != 0">
                                                 <ul ng-switch-when="true">
-                                                    <li ng-repeat="child in job.get_children()"><a href="../{{ child.id }}/">{{ child.title }}</a></li>
+                                                    <ng-include src="'/static/job_runner/templates/child_jobs.html'" onload="child = job.get_absolute_parent()"></ng-include>
                                                 </ul>
-                                                <span ng-switch-default>This job does not have any children.</span>
+                                                <span ng-switch-default>This job is not part of a chain.</span>
                                             </ng-switch>
                                         </td>
                                     </tr>

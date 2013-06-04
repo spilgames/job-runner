@@ -32,6 +32,26 @@ def validate_positive(value):
         raise ValidationError(u'The input should be greater than 0.')
 
 
+def validate_no_recursion(value, seen=[]):
+    """
+    Validate that there is no recursion in the job-chain.
+    """
+    # when the validate_no_recursion function is invoked, the ``value`` will
+    # be the id of the object referencing to, so we have to lookup this object
+    # first
+    if isinstance(value, (int, long)):
+        value = Job.objects.get(pk=value)
+
+    if value in seen:
+        raise ValidationError(u'Recursive loop of jobs detected.')
+    seen.append(value)
+
+    if value.parent:
+        validate_no_recursion(value.parent, seen)
+
+    return None
+
+
 class RescheduleException(Exception):
     """
     Exception used when a rescheduling failed.
@@ -231,7 +251,12 @@ class Job(models.Model):
     Contains the job data.
     """
     parent = models.ForeignKey(
-        'self', blank=True, null=True, related_name='children')
+        'self',
+        blank=True,
+        null=True,
+        related_name='children',
+        validators=[validate_no_recursion],
+    )
     job_template = models.ForeignKey(JobTemplate)
     worker_pool = ChainedForeignKey(
         WorkerPool,

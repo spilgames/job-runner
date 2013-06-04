@@ -54,12 +54,15 @@ Links
 Changes
 -------
 
-v3.2.1
+v3.3.0
 ~~~~~~
 
 * Handle error response when the user does not have access anymore to the
   worker data in the REST API. This can happen when a worker is removed from a
   worker-pool.
+* Show the full job-chain on the jobs page.
+* Add check to assure that there is no recursion in the job-chain
+  (parent/child relations).
 
 
 v3.2.0

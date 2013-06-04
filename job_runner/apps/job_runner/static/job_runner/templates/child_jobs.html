@@ -1,0 +1,9 @@
+<li>
+    <ng-switch on="child.id == job.id">
+        <strong ng-switch-when="true"><a href="../{{ child.id }}/">{{ child.title }}</a></strong>
+        <a ng-switch-default href="../{{ child.id }}/">{{ child.title }}</a>
+    </ng-switch>
+    <ul ng-repeat="child in child.get_children()">
+        <ng-include src="'/static/job_runner/templates/child_jobs.html'"></ng-include>
+    </ul>
+</li>
