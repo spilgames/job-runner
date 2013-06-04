@@ -1,6 +1,7 @@
 from datetime import datetime, time, timedelta
 
 from django.core import mail
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
@@ -10,6 +11,34 @@ from job_runner.apps.job_runner.models import (
     Run,
 )
 from job_runner.apps.job_runner.utils import correct_dst_difference
+
+
+class JobTestCase(TestCase):
+    """
+    Tests for the job model.
+    """
+    fixtures = [
+        'test_auth',
+        'test_projects',
+        'test_workers',
+        'test_worker_pools',
+        'test_job_templates',
+        'test_jobs'
+    ]
+
+    def test_recursion(self):
+        """
+        Test that saving a resursive job-chain will raise a validation error.
+        """
+        job = Job.objects.get(pk=2)
+        job.parent = Job.objects.get(pk=1)
+        job.full_clean()
+        job.save()
+
+        job = Job.objects.get(pk=1)
+        job.full_clean()
+        job.parent = Job.objects.get(pk=2)
+        self.assertRaises(ValidationError, job.full_clean)
 
 
 class RunTestCase(TestCase):
