@@ -262,6 +262,25 @@ angular.module('job', ['ngResource', 'getAll', 'jobTemplate', 'workerPool', 'mod
         }
     };
 
+    // Return the absolute parent of this job-chain
+    Job.prototype.get_absolute_parent = function(success) {
+        var absolute_parent = null;
+        if (this.parent) {
+            var parentId = this.parent.split('/').splice(-2, 1)[0];
+            Job.get({id: parentId}, function(job) {
+                if(job.parent) {
+                    absolute_parent = job.get_absolute_parent(success);
+                } else {
+                    absolute_parent = job;
+                }
+            });
+        } else {
+            absolute_parent = this;
+        }
+
+        return absolute_parent;
+    };
+
     // Return the children of this job (if any)
     Job.prototype.get_children = function() {
         if (!this._children && this.children) {
