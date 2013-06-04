@@ -1,12 +1,9 @@
-<ng-switch on="child != null">
-    <li ng-switch-when="true">
-        <ng-switch on="child.id == job.id">
-            <strong ng-switch-when="true"><a href="../{{ child.id }}/">{{ child.title }}</a></strong>
-            <a ng-switch-default href="../{{ child.id }}/">{{ child.title }}</a>
-        </ng-switch>
-        <ul ng-repeat="child in child.get_children()">
-            <ng-include src="'/static/job_runner/templates/child_jobs.html'"></ng-include>
-        </ul>
-    </li>
-    <li ng-switch-default>Could not render tree! Do you have recursion in your job-chain?</li>
-</ng-switch>
+<li>
+    <ng-switch on="child.id == job.id">
+        <strong ng-switch-when="true"><a href="../{{ child.id }}/">{{ child.title }}</a></strong>
+        <a ng-switch-default href="../{{ child.id }}/">{{ child.title }}</a>
+    </ng-switch>
+    <ul ng-repeat="child in child.get_children()">
+        <ng-include src="'/static/job_runner/templates/child_jobs.html'"></ng-include>
+    </ul>
+</li>
