@@ -274,7 +274,7 @@ var JobActionCtrl = function($scope, $routeParams, $route, Job, Group, Run, glob
                 });
             }
         } else if (toValue === false) {
-            if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.')) {
+            if (confirm('Are you sure you want to suspend the enqueueing of this job? If suspended, the job will not be added to the worker queue. This will not affect already running jobs.\n\nNote: this will as well affect the children of this job!')) {
                 $scope.job.enqueue_is_enabled = toValue;
                 $scope.job.$save(function() {
                     // invalidate the cache
