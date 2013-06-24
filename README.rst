@@ -54,6 +54,14 @@ Links
 Changes
 -------
 
+v3.4.0
+~~~~~~
+
+* Add ``worker_version`` and ``concurrent_jobs`` fields to the Worker resource.
+  These fields will be send by the worker at every ping response and are
+  displayed in the admin.
+
+
 v3.3.0
 ~~~~~~
 
