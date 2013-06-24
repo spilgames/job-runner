@@ -124,7 +124,9 @@ class WorkerAdmin(admin.ModelAdmin):
         'title',
         'api_key',
         'enqueue_is_enabled',
-        'ping_response'
+        'ping_response',
+        'worker_version',
+        'concurrent_jobs',
     )
     list_filter = ('enqueue_is_enabled',)
     list_display_links = ('title',)

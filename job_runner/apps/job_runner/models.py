@@ -135,6 +135,13 @@ class Worker(models.Model):
     ping_response_dts = models.DateTimeField(
         blank=True, null=True, editable=False)
 
+    # the worker will send back the worker version and concurrent jobs on
+    # ping response
+    worker_version = models.CharField(
+        max_length=100, blank=True, null=True, editable=False)
+    concurrent_jobs = models.PositiveIntegerField(
+        blank=True, null=True, editable=False)
+
     def __unicode__(self):
         return self.title
 

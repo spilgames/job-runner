@@ -158,7 +158,9 @@ class WorkerResource(ModelResource):
             'api_key',
             'description',
             'enqueue_is_enabled',
-            'ping_response_dts'
+            'ping_response_dts',
+            'worker_version',
+            'concurrent_jobs',
         ]
         filtering = {
             'api_key': ALL,
