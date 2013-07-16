@@ -62,7 +62,12 @@ Worker-pools
 ~~~~~~~~~~~~
 
 ``GET /api/v1/worker_pool/``
-    Returns a list of available worker-pools.
+    Returns a list of available worker-pools. The following filters are
+    allowed:
+
+    title
+        The exact title of the worker-pool.
+
 
 ``GET /api/vi/worker-pools/{WORKER_POOL_ID}/``
     Return the details of a specific worker-pool id.

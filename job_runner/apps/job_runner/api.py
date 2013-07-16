@@ -121,6 +121,9 @@ class WorkerPoolResource(ModelResource):
             'description',
             'enqueue_is_enabled',
         ]
+        filtering = {
+            'title': 'exact',
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())

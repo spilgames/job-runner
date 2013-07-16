@@ -171,7 +171,7 @@ class WorkerPool(models.Model):
     """
     Worker-pool.
     """
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
