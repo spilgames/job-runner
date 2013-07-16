@@ -446,9 +446,14 @@ class JobTestCase(ApiTestBase):
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
-        self.assertEqual(
-            ['get', 'put'], json_data['allowed_detail_http_methods'])
-        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+        self.assertItemsEqual(
+            ['get', 'put', 'patch'],
+            json_data['allowed_detail_http_methods']
+        )
+        self.assertItemsEqual(
+            ['get', 'post'],
+            json_data['allowed_list_http_methods']
+        )
 
     def test_job_count(self):
         """
