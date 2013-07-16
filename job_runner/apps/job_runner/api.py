@@ -200,7 +200,7 @@ class JobTemplateResource(ModelResource):
         allowed_methods = ['get']
         fields = ['id', 'title', 'description', 'enqueue_is_enabled']
         filtering = {
-            'worker': ALL_WITH_RELATIONS,
+            'title': 'exact',
         }
 
         authentication = MultiAuthentication(

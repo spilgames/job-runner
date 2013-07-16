@@ -86,7 +86,12 @@ Job-templates
 ~~~~~~~~~~~~~
 
 ``GET /api/v1/job_template/``
-    Returns a list of available job-templates.
+    Returns a list of available job-templates. The following filters are
+    allowed:
+
+    title
+        The exact title of the job-template.
+
 
 ``GET /api/v1/job_template/{JOB_TEMPLATE_ID}/``
     Returns the details of a specific job-template id.

@@ -205,7 +205,7 @@ class JobTemplate(models.Model):
     """
     Job templates
     """
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)
     body = models.TextField(help_text=(
         'Use {{ content|safe }} at the place where you want to render the '

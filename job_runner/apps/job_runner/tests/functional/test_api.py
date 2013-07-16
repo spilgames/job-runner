@@ -425,6 +425,17 @@ class JobTemplateTestCase(ApiTestBase):
             '/api/v1/job_template/2/', ACCEPT='application/json')
         self.assertEqual(401, response.status_code)
 
+    def test_filter_on_title(self):
+        """
+        Test filtering a job-template on title.
+        """
+        response = self.get('/api/v1/job_template/?{0}'.format(
+            urllib.urlencode({'title': 'Test template 1'})))
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, json_data['objects'][0]['id'])
+
 
 class JobTestCase(ApiTestBase):
     """
