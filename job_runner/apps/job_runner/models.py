@@ -290,7 +290,7 @@ class Job(models.Model):
             'Normally a failed job means that it will stop the chain.'
         )
     )
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(
         blank=True,
         help_text='You can use Markdown syntax to format this description.',

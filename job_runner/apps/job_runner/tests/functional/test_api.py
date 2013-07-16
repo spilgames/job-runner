@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import urllib
 from datetime import datetime
 
 from django.contrib.auth.models import Group
@@ -498,6 +499,18 @@ class JobTestCase(ApiTestBase):
         response = self.client.get(
             '/api/v1/job/2/', ACCEPT='application/json')
         self.assertEqual(401, response.status_code)
+
+    def test_filter_on_title(self):
+        """
+        Test filtering on job-title.
+        """
+        response = self.get('/api/v1/job/?{0}'.format(urllib.urlencode({
+            'title': 'Test job 1',
+        })))
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, json_data['objects'][0]['id'])
 
 
 class RunTestCase(ApiTestBase):

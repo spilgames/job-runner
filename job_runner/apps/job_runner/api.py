@@ -252,6 +252,7 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
         ]
         filtering = {
             'job_template': ALL_WITH_RELATIONS,
+            'title': 'exact',
         }
 
         authentication = MultiAuthentication(

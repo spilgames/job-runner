@@ -96,7 +96,14 @@ Jobs
 ~~~~
 
 ``GET /api/v1/job/``
-    Returns a list of available jobs.
+    Returns a list of available jobs. The following filters are allowed:
+
+    job_template
+        The the job-template of the job.
+
+    title
+        The exact title of the job.
+
 
 ``GET /api/v1/job/{JOB_ID}/``
     Returns the details of a specific job-id.
