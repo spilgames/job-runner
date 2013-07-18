@@ -79,7 +79,8 @@ class ProjectResource(ModelResource):
         allowed_methods = ['get']
         fields = ['title', 'id', 'description', 'enqueue_is_enabled']
         filtering = {
-            'id': ('exact',),
+            'id': 'exact',
+            'title': 'exact',
         }
 
         authentication = MultiAuthentication(
@@ -203,6 +204,7 @@ class JobTemplateResource(ModelResource):
         allowed_methods = ['get']
         fields = ['id', 'title', 'description', 'enqueue_is_enabled']
         filtering = {
+            'project': ALL_WITH_RELATIONS,
             'title': 'exact',
         }
 

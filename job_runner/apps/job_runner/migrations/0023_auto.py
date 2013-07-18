@@ -14,6 +14,9 @@ class Migration(SchemaMigration):
         # Adding index on 'Job', fields ['title']
         db.create_index('job_runner_job', ['title'])
 
+        # Adding index on 'Project', fields ['title']
+        db.create_index('job_runner_project', ['title'])
+
         # Adding index on 'JobTemplate', fields ['title']
         db.create_index('job_runner_jobtemplate', ['title'])
 
@@ -21,6 +24,9 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Removing index on 'JobTemplate', fields ['title']
         db.delete_index('job_runner_jobtemplate', ['title'])
+
+        # Removing index on 'Project', fields ['title']
+        db.delete_index('job_runner_project', ['title'])
 
         # Removing index on 'Job', fields ['title']
         db.delete_index('job_runner_job', ['title'])
@@ -96,7 +102,7 @@ class Migration(SchemaMigration):
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'notification_addresses': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255', 'db_index': 'True'}),
             'worker_pools': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['job_runner.WorkerPool']", 'symmetrical': 'False'})
         },
         'job_runner.rescheduleexclude': {

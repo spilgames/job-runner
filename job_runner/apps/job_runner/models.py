@@ -62,7 +62,7 @@ class Project(models.Model):
     """
     Projects
     """
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)
     groups = models.ManyToManyField(
         Group,

@@ -123,6 +123,17 @@ class GroupTestCase(ApiTestBase):
             '/api/v1/group/2/', ACCEPT='application/json')
         self.assertEqual(401, response.status_code)
 
+    def test_filter_on_title(self):
+        """
+        Test filtering on project title.
+        """
+        response = self.get('/api/v1/project/?{0}'.format(
+            urllib.urlencode({'title': 'Test project 1'})))
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, json_data['objects'][0]['id'])
+
 
 class ProjectTestCase(ApiTestBase):
     """
