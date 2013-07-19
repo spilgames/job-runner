@@ -251,9 +251,14 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
             'title',
             'description',
             'script_content',
+            'script_content_partial',
             'enqueue_is_enabled',
             'reschedule_interval',
             'reschedule_interval_type',
+            'run_on_all_workers',
+            'schedule_children_on_error',
+            'notification_addresses',
+            'disable_enqueue_after_fails',
         ]
         filtering = {
             'job_template': ALL_WITH_RELATIONS,
@@ -298,6 +303,7 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         list_allowed_methods = ['get', 'post']
         filtering = {
             'schedule_dts': ALL,
+            'is_manual': ALL,
             'job': ALL_WITH_RELATIONS,
             'worker': ALL_WITH_RELATIONS,
         }
