@@ -54,6 +54,13 @@ Links
 Changes
 -------
 
+v3.5.0
+~~~~~~
+
+* Add support for filtering on ``title`` in the API.
+* Add support for updating and creating jobs in the API.
+
+
 v3.4.0
 ~~~~~~
 
