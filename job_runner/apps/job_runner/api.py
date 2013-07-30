@@ -79,7 +79,8 @@ class ProjectResource(ModelResource):
         allowed_methods = ['get']
         fields = ['title', 'id', 'description', 'enqueue_is_enabled']
         filtering = {
-            'id': ('exact',),
+            'id': 'exact',
+            'title': 'exact',
         }
 
         authentication = MultiAuthentication(
@@ -121,6 +122,9 @@ class WorkerPoolResource(ModelResource):
             'description',
             'enqueue_is_enabled',
         ]
+        filtering = {
+            'title': 'exact',
+        }
 
         authentication = MultiAuthentication(
             SessionAuthentication(), HmacAuthentication())
@@ -200,7 +204,8 @@ class JobTemplateResource(ModelResource):
         allowed_methods = ['get']
         fields = ['id', 'title', 'description', 'enqueue_is_enabled']
         filtering = {
-            'worker': ALL_WITH_RELATIONS,
+            'project': ALL_WITH_RELATIONS,
+            'title': 'exact',
         }
 
         authentication = MultiAuthentication(
@@ -239,19 +244,25 @@ class JobResource(NoRelatedSaveMixin, ModelResource):
     class Meta:
         queryset = Job.objects.all()
         resource_name = 'job'
-        detail_allowed_methods = ['get', 'put']
-        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get', 'put', 'patch']
+        list_allowed_methods = ['get', 'post']
         fields = [
             'id',
             'title',
             'description',
             'script_content',
+            'script_content_partial',
             'enqueue_is_enabled',
             'reschedule_interval',
             'reschedule_interval_type',
+            'run_on_all_workers',
+            'schedule_children_on_error',
+            'notification_addresses',
+            'disable_enqueue_after_fails',
         ]
         filtering = {
             'job_template': ALL_WITH_RELATIONS,
+            'title': 'exact',
         }
 
         authentication = MultiAuthentication(
@@ -292,6 +303,7 @@ class RunResource(NoRelatedSaveMixin, ModelResource):
         list_allowed_methods = ['get', 'post']
         filtering = {
             'schedule_dts': ALL,
+            'is_manual': ALL,
             'job': ALL_WITH_RELATIONS,
             'worker': ALL_WITH_RELATIONS,
         }

@@ -62,7 +62,12 @@ Worker-pools
 ~~~~~~~~~~~~
 
 ``GET /api/v1/worker_pool/``
-    Returns a list of available worker-pools.
+    Returns a list of available worker-pools. The following filters are
+    allowed:
+
+    title
+        The exact title of the worker-pool.
+
 
 ``GET /api/vi/worker-pools/{WORKER_POOL_ID}/``
     Return the details of a specific worker-pool id.
@@ -86,7 +91,12 @@ Job-templates
 ~~~~~~~~~~~~~
 
 ``GET /api/v1/job_template/``
-    Returns a list of available job-templates.
+    Returns a list of available job-templates. The following filters are
+    allowed:
+
+    title
+        The exact title of the job-template.
+
 
 ``GET /api/v1/job_template/{JOB_TEMPLATE_ID}/``
     Returns the details of a specific job-template id.
@@ -96,7 +106,14 @@ Jobs
 ~~~~
 
 ``GET /api/v1/job/``
-    Returns a list of available jobs.
+    Returns a list of available jobs. The following filters are allowed:
+
+    job_template
+        The the job-template of the job.
+
+    title
+        The exact title of the job.
+
 
 ``GET /api/v1/job/{JOB_ID}/``
     Returns the details of a specific job-id.

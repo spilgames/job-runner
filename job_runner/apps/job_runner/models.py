@@ -62,7 +62,7 @@ class Project(models.Model):
     """
     Projects
     """
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)
     groups = models.ManyToManyField(
         Group,
@@ -171,7 +171,7 @@ class WorkerPool(models.Model):
     """
     Worker-pool.
     """
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)
     notification_addresses = models.TextField(
         help_text='Separate e-mail addresses by a newline',
@@ -205,7 +205,7 @@ class JobTemplate(models.Model):
     """
     Job templates
     """
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)
     body = models.TextField(help_text=(
         'Use {{ content|safe }} at the place where you want to render the '
@@ -290,7 +290,7 @@ class Job(models.Model):
             'Normally a failed job means that it will stop the chain.'
         )
     )
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     description = models.TextField(
         blank=True,
         help_text='You can use Markdown syntax to format this description.',

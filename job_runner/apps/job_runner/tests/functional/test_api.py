@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import urllib
 from datetime import datetime
 
 from django.contrib.auth.models import Group
@@ -121,6 +122,17 @@ class GroupTestCase(ApiTestBase):
         response = self.client.get(
             '/api/v1/group/2/', ACCEPT='application/json')
         self.assertEqual(401, response.status_code)
+
+    def test_filter_on_title(self):
+        """
+        Test filtering on project title.
+        """
+        response = self.get('/api/v1/project/?{0}'.format(
+            urllib.urlencode({'title': 'Test project 1'})))
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, json_data['objects'][0]['id'])
 
 
 class ProjectTestCase(ApiTestBase):
@@ -259,6 +271,17 @@ class WorkerPoolTestCase(ApiTestBase):
         response = self.client.get(
             '/api/v1/worker_pool/2/', ACCEPT='application/json')
         self.assertEqual(401, response.status_code)
+
+    def test_filter_on_title(self):
+        """
+        Test filter on worker-pool title.
+        """
+        response = self.get('/api/v1/worker_pool/?{0}'.format(
+            urllib.urlencode({'title': 'Pool 1'})))
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, json_data['objects'][0]['id'])
 
 
 class WorkerTestCase(ApiTestBase):
@@ -424,6 +447,17 @@ class JobTemplateTestCase(ApiTestBase):
             '/api/v1/job_template/2/', ACCEPT='application/json')
         self.assertEqual(401, response.status_code)
 
+    def test_filter_on_title(self):
+        """
+        Test filtering a job-template on title.
+        """
+        response = self.get('/api/v1/job_template/?{0}'.format(
+            urllib.urlencode({'title': 'Test template 1'})))
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, json_data['objects'][0]['id'])
+
 
 class JobTestCase(ApiTestBase):
     """
@@ -446,9 +480,14 @@ class JobTestCase(ApiTestBase):
         self.assertEqual(200, response.status_code)
 
         json_data = json.loads(response.content)
-        self.assertEqual(
-            ['get', 'put'], json_data['allowed_detail_http_methods'])
-        self.assertEqual(['get'], json_data['allowed_list_http_methods'])
+        self.assertItemsEqual(
+            ['get', 'put', 'patch'],
+            json_data['allowed_detail_http_methods']
+        )
+        self.assertItemsEqual(
+            ['get', 'post'],
+            json_data['allowed_list_http_methods']
+        )
 
     def test_job_count(self):
         """
@@ -493,6 +532,18 @@ class JobTestCase(ApiTestBase):
         response = self.client.get(
             '/api/v1/job/2/', ACCEPT='application/json')
         self.assertEqual(401, response.status_code)
+
+    def test_filter_on_title(self):
+        """
+        Test filtering on job-title.
+        """
+        response = self.get('/api/v1/job/?{0}'.format(urllib.urlencode({
+            'title': 'Test job 1',
+        })))
+        self.assertEqual(200, response.status_code)
+
+        json_data = json.loads(response.content)
+        self.assertEqual(1, json_data['objects'][0]['id'])
 
 
 class RunTestCase(ApiTestBase):
