@@ -54,6 +54,11 @@ Links
 Changes
 -------
 
+v3.5.1
+~~~~~~
+
+* Add logging about scheduling, job kills and general failures
+
 v3.5.0
 ~~~~~~
 
