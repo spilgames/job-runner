@@ -455,7 +455,7 @@ class Job(models.Model):
             except RescheduleException:
                 logger.error(
                     'Reschedule failed for {0}: RescheduleException'.format(
-                    self.title))
+                        self.title))
                 notifications.reschedule_failed(self)
 
     def _get_reschedule_incremented_dts(self, increment_date):
