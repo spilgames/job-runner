@@ -162,7 +162,7 @@ class Command(NoArgsCommand):
                     'action': 'kill',
                 })
             ]
-            logger.debug('Sending: {0}'.format(message))
+            logger.info('Sending: {0}'.format(message))
             self.publisher.send_multipart(message)
 
     def _broadcast_worker_ping(self):
