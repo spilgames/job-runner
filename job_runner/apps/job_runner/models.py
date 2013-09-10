@@ -1,5 +1,6 @@
 import calendar
 from datetime import timedelta
+import logging
 
 from django.conf import settings
 from django.contrib.auth.models import Group
@@ -14,6 +15,8 @@ from job_runner.apps.job_runner import notifications
 from job_runner.apps.job_runner.managers import KillRequestManager, RunManager
 from job_runner.apps.job_runner.signals import post_run_update, post_run_create
 from job_runner.apps.job_runner.utils import correct_dst_difference
+
+logger = logging.getLogger(__name__)
 
 
 RESCHEDULE_INTERVAL_TYPE_CHOICES = (
@@ -610,6 +613,7 @@ class Run(models.Model):
 
         log_message = 'This run was marked as failed. Reason: {0}'.format(
             message)
+        logger.error(log_message)
 
         try:
             # In rare cases, it is possible that there is already a log for

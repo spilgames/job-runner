@@ -1,12 +1,15 @@
 import hashlib
 import hmac
 import re
+import logging
 
 from django.db.models import Q
 from tastypie.authentication import Authentication
 from tastypie.authorization import Authorization
 
 from job_runner.apps.job_runner.models import Worker
+
+logger = logging.getLogger(__name__)
 
 
 def validate_hmac(request):
@@ -37,11 +40,13 @@ def validate_hmac(request):
     api_key_match = re.match(r'^ApiKey (.*?):(.*?)$', auth_header)
 
     if not api_key_match:
+        logger.error('api key mismatch')
         return False
 
     try:
         worker = Worker.objects.get(api_key=api_key_match.group(1))
     except Worker.DoesNotExist:
+        logger.error('worker does not exist')
         return False
 
     hmac_message = '{request_method}{full_path}{request_body}'.format(
@@ -55,6 +60,8 @@ def validate_hmac(request):
 
     if expected_hmac.hexdigest() == api_key_match.group(2):
         return True
+
+    logger.error('hmac mismatch')
 
     return False
 
