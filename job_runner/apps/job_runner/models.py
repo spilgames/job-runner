@@ -164,6 +164,7 @@ class Worker(models.Model):
             if self.ping_response_dts + acceptable_delta >= timezone.now():
                 return True
 
+        logger.error('Worker {0} is not responsive'.format(self.title))
         return False
 
     class Meta:
@@ -389,6 +390,8 @@ class Job(models.Model):
         if not dts:
             dts = timezone.now()
 
+        logger.info('Scheduling {0} on {1}'.format(self.title, dts))
+
         Run.objects.create(
             job=self,
             schedule_dts=dts,
@@ -419,7 +422,11 @@ class Job(models.Model):
         # since we are pre-scheduling (a new run is created, before the
         # scheduled run is sent to the worker), having one schedule id is valid
         if len(active_schedule_ids) > 1:
+            logging.error('Multiple ({0}) active schedule ids'.format(
+                active_schedule_ids))
             return
+
+        logger.info('Attempting rescheduling {0}'.format(self.title))
 
         # check if job is setup for re-scheduling
         if self.reschedule_interval_type and self.reschedule_interval:
@@ -429,6 +436,8 @@ class Job(models.Model):
                 last_run = self.run_set.filter(
                     is_manual=False).order_by('-pk')[0]
             except IndexError:
+                logger.error('Reschedule failed for {0}: IndexError'.format(
+                    self.title))
                 return
 
             try:
@@ -441,7 +450,12 @@ class Job(models.Model):
                     last_run.schedule_dts, reschedule_date)
 
                 self.schedule(reschedule_date)
+                logger.info('Rescheduled {0} for {1}'.format(
+                    self.title, reschedule_date))
             except RescheduleException:
+                logger.error(
+                    'Reschedule failed for {0}: RescheduleException'.format(
+                    self.title))
                 notifications.reschedule_failed(self)
 
     def _get_reschedule_incremented_dts(self, increment_date):
@@ -611,8 +625,9 @@ class Run(models.Model):
         self.return_dts = timezone.now()
         self.return_success = False
 
-        log_message = 'This run was marked as failed. Reason: {0}'.format(
-            message)
+        log_message = 'This run for {0} was marked as failed. \
+            Reason: {1}'.format(
+            self.job.title, message)
         logger.error(log_message)
 
         try:

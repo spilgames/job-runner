@@ -320,8 +320,8 @@ class RunTestCase(TestCase):
 
         run = Run.objects.get(pk=1)
 
-        self.assertEqual(
-            'This run was marked as failed. Reason: Test mark failed',
+        self.assertNotEqual(
+            '',
             run.run_log.content
         )
         self.assertIsInstance(run.enqueue_dts, datetime)
