@@ -197,6 +197,9 @@ class WorkerPool(models.Model):
     def __unicode__(self):
         return self.title
 
+    def log_name(self):
+        return u'"{0}"({1})'.format(self.title, self.pk)
+
     def get_notification_addresses(self):
         """
         Return a ``list`` notification addresses.
