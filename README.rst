@@ -54,6 +54,11 @@ Links
 Changes
 -------
 
+v3.5.2
+~~~~~~
+
+* Added more logging (notifications) and fixed minor logging issues
+
 v3.5.1
 ~~~~~~
 
