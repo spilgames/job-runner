@@ -1,15 +1,20 @@
 import copy
+import logging
 
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template import Context
 from django.template.loader import get_template
 
+logger = logging.getLogger(__name__)
+
 
 def reschedule_failed(job):
     """
     Send out a notification that the given ``job`` failed to reschedule.
     """
+    logger.error('Reschedule failed for {0}'.format(job.log_name()))
+
     t = get_template('job_runner/email/reschedule_failed.txt')
     c = Context({
         'job': job,
@@ -33,6 +38,8 @@ def run_failed(run):
     """
     Send out a notification that the given ``run`` failed.
     """
+    logger.error('Job run failed for {0}'.format(run.log_name()))
+
     t = get_template('job_runner/email/job_failed.txt')
     c = Context({
         'time_zone': settings.TIME_ZONE,
@@ -57,6 +64,9 @@ def worker_pool_unresponsive(worker_pool):
     """
     Send out a notification that the given ``worker_pool`` is unresponsive.
     """
+    logger.error('WorkerPool is unresponsive: {0}'.format(
+        worker_pool.log_name()))
+
     t = get_template('job_runner/email/worker_pool_unresponsive.txt')
     c = Context({
         'worker_pool': worker_pool,

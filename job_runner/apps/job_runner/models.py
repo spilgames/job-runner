@@ -148,6 +148,9 @@ class Worker(models.Model):
     def __unicode__(self):
         return self.title
 
+    def log_name(self):
+        return u'"{0}"({1})'.format(self.title, self.pk)
+
     def is_responsive(self):
         """
         Return ``bool`` indicating if the worker is resposive.
@@ -164,7 +167,7 @@ class Worker(models.Model):
             if self.ping_response_dts + acceptable_delta >= timezone.now():
                 return True
 
-        logger.error('Worker {0} is not responsive'.format(self.title))
+        logger.error('Worker {0} is not responsive'.format(self.log_name()))
         return False
 
     class Meta:
@@ -193,6 +196,9 @@ class WorkerPool(models.Model):
 
     def __unicode__(self):
         return self.title
+
+    def log_name(self):
+        return u'"{0}"({1})'.format(self.title, self.pk)
 
     def get_notification_addresses(self):
         """
@@ -362,6 +368,9 @@ class Job(models.Model):
     def __unicode__(self):
         return u'{0} > {1}'.format(self.job_template, self.title)
 
+    def log_name(self):
+        return u'"{0}"({1})'.format(self.title, self.pk)
+
     def save(self, *args, **kwargs):
         t = Template(self.job_template.body)
         c = Context({'content': self.script_content_partial})
@@ -390,7 +399,7 @@ class Job(models.Model):
         if not dts:
             dts = timezone.now()
 
-        logger.info('Scheduling {0} on {1}'.format(self.title, dts))
+        logger.info('Scheduling {0} on {1}'.format(self.log_name(), dts))
 
         Run.objects.create(
             job=self,
@@ -422,11 +431,11 @@ class Job(models.Model):
         # since we are pre-scheduling (a new run is created, before the
         # scheduled run is sent to the worker), having one schedule id is valid
         if len(active_schedule_ids) > 1:
-            logging.error('Multiple ({0}) active schedule ids'.format(
-                active_schedule_ids))
+            logger.error('Multiple ({0}) active schedule ids for {1}'.format(
+                active_schedule_ids, self.log_name()))
             return
 
-        logger.info('Attempting rescheduling {0}'.format(self.title))
+        logger.info('Attempting rescheduling {0}'.format(self.log_name()))
 
         # check if job is setup for re-scheduling
         if self.reschedule_interval_type and self.reschedule_interval:
@@ -437,7 +446,7 @@ class Job(models.Model):
                     is_manual=False).order_by('-pk')[0]
             except IndexError:
                 logger.error('Reschedule failed for {0}: IndexError'.format(
-                    self.title))
+                    self.log_name()))
                 return
 
             try:
@@ -451,11 +460,11 @@ class Job(models.Model):
 
                 self.schedule(reschedule_date)
                 logger.info('Rescheduled {0} for {1}'.format(
-                    self.title, reschedule_date))
+                    self.log_name(), reschedule_date))
             except RescheduleException:
                 logger.error(
                     'Reschedule failed for {0}: RescheduleException'.format(
-                        self.title))
+                        self.log_name()))
                 notifications.reschedule_failed(self)
 
     def _get_reschedule_incremented_dts(self, increment_date):
@@ -580,6 +589,9 @@ class Run(models.Model):
         ordering = (
             '-return_dts', '-start_dts', '-enqueue_dts', 'schedule_dts')
 
+    def log_name(self):
+        return u'Id: {0} ({1})'.format(self.pk, self.job.log_name())
+
     @models.permalink
     def get_absolute_url(self):
         return ('job_runner:job_run', (), {
@@ -627,7 +639,7 @@ class Run(models.Model):
 
         log_message = 'This run for {0} was marked as failed. \
             Reason: {1}'.format(
-            self.job.title, message)
+            self.log_name(), message)
         logger.error(log_message)
 
         try:
