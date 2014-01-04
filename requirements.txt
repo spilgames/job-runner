@@ -1,5 +1,5 @@
 django==1.4.2
-django-grappelli
+django-grappelli==2.4.8
 django_compressor
 django-smart-selects
 django-tastypie==0.9.14
