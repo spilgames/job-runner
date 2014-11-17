@@ -9,7 +9,7 @@ setup(
     url='http://github.com/spilgames/job-runner',
     license='BSD',
     author='Spil Games',
-    author_email='datawarehouse@spilgames.com',
+    author_email='dwh-eng@spilgames.com',
     description='Tool for scheduling jobs and realtime monitoring',
     long_description=open('README.rst').read(),
     packages=find_packages(),
